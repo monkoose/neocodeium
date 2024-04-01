@@ -1,0 +1,37 @@
+name: ci
+
+on: [ push, pull_request ]
+
+jobs:
+  tests:
+    name: unit tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        nvim-version: [ nightly ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: ${{ matrix.nvim-version }}
+      - name: Install plenary plugin
+        run: |
+          mkdir -p ~/.local/share/nvim/site/pack/test-workflow/start
+          git clone --depth=1 https://github.com/nvim-lua/plenary.nvim.git ~/.local/share/nvim/site/pack/test-workflow/start/plenary
+          ln -s . ~/.local/share/nvim/site/pack/test-workflow/start/neocodeium
+      - name: Run tests
+        run: |
+          nvim --version
+          make test
+
+  stylua:
+    name: stylua
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: JohnnyMorganz/stylua-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: latest
+          args: --check .
