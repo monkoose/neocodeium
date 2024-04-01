@@ -1,6 +1,5 @@
 -- Imports ------------------------------------------------- {{{1
 
-local log = require("neocodeium.log")
 local utils = require("neocodeium.utils")
 local types = require("neocodeium.types")
 local options = require("neocodeium.options").options
