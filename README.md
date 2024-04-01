@@ -25,6 +25,7 @@ only manually invoke nvim-cmp.
 - Performance improvements have been achieved through cache techniques.
 - The suggestion count label is displayed in the number column, making it closer to the context.
 - Default keybindings have been removed.
+- Possibility to complete only word/line of the suggestion.
 - By default, there is no debounce, allowing suggestions to appear while
   typing. If you don't like this behavior, set `debounce = true` in the setup.
 
