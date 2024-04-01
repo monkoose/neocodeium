@@ -25,7 +25,8 @@ only manually invoke nvim-cmp.
 - Performance improvements have been achieved through cache techniques.
 - The suggestion count label is displayed in the number column, making it closer to the context.
 - Default keybindings have been removed.
-- By default, there is no debounce, allowing suggestions to appear while typing (although this may be perceived as annoying by some users).
+- By default, there is no debounce, allowing suggestions to appear while
+  typing. If you don't like this behavior, set `debounce = true` in the setup.
 
 </details>
 
@@ -158,6 +159,8 @@ require("neocodeium").setup({
   },
   -- Set to `false` to disable showing the number of suggestions label at the line column
   show_label = true,
+  -- Set to `true` to enable suggestions debounce
+  debounce = false,
   -- Maximum number of lines parsed from non-current loaded buffers
   -- Set to `0` to disable parsing non-current buffers (may lower suggestion quality)
   -- Set it to `-1` to parse all lines

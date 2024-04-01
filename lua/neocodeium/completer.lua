@@ -9,6 +9,7 @@ local server = require("neocodeium.server")
 local renderer = require("neocodeium.renderer")
 
 local vf = vim.fn
+local uv = vim.uv
 local json = vim.json
 
 local nvim_feedkeys = vim.api.nvim_feedkeys
@@ -28,12 +29,14 @@ local status = {
 ---@field pos pos
 ---@field data compl.data
 ---@field status compl.status
+---@field timer uv.uv_timer_t
 ---@field request_id integer
 ---@field allowed_encoding boolean
 ---@field other_docs document[]
 local Completer = {
   data = {},
   status = status.none,
+  timer = assert(uv.new_timer()),
   request_id = 0,
   allowed_encoding = false,
   other_docs = {},
@@ -238,8 +241,11 @@ end
 ---virtual text is cleared too.
 ---@param force? boolean
 function Completer:clear(force)
-  if force or self.status ~= status.pending then
+  if force or options.debounce or self.status ~= status.pending then
     self.status = status.none
+    if options.debounce and self.timer:is_active() then
+      self.timer:stop()
+    end
     -- Cancel request if there is one
     if not vim.tbl_isempty(self.data) then
       if self.data.id and self.data.id > 0 then
@@ -264,7 +270,20 @@ function Completer:initiate()
     return
   end
 
-  self:request()
+  if options.debounce then
+    if self.timer:is_active() then
+      self.timer:stop()
+    end
+    self.timer:start(
+      120,
+      0,
+      vim.schedule_wrap(function()
+        self:request()
+      end)
+    )
+  else
+    self:request()
+  end
 end
 
 ---Completes the current suggestion.
