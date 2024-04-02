@@ -15,7 +15,6 @@ local json = vim.json
 local nvim_feedkeys = vim.api.nvim_feedkeys
 local nvim_get_current_buf = vim.api.nvim_get_current_buf
 local nvim_replace_termcodes = vim.api.nvim_replace_termcodes
-local nvim_exec_autocmds = vim.api.nvim_exec_autocmds
 
 -- Completer ----------------------------------------------- {{{1
 
@@ -108,12 +107,7 @@ function Completer:cycle_or_complete(n)
   if self:curr_item() then
     self:cycle(n)
   else
-    -- required to show suggestions after self:clear()
-    -- checking insert mode required to fix https://github.com/monkoose/neocodeium/issues/2
-    if utils.is_insert() then
-      nvim_exec_autocmds("CursorMovedI", { modeline = false })
-    end
-    self:request()
+    self:initiate()
   end
 end
 
