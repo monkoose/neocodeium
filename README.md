@@ -59,7 +59,8 @@ a different plugin manager, please refer to its documentation for installation i
 ```
 
 Now you can use `Alt-f` in insert mode to complete codeium suggestions.
-**Note:** You may also will need to run `:NeoCodeium auth` to obtain an API token.
+
+**Note:** To obtain an API token, you’ll need to run `:NeoCodeium auth`.
 
 ### 🚀 Usage
 
