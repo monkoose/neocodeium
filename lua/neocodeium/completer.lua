@@ -107,6 +107,8 @@ function Completer:cycle_or_complete(n)
   if self:curr_item() then
     self:cycle(n)
   else
+    -- required to show suggestions after self:clear()
+    vim.cmd.doautocmd("CursorMovedI")
     self:request()
   end
 end
