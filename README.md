@@ -137,7 +137,27 @@ NeoCodeium offers a couple of color groups that you can customize to match your 
 - `NeoCodeiumSuggestion` - corresponds to the virtual text color (default: darkgray)
 - `NeoCodeiumLabel` - represents the label indicating the number of suggestions (default: inverted DiagnosticInfo)
 
-Feel free to adjust these colors to your preference and enhance your NeoCodeium experience! 🎨🚀
+Feel free to adjust these colors to your preference and enhance your NeoCodeium experience!
+
+#### nvim-cmp integration
+
+If you want to disable NeoCodeium suggestions when nvim-cmp menu is visible,
+you can use this code snippet in your config to achieve this:
+
+```lua
+local cmp = require("cmp")
+local neocodeium = require("neocodeium")
+
+-- Make codeium suggestions appear only when `nvim-cmp` menu is closed
+cmp.event:on("menu_opened", function()
+  vim.cmd("NeoCodeium disable")
+  neocodeium.clear()
+end)
+cmp.event:on("menu_closed", function()
+  vim.cmd("NeoCodeium enable")
+  neocodeium.cycle_or_complete()
+end)
+```
 
 ### ⚒️ Setup
 
