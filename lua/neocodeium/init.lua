@@ -180,7 +180,7 @@ function M.setup(opts)
   end
 end
 
-function M.complete()
+function M.accept()
   require("neocodeium.completer"):accept()
 end
 
@@ -196,12 +196,12 @@ function M.cycle_or_complete(n)
   require("neocodeium.completer"):cycle_or_complete(n)
 end
 
-function M.complete_word()
-  require("neocodeium.completer"):complete_word()
+function M.accept_word()
+  require("neocodeium.completer"):accept_word()
 end
 
-function M.complete_line()
-  require("neocodeium.completer"):complete_line()
+function M.accept_line()
+  require("neocodeium.completer"):accept_line()
 end
 -- }}}1
 

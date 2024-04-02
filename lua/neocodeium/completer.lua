@@ -139,10 +139,10 @@ function Completer:handle_response(r)
   end)
 end
 
----Completes a suggestion till regex match end.
+---Accepts a suggestion till regex match end.
 ---@private
 ---@param regex string
-function Completer:complete(regex)
+function Completer:accept_regex(regex)
   if not utils.is_insert() then
     return
   end
@@ -193,14 +193,14 @@ function Completer:complete(regex)
   nvim_feedkeys(text, "nt", false)
 end
 
----Completes a suggestion till the end of the word.
-function Completer:complete_word()
-  self:complete([[.\{-}\%(\>\|$\)]])
+---Accepts a suggestion till the end of the word.
+function Completer:accept_word()
+  self:accept_regex([[.\{-}\%(\>\|$\)]])
 end
 
----Completes a suggestion till the end of the line.
-function Completer:complete_line()
-  self:complete([[.*]])
+---Accepts a suggestion till the end of the line.
+function Completer:accept_line()
+  self:accept_regex([[.*]])
 end
 
 ---@private
@@ -333,9 +333,9 @@ function Completer:accept()
   end
 
   if inline then
-    self:complete_line()
+    self:accept_line()
   end
-  -- defer to prevent pasting block before complete_line()
+  -- defer to prevent pasting block before accept_line()
   vim.defer_fn(function()
     renderer:reset()
     if block then

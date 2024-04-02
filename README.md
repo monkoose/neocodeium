@@ -52,30 +52,30 @@ a different plugin manager, please refer to its documentation for installation i
   config = function()
     local neocodeium = require("neocodeium")
     neocodeium.setup()
-    vim.keymap.set("i", "<A-f>", neocodeium.complete)
+    vim.keymap.set("i", "<A-f>", neocodeium.accept)
   end,
 }
 
 ```
 
-Now you can use `Alt-f` in insert mode to complete codeium suggestions.
+Now you can use `Alt-f` in insert mode to accept codeium suggestions.
 
 **Note:** To obtain an API token, you’ll need to run `:NeoCodeium auth`.
 
 ### 🚀 Usage
 
 #### 📒 API
-In addition to the already mentioned `complete()` function, the plugin also provides a few other:
+In addition to the already mentioned `accept()` function, the plugin also provides a few other:
 
 ```lua
 local neocodeium = require("neocodeium")
 
--- Completes the suggestion
-neocodeium.complete()
+-- Accepts the suggestion
+neocodeium.accept()
 
--- Completes only part of the suggestion if the full suggestion doesn't make sense
-neocodeium.complete_word()
-neocodeium.complete_line()
+-- Accepts only part of the suggestion if the full suggestion doesn't make sense
+neocodeium.accept_word()
+neocodeium.accept_line()
 
 -- Clears the current suggestion
 neocodeium.clear()
@@ -102,13 +102,13 @@ Suggested keybindings:
 
 ```lua
 vim.keymap.set("i", "<A-f>", function()
-    require("neocodeium").complete()
+    require("neocodeium").accept()
 end)
 vim.keymap.set("i", "<A-w>", function()
-    require("neocodeium").complete_word()
+    require("neocodeium").accept_word()
 end)
 vim.keymap.set("i", "<A-a>", function()
-    require("neocodeium").complete_line()
+    require("neocodeium").accept_line()
 end)
 vim.keymap.set("i", "<A-e>", function()
     require("neocodeium").cycle_or_complete()
