@@ -155,7 +155,6 @@ cmp.event:on("menu_opened", function()
 end)
 cmp.event:on("menu_closed", function()
   vim.cmd("NeoCodeium enable")
-  neocodeium.cycle_or_complete()
 end)
 ```
 
