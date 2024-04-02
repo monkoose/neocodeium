@@ -46,18 +46,17 @@ local function enable_autocmds()
   local renderer = require("neocodeium.renderer")
   local doc = require("neocodeium.doc")
 
-  -- TODO: find a proper name
-  local function allow_encoding()
+  local function utf8_or_latin1()
     local encoding = vim.o.encoding
     return encoding == "utf-8" or encoding == "latin1"
   end
 
-  completer.allowed_encoding = allow_encoding()
+  completer.allowed_encoding = utf8_or_latin1()
   local other_timer = assert(uv.new_timer())
 
   create_autocmd("BufEnter", {
     callback = function()
-      completer.allowed_encoding = allow_encoding()
+      completer.allowed_encoding = utf8_or_latin1()
       other_timer:stop()
       other_timer:start(
         1,
@@ -72,11 +71,11 @@ local function enable_autocmds()
   create_autocmd("OptionSet", {
     pattern = "encoding",
     callback = function()
-      completer.allowed_encoding = allow_encoding()
+      completer.allowed_encoding = utf8_or_latin1()
     end,
   })
 
-  local function allow_label()
+  local function nu_or_rnu()
     return vim.wo.number or vim.wo.relativenumber
   end
 
@@ -84,20 +83,20 @@ local function enable_autocmds()
     pattern = "*:i*",
     once = true,
     callback = function()
-      renderer.label.enabled = allow_label()
+      renderer.label.enabled = nu_or_rnu()
     end,
   })
 
   create_autocmd("WinEnter", {
     callback = function()
-      renderer.label.enabled = allow_label()
+      renderer.label.enabled = nu_or_rnu()
     end,
   })
 
   create_autocmd("OptionSet", {
     pattern = "number,relativenumber",
     callback = function()
-      renderer.label.enabled = allow_label()
+      renderer.label.enabled = nu_or_rnu()
     end,
   })
 
