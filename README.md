@@ -130,6 +130,7 @@ NeoCodeium provides `:NeoCodeium` user command, which has some useful actions:
 - `:NeoCodeium toggle` - toggles NeoCodeium completion.
 - `:NeoCodeium disable_buffer` - disables NeoCodeium completion in the current buffer.
 - `:NeoCodeium enable_buffer` - enables NeoCodeium completion in the current buffer.
+- `:NeoCodeium restart` - restarts Codeium server (useful when server stop responding for any reason).
 
 #### 🎨 Color groups
 

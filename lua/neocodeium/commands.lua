@@ -6,6 +6,7 @@ local conf = require("neocodeium.utils.conf")
 local log = require("neocodeium.log")
 local options = require("neocodeium.options").options
 local api_key = require("neocodeium.api_key")
+local server = require("neocodeium.server")
 
 local vf = vim.fn
 local json = vim.json
@@ -158,6 +159,10 @@ end
 
 function commands.enable_buffer()
   vim.b.neocodeium_enabled = true
+end
+
+function commands.restart()
+  server:restart()
 end
 
 function commands.toggle()

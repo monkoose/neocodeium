@@ -4,6 +4,7 @@ local log = require("neocodeium.log")
 local api_key = require("neocodeium.api_key")
 local options = require("neocodeium.options").options
 local stdio = require("neocodeium.utils.stdio")
+local echo = require("neocodeium.utils.echo")
 local utils = require("neocodeium.utils")
 local Bin = require("neocodeium.binary")
 
@@ -17,9 +18,12 @@ local json = vim.json
 ---@class Server
 ---@field bin Binary
 ---@field port? string
----@field handle? uv.uv_handle_t
+---@field handle? uv.uv_process_t
+---@field pid? integer
+---@field is_restart boolean
 local Server = {
   bin = Bin.new(),
+  is_restart = false,
 }
 
 -- Auxiliary functions ------------------------------------- {{{1
@@ -66,7 +70,7 @@ function Server:start()
   local stderr = assert(uv.new_pipe())
 
   ---@diagnostic disable-next-line: missing-fields
-  self.handle = uv.spawn(self.bin.path, {
+  self.handle, self.pid = uv.spawn(self.bin.path, {
     args = args,
     stdio = { stdin, stdout, stderr },
   }, function(_, _)
@@ -77,6 +81,14 @@ function Server:start()
     uv.close(stderr)
     if self.handle then
       uv.close(self.handle)
+      self.handle = nil
+    end
+    self.port = nil
+    if self.is_restart then
+      self.is_restart = false
+      vim.schedule(function()
+        self:run()
+      end)
     end
   end)
 
@@ -110,12 +122,23 @@ function Server:run()
   end
 end
 
----Properly stops the server and closes the handle
+---Properly stops the server, executing self.handle on_exit callback.
 function Server:stop()
-  if self.handle then
-    uv.close(self.handle)
-    self.handle = nil
+  if self.pid then
+    uv.kill(self.pid, "sigint")
   end
+end
+
+---Restarts the server
+function Server:restart()
+  if self.handle and not uv.is_closing(self.handle) then
+    self.is_restart = true
+    self:stop()
+  else
+    self:run()
+  end
+  log.info("Server restarted")
+  echo.info("server restarted")
 end
 
 ---Sends request to the server
