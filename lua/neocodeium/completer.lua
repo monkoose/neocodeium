@@ -107,7 +107,9 @@ function Completer:cycle_or_complete(n)
   if self:curr_item() then
     self:cycle(n)
   else
-    self:initiate()
+    -- `true` requires to skip early return in self:initiate(), which prevents suggestion
+    -- to show up when manual completion is enabled
+    self:initiate(true)
   end
 end
 
@@ -261,11 +263,12 @@ function Completer:clear(force)
 end
 
 ---Initiates a completion.
-function Completer:initiate()
+---@param omit_manual? boolean
+function Completer:initiate(omit_manual)
   renderer:update()
   self:clear()
 
-  if options.manual then
+  if options.manual and not omit_manual then
     renderer:clear_all()
     return
   end
