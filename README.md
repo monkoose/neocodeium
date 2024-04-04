@@ -130,6 +130,7 @@ NeoCodeium provides `:NeoCodeium` user command, which has some useful actions:
 - `:NeoCodeium toggle` - toggles NeoCodeium completion.
 - `:NeoCodeium disable_buffer` - disables NeoCodeium completion in the current buffer.
 - `:NeoCodeium enable_buffer` - enables NeoCodeium completion in the current buffer.
+- `:NeoCodeium open_log` - opens split with the log output. More info in the [logging](#logging) section.
 - `:NeoCodeium restart` - restarts Codeium server (useful when server stop responding for any reason).
 
 #### 🎨 Color groups
@@ -157,6 +158,19 @@ end)
 cmp.event:on("menu_closed", function()
   vim.cmd("NeoCodeium enable")
 end)
+```
+
+#### 📄 Logging
+
+While runnging NeoCodeium logs important messages into a temporary file. It can
+be viewed with `:NeoCodeium open_log` command. By default only errors and warnings are logged.
+
+You can set the logging level to one of `trace`, `debug`, `info`, `warn`, `error` by
+exporting the `NEOCODEIUM_LOG_LEVEL` environment variable.
+
+Example:
+```sh
+NEOCODEIUM_LOG_LEVEL=info nvim
 ```
 
 ### ⚒️ Setup
@@ -202,7 +216,7 @@ require("neocodeium").setup({
 ### 🚗 Roadmap
 
 - [ ] Add vimdoc help
-- [ ] Add command to open buffer with the log output
+- [x] Add command to open buffer with the log output
 - [ ] Add :checkhealth
 - [ ] Add support for Codeium Chat
 - [ ] Add new renderer with floating windows instead of virtual text

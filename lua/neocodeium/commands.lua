@@ -6,6 +6,7 @@ local conf = require("neocodeium.utils.conf")
 local log = require("neocodeium.log")
 local options = require("neocodeium.options").options
 local api_key = require("neocodeium.api_key")
+local stdio = require("neocodeium.utils.stdio")
 local server = require("neocodeium.server")
 
 local vf = vim.fn
@@ -104,8 +105,6 @@ end
 
 local commands = {}
 
--- TODO: add log command to open log file in the buffer
--- TODO: add restart command to restart server
 -- TODO: make disable and enable commands remove autocmds
 
 function commands.auth()
@@ -159,6 +158,19 @@ end
 
 function commands.enable_buffer()
   vim.b.neocodeium_enabled = true
+end
+
+function commands.open_log()
+  local log_file = log.get_log_file()
+  if stdio.readable(log_file) then
+    vim.cmd.vsplit(log_file)
+    vim.bo.buftype = "nofile"
+    vim.bo.bufhidden = "wipe"
+    vim.bo.modifiable = false
+    vim.wo.wrap = true
+  else
+    echo.warn("log file is empty")
+  end
 end
 
 function commands.restart()
