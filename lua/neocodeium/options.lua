@@ -7,6 +7,7 @@
 ---@field show_label boolean
 ---@field debounce boolean
 ---@field max_lines integer
+---@field silent boolean
 ---@field filetypes table<string, boolean>
 local defaults = {
   enabled = true,
@@ -17,6 +18,7 @@ local defaults = {
   show_label = true,
   debounce = false,
   max_lines = 10000,
+  silent = false,
   filetypes = {
     help = false,
     gitcommit = false,

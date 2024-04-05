@@ -69,32 +69,41 @@ function Server:start()
   local stdout = assert(uv.new_pipe())
   local stderr = assert(uv.new_pipe())
 
-  ---@diagnostic disable-next-line: missing-fields
-  self.handle, self.pid = uv.spawn(self.bin.path, {
-    args = args,
-    stdio = { stdin, stdout, stderr },
-  }, function(_, _)
-    timer:stop()
-    timer:close()
-    uv.close(stdin)
-    uv.close(stdout)
-    uv.close(stderr)
-    if self.handle then
-      uv.close(self.handle)
-      self.handle = nil
-    end
-    self.port = nil
-    if self.is_restart then
-      self.is_restart = false
-      vim.schedule(function()
+  self.handle, self.pid = uv.spawn(
+    self.bin.path,
+    ---@diagnostic disable-next-line: missing-fields
+    {
+      args = args,
+      stdio = { stdin, stdout, stderr },
+    },
+    vim.schedule_wrap(function(_, _)
+      timer:stop()
+      timer:close()
+      uv.close(stdin)
+      uv.close(stdout)
+      uv.close(stderr)
+      if self.handle then
+        uv.close(self.handle)
+        self.handle = nil
+      end
+      log.info("Server stopped")
+      self.pid = nil
+      self.port = nil
+      if self.is_restart then
+        self.is_restart = false
         self:run()
-      end)
-    end
-  end)
+      end
+    end)
+  )
 
-  timer:start(500, 300, function()
-    self:init(timer, manager_dir)
-  end)
+  -- Timer to find and connect to the server port
+  timer:start(
+    500,
+    300,
+    vim.schedule_wrap(function()
+      self:init(timer, manager_dir)
+    end)
+  )
 end
 
 ---Launches the server; if server binary is not found, downloads it first.
@@ -126,6 +135,9 @@ end
 function Server:stop()
   if self.pid then
     uv.kill(self.pid, "sigint")
+    echo.info("server stopped", options.silent)
+  else
+    echo.warn("server is not running")
   end
 end
 
@@ -137,8 +149,6 @@ function Server:restart()
   else
     self:run()
   end
-  log.info("Server restarted")
-  echo.info("server restarted")
 end
 
 ---Sends request to the server
@@ -200,6 +210,7 @@ function Server:init(timer, manager_dir)
   if port_file then
     local port = fs.basename(port_file)
     log.info("Found port: " .. port)
+    echo.info("server started on port " .. port, options.silent)
     self.port = port
 
     timer:stop()

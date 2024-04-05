@@ -201,6 +201,8 @@ require("neocodeium").setup({
   -- Set to `0` to disable parsing non-current buffers (may lower suggestion quality)
   -- Set it to `-1` to parse all lines
   max_lines = 10000,
+  -- Set to `true` to disable some not important messages, like "NeoCodeium: server started..."
+  silent = false,
   -- Path to a custom log file
   log_file = nil,
   -- Set to `false` to disable suggestions in buffers with specific filetypes
