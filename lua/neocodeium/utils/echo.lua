@@ -1,20 +1,18 @@
 local types = require("neocodeium.types")
 
 ---@param lvl level one of vim.log.levels
----@return fun(msg: string)
+---@return fun(msg: string, silent?: boolean)
 local function echo(lvl)
-  ---@param msg string
-  return function(msg)
-    vim.cmd.redraw()
-    vim.notify("NeoCodeium: " .. msg, lvl)
+  return function(msg, silent)
+    if not silent then
+      vim.cmd.redraw()
+      vim.notify("NeoCodeium: " .. msg, lvl)
+    end
   end
 end
 
 return {
-  ---@type fun(msg: string)
   info = echo(types.level.info),
-  ---@type fun(msg: string)
   warn = echo(types.level.warn),
-  ---@type fun(msg: string)
   error = echo(types.level.error),
 }
