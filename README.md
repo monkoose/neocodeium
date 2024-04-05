@@ -133,6 +133,9 @@ NeoCodeium provides `:NeoCodeium` user command, which has some useful actions:
 - `:NeoCodeium open_log` - opens split with the log output. More info in the [logging](#logging) section.
 - `:NeoCodeium restart` - restarts Codeium server (useful when server stop responding for any reason).
 
+You can also use such commands in your lua scripts by calling
+`require("neocodeium.commands").<command_name>()`.
+
 #### 🎨 Color groups
 
 NeoCodeium offers a couple of color groups that you can customize to match your colorscheme:
@@ -149,14 +152,15 @@ you can use this code snippet in your config to achieve this:
 ```lua
 local cmp = require("cmp")
 local neocodeium = require("neocodeium")
+local commands = require("neocodeium.commands")
 
 -- Make codeium suggestions appear only when `nvim-cmp` menu is closed
 cmp.event:on("menu_opened", function()
-  vim.cmd("NeoCodeium disable")
+  commands.disable()
   neocodeium.clear()
 end)
 cmp.event:on("menu_closed", function()
-  vim.cmd("NeoCodeium enable")
+  commands.enable()
 end)
 ```
 

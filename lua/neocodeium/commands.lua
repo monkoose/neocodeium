@@ -103,11 +103,11 @@ end
 
 -- Commands ------------------------------------------------ {{{1
 
-local commands = {}
+local M = {}
 
 -- TODO: make disable and enable commands remove autocmds
 
-function commands.auth()
+function M.auth()
   local url = table.concat({
     options.server.portal_url or "https://www.codeium.com",
     "/profile?response_type=token",
@@ -144,23 +144,23 @@ function commands.auth()
   end
 end
 
-function commands.disable()
+function M.disable()
   options.enabled = false
 end
 
-function commands.enable()
+function M.enable()
   options.enabled = true
 end
 
-function commands.disable_buffer()
+function M.disable_buffer()
   vim.b.neocodeium_enabled = false
 end
 
-function commands.enable_buffer()
+function M.enable_buffer()
   vim.b.neocodeium_enabled = true
 end
 
-function commands.open_log()
+function M.open_log()
   local log_file = log.get_log_file()
   if stdio.readable(log_file) then
     vim.cmd.vsplit(log_file)
@@ -173,42 +173,12 @@ function commands.open_log()
   end
 end
 
-function commands.restart()
+function M.restart()
   server:restart()
 end
 
-function commands.toggle()
+function M.toggle()
   options.enabled = not options.enabled
-end
-
--- User Command -------------------------------------------- {{{1
-
-local M = {}
-
----Returns list of :NeoCodeium commands for completion
----@param arg_lead string
----@return table
-function M.complete(arg_lead)
-  local result = {}
-  for cmd in pairs(commands) do
-    if vim.startswith(cmd, arg_lead) then
-      table.insert(result, cmd)
-    end
-  end
-  table.sort(result)
-
-  return result
-end
-
----Calls a function mapped to the command
----@param cmd string
-function M.run(cmd)
-  local func = commands[cmd]
-  if func then
-    func()
-  else
-    echo.warn("command '" .. cmd .. "' not found")
-  end
 end
 -- }}}1
 

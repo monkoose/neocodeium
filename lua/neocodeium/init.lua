@@ -164,11 +164,39 @@ function M.setup(opts)
   enable_autocmds()
 
   -- User command
+
+  ---Returns list of :NeoCodeium commands for completion
+  ---@param arg_lead string
+  ---@return table
+  local function complete_commands(arg_lead)
+    local result = {}
+    for cmd in pairs(commands) do
+      if vim.startswith(cmd, arg_lead) then
+        table.insert(result, cmd)
+      end
+    end
+    table.sort(result)
+
+    return result
+  end
+
+  ---Calls a function mapped to the command
+  ---@param cmd string
+  local function run_command(cmd)
+    local func = commands[cmd]
+    if func then
+      func()
+    else
+      local echo = require("neocodeium.utils.echo")
+      echo.warn("command '" .. cmd .. "' not found")
+    end
+  end
+
   nvim_create_user_command("NeoCodeium", function(t)
-    commands.run(t.args)
+    run_command(t.args)
   end, {
     nargs = 1,
-    complete = commands.complete,
+    complete = complete_commands,
   })
 
   function M.get_status()
