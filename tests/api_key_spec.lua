@@ -21,7 +21,7 @@ describe("check()", function()
 
   it("should write warning message when api key is missing", function()
     print("test")
-    api_key.set(nil)
+    api_key.set(nil) ---@diagnostic disable-line: param-type-mismatch
     api_key.check()
     assert.is.Truthy(last_message():match("No API key found"))
   end)
