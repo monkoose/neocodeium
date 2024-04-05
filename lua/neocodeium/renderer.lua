@@ -227,7 +227,7 @@ function Renderer:display(items, index)
 
   -- When only block part is present and text was changed compared to when
   -- request was sent, return false, so it will dispatch new request
-  if self.fulltext ~= "" and item.completion.originalText:match("^\n") then
+  if not self.fulltext:match("^%s*$") and item.completion.text:match("^\n") then
     return false
   end
 
