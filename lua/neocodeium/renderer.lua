@@ -225,6 +225,12 @@ function Renderer:display(items, index)
     return true
   end
 
+  -- When only block part is present and text was changed compared to when
+  -- request was sent, return false, so it will dispatch new request
+  if self.fulltext ~= "" and item.completion.originalText:match("^\n") then
+    return false
+  end
+
   local block_text ---@type string?
   local inline_contents = {} ---@type inline_content[]
   local cummulative_cols = 0

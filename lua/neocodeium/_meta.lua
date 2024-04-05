@@ -95,8 +95,7 @@
 
 ---@alias completionId string
 ---@class compl.item
----Some LLM completion data (not used).
----@field completion { completionId: completionId }
+---@field completion { completionId: completionId, originalText: string }
 ---@field completionParts compl.part[]
 ---@field range compl.range
 ---@field source compl.source
