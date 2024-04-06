@@ -5,7 +5,7 @@ local fn = vim.fn
 local uv = vim.uv
 
 ---Log file
-local logfile = options.log_file or fn.tempname() .. "-neocodeium.log"
+local logfile = fn.tempname() .. "-neocodeium.log"
 local min_log_level = vim.env.NEOCODEIUM_LOG_LEVEL or "warn"
 
 ---@param lvl level

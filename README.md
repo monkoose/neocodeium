@@ -216,8 +216,6 @@ require("neocodeium").setup({
   max_lines = 10000,
   -- Set to `true` to disable some not important messages, like "NeoCodeium: server started..."
   silent = false,
-  -- Path to a custom log file
-  log_file = nil,
   -- Set to `false` to disable suggestions in buffers with specific filetypes
   filetypes = {
     help = false,

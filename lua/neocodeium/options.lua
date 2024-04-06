@@ -3,7 +3,6 @@
 ---@field bin? string
 ---@field manual boolean
 ---@field server { api_url?: string, portal_url?: string }
----@field log_file? string
 ---@field show_label boolean
 ---@field debounce boolean
 ---@field max_lines integer
@@ -14,7 +13,6 @@ local defaults = {
   bin = nil,
   manual = false,
   server = {},
-  log_file = nil,
   show_label = true,
   debounce = false,
   max_lines = 10000,

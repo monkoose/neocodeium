@@ -230,9 +230,6 @@ CONFIGURATION                                       *NeoCodeium-Configuration*
         Boolean.
         When `true`, then some information messages like "Neocodeium: server
         started..." would be disabled.
-    log_file~
-        String.
-        Path to a custom log file.
     filetypes~
         Table where keys are filetypes and values are booleans.
         By default the plugin is enabled for all filetypes except defaults
@@ -246,7 +243,6 @@ Defaults: >lua
         bin = nil,
         manual = false,
         server = {},
-        log_file = nil,
         show_label = true,
         debounce = false,
         max_lines = 10000,
