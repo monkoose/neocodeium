@@ -150,6 +150,9 @@ end
 
 function M.enable()
   options.enabled = true
+  if not server.pid then
+    server:run()
+  end
 end
 
 function M.disable_buffer()
