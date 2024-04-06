@@ -8,7 +8,7 @@ local types = require("neocodeium.types")
 local server = require("neocodeium.server")
 local renderer = require("neocodeium.renderer")
 
-local vf = vim.fn
+local fn = vim.fn
 local uv = vim.uv
 local json = vim.json
 
@@ -155,7 +155,7 @@ function Completer:accept_regex(regex)
   end
 
   if text ~= "" then
-    text = vf.matchstr(text, regex)
+    text = fn.matchstr(text, regex)
     if #renderer.inline > 1 then
       local text_len = #text
       local combined_text = renderer.inline[1].text
@@ -173,7 +173,7 @@ function Completer:accept_regex(regex)
             break
           end
         end
-        local prefix_chars = vf.strchars(combined_prefix)
+        local prefix_chars = fn.strchars(combined_prefix)
         if prefix_chars > 0 then
           local dels = nvim_replace_termcodes(string.rep("<Del>", prefix_chars), true, false, true)
           nvim_feedkeys(dels, "n", false)
@@ -187,7 +187,7 @@ function Completer:accept_regex(regex)
     end
 
     text = vim.split(text, "\n")[1]
-    text = vf.matchstr(text, regex)
+    text = fn.matchstr(text, regex)
     local lnum1 = renderer.pos[1] + 1
     utils.set_lines(lnum1, lnum1, { "" })
     utils.set_cursor({ lnum1, 0 })

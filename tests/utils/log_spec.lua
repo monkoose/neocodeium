@@ -1,4 +1,5 @@
 local log = require("neocodeium.log")
+local fn = vim.fn
 
 describe("get_log_file()", function()
   it("should return correct path", function()
@@ -10,7 +11,7 @@ describe("get_log_file()", function()
           vim.uv.fs_close(fd)
         end)
       end
-      assert.is.Truthy(vim.fn.filereadable(path) == 1)
+      assert.is.Truthy(fn.filereadable(path) == 1)
     end)
   end)
 end)
@@ -19,7 +20,7 @@ end)
 local function read_log_file()
   local path = log.get_log_file()
   vim.cmd.sleep("10m")
-  local lines = vim.fn.readfile(path, "", -1)
+  local lines = fn.readfile(path, "", -1)
   if #lines > 0 then
     return lines[1]
   end

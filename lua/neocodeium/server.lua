@@ -8,7 +8,7 @@ local echo = require("neocodeium.utils.echo")
 local utils = require("neocodeium.utils")
 local Bin = require("neocodeium.binary")
 
-local vf = vim.fn
+local fn = vim.fn
 local uv = vim.uv
 local fs = vim.fs
 local json = vim.json
@@ -53,8 +53,8 @@ end
 function Server:start()
   local timer = assert(uv.new_timer())
   local api_url = options.server.api_url
-  local manager_dir = vf.tempname() .. "/codeium/manager"
-  vf.mkdir(manager_dir, "p")
+  local manager_dir = fn.tempname() .. "/codeium/manager"
+  fn.mkdir(manager_dir, "p")
 
   local args = {
     "--api_server_url",
@@ -119,8 +119,8 @@ function Server:run()
   else
     local bin_dir = fs.dirname(self.bin.path)
     if bin_dir then
-      vf.delete(bin_dir, "rf")
-      vf.mkdir(bin_dir, "p")
+      fn.delete(bin_dir, "rf")
+      fn.mkdir(bin_dir, "p")
     end
 
     self.bin:download(function()

@@ -4,7 +4,7 @@ local utils = require("neocodeium.utils")
 local types = require("neocodeium.types")
 local options = require("neocodeium.options").options
 
-local vf = vim.fn
+local fn = vim.fn
 local uv = vim.uv
 
 local nvim_get_current_line = vim.api.nvim_get_current_line
@@ -78,7 +78,7 @@ local function leading_tabs_to_spaces(str)
     return string.sub(
       [[                                                         ]],
       1,
-      #m * vf.shiftwidth()
+      #m * fn.shiftwidth()
     )
   end)
 end

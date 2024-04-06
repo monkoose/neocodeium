@@ -1,4 +1,4 @@
-local vf = vim.fn
+local fn = vim.fn
 
 local M = {}
 
@@ -6,14 +6,14 @@ local M = {}
 ---@param path filepath
 ---@return boolean
 function M.readable(path)
-  return vf.filereadable(path) == 1
+  return fn.filereadable(path) == 1
 end
 
 ---Returns true if command/file exists and executable
 ---@param cmd string
 ---@return boolean
 function M.executable(cmd)
-  return vf.executable(cmd) == 1
+  return fn.executable(cmd) == 1
 end
 
 ---Reads file content into string, on failure returns nil
@@ -37,7 +37,7 @@ end
 ---Returns plugin's root directory
 ---@return filepath
 function M.root_dir()
-  return vf.fnamemodify(script_path(), ":h:h:h:h")
+  return fn.fnamemodify(script_path(), ":h:h:h:h")
 end
 
 return M

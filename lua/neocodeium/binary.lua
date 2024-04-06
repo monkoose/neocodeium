@@ -6,7 +6,7 @@ local conf = require("neocodeium.utils.conf")
 local options = require("neocodeium.options").options
 local stdio = require("neocodeium.utils.stdio")
 
-local vf = vim.fn
+local fn = vim.fn
 
 -- Binary -------------------------------------------------- {{{1
 
@@ -29,11 +29,11 @@ local function powershell_expand(bin_gz)
     vim.o.shellquote = ""
     vim.o.shellxquote = ""
     vim.o.shellcmdflag = "-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command"
-    vf.system(
+    fn.system(
       "& { . "
-        .. vf.shellescape(stdio.root_dir() .. "/powershell/gzip.ps1")
+        .. fn.shellescape(stdio.root_dir() .. "/powershell/gzip.ps1")
         .. "; Expand-File "
-        .. vf.shellescape(bin_gz)
+        .. fn.shellescape(bin_gz)
         .. " }"
     )
   end)
@@ -113,13 +113,13 @@ function Bin:expand()
     powershell_expand(bin_gz)
   else
     -- Uncompress binary
-    vf.system("gzip -d " .. vf.shellescape(bin_gz))
+    fn.system("gzip -d " .. fn.shellescape(bin_gz))
     if vim.v.shell_error ~= 0 then
       echo.error("failed to extract binary\n" .. vim.v.shell_error)
       return false
     end
     -- Make binary executable
-    vf.system("chmod +x " .. vf.shellescape(self.path))
+    fn.system("chmod +x " .. fn.shellescape(self.path))
     if vim.v.shell_error ~= 0 then
       echo.error("failed to make binary executable\n" .. vim.v.shell_error)
       return false

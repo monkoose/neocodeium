@@ -3,7 +3,7 @@
 local filetype = require("neocodeium.filetype")
 local options = require("neocodeium.options").options
 
-local vf = vim.fn
+local fn = vim.fn
 local nvim_buf_get_lines = vim.api.nvim_buf_get_lines
 local nvim_buf_get_name = vim.api.nvim_buf_get_name
 local nvim_list_bufs = vim.api.nvim_list_bufs
@@ -77,7 +77,7 @@ function M.get(buf, ft, max_lines, pos)
     language = filetype.language[lang] or filetype.language.unspecified,
     cursor_position = { row = pos[1], col = pos[2] },
     absolute_path = name,
-    relative_path = vf.fnamemodify(name, ":."),
+    relative_path = fn.fnamemodify(name, ":."),
     line_ending = "\n",
   }
 end

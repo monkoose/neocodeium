@@ -9,7 +9,7 @@ local api_key = require("neocodeium.api_key")
 local stdio = require("neocodeium.utils.stdio")
 local server = require("neocodeium.server")
 
-local vf = vim.fn
+local fn = vim.fn
 local json = vim.json
 
 -- Auxiliary functions ------------------------------------- {{{1
@@ -34,9 +34,9 @@ end
 ---@param msg string
 ---@return string
 local function secret_input(msg)
-  vf.inputsave()
-  local result = vf.inputsecret(msg)
-  vf.inputrestore()
+  fn.inputsave()
+  local result = fn.inputsecret(msg)
+  fn.inputrestore()
   return result
 end
 
@@ -60,14 +60,14 @@ local function request_api_key()
 
   local system = function(cmd)
     local str_cmd = table.concat(cmd, " ")
-    return vf.system(str_cmd)
+    return fn.system(str_cmd)
   end
 
   local on_windows = utils.get_system_info().is_win
   local ssl_error = "The revocation function was unable to check revocation for the certificate."
   local auth_token = secret_input("Paste your token here (it would be hidden): ")
   for _ = 1, 3 do
-    local json_token = vf.shellescape(json.encode({ firebase_id_token = auth_token }) or "")
+    local json_token = fn.shellescape(json.encode({ firebase_id_token = auth_token }) or "")
     local cmd = vim.iter(curl_with_args):totable()
     table.insert(cmd, json_token)
 
@@ -132,8 +132,8 @@ function M.auth()
   config.api_key = key
 
   local ok, err = pcall(function()
-    vf.mkdir(config_dir, "p")
-    vf.writefile({ json.encode(config) }, config_path)
+    fn.mkdir(config_dir, "p")
+    fn.writefile({ json.encode(config) }, config_path)
   end)
 
   if ok then
