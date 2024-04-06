@@ -24,7 +24,7 @@ only manually invoke nvim-cmp.
 - Completions on the current line can now be repeated using the `.` key.
 - Performance improvements have been achieved through cache techniques.
 - The suggestion count label is displayed in the number column, making it closer to the context.
-- Default keybindings have been removed.
+- Default keymaps have been removed.
 - Possibility to complete only word/line of the suggestion.
 - By default, there is no debounce, allowing suggestions to appear while
   typing. If you don't like this behavior, set `debounce = true` in the setup.
@@ -88,17 +88,18 @@ neocodeium.cycle(n)
 neocodeium.cycle_or_complete(n)
 ```
 
-#### ⌨️ Keybindings
+#### ⌨️ Keymaps
 
-NeoCodeium doesn’t enforce any keybindings, so you’ll need to add them
+NeoCodeium doesn’t enforce any keymaps, that means you’ll need to add them
 yourself. While [codeium.vim] and
-[copilot.vim](https://github.com/github/copilot.vim) set the `<Tab>` keybinding
-as the default for completion, but there are some downsides to consider (but nothing stops you from using it):
+[copilot.vim](https://github.com/github/copilot.vim) set the `<Tab>` keymap as
+the default key for accepting a suggestion, but `<Tab>` has some downsides to
+consider (but nothing stops you from using it):
 - **Risk of Interference:** There’s a high chance of it conflicting with other plugins (such as snippets, nvim-cmp, etc.).
 - **Not Consistent:** It doesn’t work in the `:h command-line-window`.
-- **Indentation Challenges:** It can make it harder to indent with the tab at the start of a line.
+- **Indentation Challenges:** It is harder to indent with the tab at the start of a line.
 
-Suggested keybindings:
+Suggested keymaps:
 
 ```lua
 vim.keymap.set("i", "<A-f>", function()
@@ -131,46 +132,54 @@ NeoCodeium provides `:NeoCodeium` user command, which has some useful actions:
 - `:NeoCodeium disable_buffer` - disables NeoCodeium completion in the current buffer.
 - `:NeoCodeium enable_buffer` - enables NeoCodeium completion in the current buffer.
 - `:NeoCodeium open_log` - opens split with the log output. More info in the [logging](#logging) section.
-- `:NeoCodeium restart` - restarts Codeium server (useful when server stop responding for any reason).
+- `:NeoCodeium restart` - restarts Codeium server (useful when server stops responding for any reason).
 
 You can also use such commands in your lua scripts by calling
 `require("neocodeium.commands").<command_name>()`.
 
-#### 🎨 Color groups
+#### 🎨 Highlight groups
 
-NeoCodeium offers a couple of color groups that you can customize to match your colorscheme:
-- `NeoCodeiumSuggestion` - corresponds to the virtual text color (default: darkgray)
-- `NeoCodeiumLabel` - represents the label indicating the number of suggestions (default: inverted DiagnosticInfo)
+NeoCodeium offers a couple of highlight groups. Feel free to adjust them to
+your preference and to match your choosen color scheme:
+- `NeoCodeiumSuggestion` - virtual text color of the plugin suggestions (default: `#808080`)
+- `NeoCodeiumLabel` - color of the label that indicates the number of suggestions (default: inverted DiagnosticInfo)
 
-Feel free to adjust these colors to your preference and enhance your NeoCodeium experience!
+#### using with nvim-cmp
 
-#### nvim-cmp integration
-
-If you want to disable NeoCodeium suggestions when nvim-cmp menu is visible,
-you can use this code snippet in your config to achieve this:
+If you are using NeoCodeium with `manual = false` (it is default), it would be
+useful to set nvim-cmp to manual completion then and clear NeoCodeium
+suggestions on opening nvim-cmp popup menu. You can achieve this with following
+code in the place where nvim-cmp is configured:
 
 ```lua
 local cmp = require("cmp")
 local neocodeium = require("neocodeium")
 local commands = require("neocodeium.commands")
 
--- Make codeium suggestions appear only when `nvim-cmp` menu is closed
 cmp.event:on("menu_opened", function()
-  commands.disable()
-  neocodeium.clear()
+    commands.disable()
+    neocodeium.clear()
 end)
+
 cmp.event:on("menu_closed", function()
-  commands.enable()
+    commands.enable()
 end)
+
+cmp.setup({
+    completion = {
+        autocomplete = false,
+    },
+})
 ```
 
 #### 📄 Logging
 
-While runnging NeoCodeium logs important messages into a temporary file. It can
-be viewed with `:NeoCodeium open_log` command. By default only errors and warnings are logged.
+While runnging NeoCodeium logs some messages into a temporary file. It can be
+viewed with `:NeoCodeium open_log` command. By default only errors and warnings
+are logged.
 
 You can set the logging level to one of `trace`, `debug`, `info`, `warn`, `error` by
-exporting the `NEOCODEIUM_LOG_LEVEL` environment variable.
+exporting `NEOCODEIUM_LOG_LEVEL` environment variable.
 
 Example:
 ```sh
@@ -184,7 +193,7 @@ NeoCodeium comes with the following default options:
 ```lua
 -- NeoCodeium Configuration
 require("neocodeium").setup({
-  -- Enable NeoCodeium at startup
+  -- Enable NeoCodeium on startup
   enabled = true,
   -- Path to a custom Codeium server binary (you can download one from: https://github.com/Exafunction/codeium/releases)
   bin = nil,
@@ -192,9 +201,9 @@ require("neocodeium").setup({
   manual = false,
   -- Information about the API server to use
   server = {
-    -- The API URL to use (for Enterprise mode)
+    -- API URL to use (for Enterprise mode)
     api_url = nil,
-    -- The portal URL to use (for registering a user and downloading the binary)
+    -- Portal URL to use (for registering a user and downloading the binary)
     portal_url = nil,
   },
   -- Set to `false` to disable showing the number of suggestions label at the line column
@@ -221,7 +230,7 @@ require("neocodeium").setup({
 
 ### 🚗 Roadmap
 
-- [ ] Add vimdoc help
+- [x] Add vimdoc help
 - [x] Add command to open buffer with the log output
 - [ ] Add :checkhealth
 - [ ] Add support for Codeium Chat

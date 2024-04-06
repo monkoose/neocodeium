@@ -1,0 +1,276 @@
+*NeoCodeium*           free AI completion plugin powered by codeium
+
+Author: monkoose <https://github.com/monkoose>
+License: MIT license
+
+==============================================================================
+CONTENTS
+
+    Introduction                                   |NeoCodeium-Introduction|
+    Installation                                   |NeoCodeium-Installation|
+    Usage                                          |NeoCodeium-Usage|
+        API                                        |NeoCodeium-API|
+        Commands                                   |NeoCodeium-Commands|
+        Keymaps                                    |NeoCodeium-Keymaps|
+        Highlight groups                           |NeoCodeium-Highlights|
+        Using with nvim-cmp
+    Configuration                                  |NeoCodeium-Configuration|
+    Logging                                        |NeoCodeium-Logging|
+
+==============================================================================
+INTRODUCTION                                         *NeoCodeium-Introduction*
+
+|NeoCodeium| is AI completion plugin powered by https://codeium.com/ toolkit.
+It spawns codeium server and sends requests to it to get so called completion
+items, which is rendering as virtual text and can span multiple lines.
+|NeoCodeium| parses loaded buffers on BufEnter autocmd to improve the quality
+of suggested items.
+
+==============================================================================
+INSTALLATION                                          *NeoCodeium-Intallation*
+
+Here’s an example for `lazy`💤 https://github.com/folke/lazy.nvim plugin
+manager. If you're using a different plugin manager, please refer to its
+documentation for installation instructions.
+>lua
+    -- add this to the file where you setup your other plugins:
+    {
+    "monkoose/neocodeium",
+    event = "VeryLazy",
+    config = function()
+        local neocodeium = require("neocodeium")
+        neocodeium.setup()
+        vim.keymap.set("i", "<A-f>", neocodeium.accept)
+    end,
+    }
+<
+Now you can use `Alt-f` in insert mode to accept codeium suggestions.
+Note: To obtain an API token, you’ll need to run `:NeoCodeium auth` command.
+
+==============================================================================
+USAGE                                                       *NeoCodeium-Usage*
+
+------------------------------------------------------------------------------
+API                                                           *NeoCodeium-API*
+
+|NeoCodeium| provides API functions exported in `neocodeium` module.
+>lua
+    local neocodeium = require("neocodeium")
+
+    -- Accepts the suggestion.
+    neocodeium.accept()
+
+    -- Accepts only part of the suggestion if the full suggestion doesn't make
+    -- sense.
+    neocodeium.accept_word()
+    neocodeium.accept_line()
+
+    -- Clears the current suggestion.
+    neocodeium.clear()
+
+    -- Cycles through suggestions by `n` (1 by default) items. Use a negative
+    -- value to cycle in reverse order.
+    neocodeium.cycle(n)
+
+    -- Same as `cycle()`, but also tries to show suggestions if none is
+    -- visible. Mostly useful with the enabled `manual` option.
+    neocodeium.cycle_or_complete(n)
+<
+------------------------------------------------------------------------------
+COMMANDS                                                 *NeoCodeium-Commands*
+
+
+|NeoCodeium| provides `:NeoCodeium` user command, which has some useful actions:
+    auth~
+        Authenticates the user and saves the API token.
+    disable~
+        Disables NeoCodeium completion.
+    enable~
+        Enables NeoCodeium completion.
+    toggle~
+        Toggles NeoCodeium completion.
+    disable_buffer~
+        Disables NeoCodeium completion in the current buffer.
+    enable_buffer~
+        Enables NeoCodeium completion in the current buffer.
+    open_log~
+        Opens split with the log output. Read |NeoCodeium-Logging| for more
+        information about logging.
+    restart~
+        Restarts Codeium server. Useful when server stops responding for any
+        reason.
+
+You can also use such commands in your lua scripts:
+>lua
+    local cmds = require("neocodeium.commands")
+    cmds.auth()
+    cmds.disable()
+    cmds.enable()
+    cmds.toggle()
+    cmds.disable_buffer()
+    cmds.enable_buffer()
+    cmds.open_log()
+    cmds.restart()
+<
+------------------------------------------------------------------------------
+KEYMAPS                                                  *NeoCodeium-Keymaps*
+
+NeoCodeium doesn’t enforce any keymaps, that means you’ll need to add them
+yourself. `codeium.vim` and `copilot.vim` set `<Tab>` keymap as the default
+key for accepting a suggestion, but `<Tab>` has some downsides to consider
+(but nothing stops you from using it):
+>
+    - There’s a high chance of it conflicting with other plugins (such as
+      snippets, nvim-cmp, etc.).
+    - It doesn’t work in the `:h command-line-window`.
+    - It is harder to indent with the tab at the start of a line.
+
+Suggested keymaps:
+>lua
+    vim.keymap.set("i", "<A-f>", function()
+        require("neocodeium").accept()
+    end)
+    vim.keymap.set("i", "<A-w>", function()
+        require("neocodeium").accept_word()
+    end)
+    vim.keymap.set("i", "<A-a>", function()
+        require("neocodeium").accept_line()
+    end)
+    vim.keymap.set("i", "<A-e>", function()
+        require("neocodeium").cycle_or_complete()
+    end)
+    vim.keymap.set("i", "<A-r>", function()
+        require("neocodeium").cycle_or_complete(-1)
+    end)
+    vim.keymap.set("i", "<A-c>", function()
+        require("neocodeium").clear()
+    end)
+<
+------------------------------------------------------------------------------
+HIGHLIGHT GROUPS                                       *NeoCodeium-Highlights*
+
+|NeoCodeium| offers a couple of highlight groups. Feel free to adjust them to
+your preference and to match your choosen color scheme:
+    NeoCodeiumSuggestion~
+        Virtual text color of the plugin suggestions.
+        Default: `#808080`
+    NeoCodeiumLabel~
+        Color of the label that indicates the number of suggestions.
+        Default: `inverted` |hl-DiagnosticInfo|.
+
+------------------------------------------------------------------------------
+USING WITH NVIM-CMP
+
+If you are using NeoCodeium with `manual = false` (it is default), it would be
+useful to set nvim-cmp to manual completion then and clear NeoCodeium
+suggestions on opening nvim-cmp popup menu. You can achieve this with
+following code in the place where nvim-cmp is configured:
+>lua
+    local cmp = require("cmp")
+    local neocodeium = require("neocodeium")
+    local commands = require("neocodeium.commands")
+
+    cmp.event:on("menu_opened", function()
+        commands.disable()
+        neocodeium.clear()
+    end)
+
+    cmp.event:on("menu_closed", function()
+        commands.enable()
+    end)
+
+    cmp.setup({
+        completion = {
+            autocomplete = false,
+        },
+    })
+<
+==============================================================================
+CONFIGURATION                                       *NeoCodeium-Configuration*
+
+`setup()` function accepts table with following keys:
+    enabled~
+        Boolean.
+        When `true`, then the plugin will be enabled on neovim startup.
+    bin~
+        String.
+        Path to a custom Codeium server binary.
+        You can download specific version from codeium github page
+        https://github.com/Exafunction/codeium/releases
+    manual~
+        Boolean.
+        When `true`, then automatic display of suggestions are disabled.
+        Use |cycle_or_complete()| to show one manually.
+    server~
+        Table with keys:
+            api_url~
+                String.
+                API url to use for Enterprise mode.
+            portal_url~
+                String.
+                Portal url to use for registering a user and downloading the
+                server binary.
+        Information about the API server to use.
+    show_label~
+        Boolean.
+        When `true`, then label with number of suggestions is showing at the
+        line column.
+    debounce~
+        Boolean.
+        When `true`, then showing of suggestions is debounced.
+    max_lines~
+        Integer.
+        Maximum number of lines of non-current loaded buffers parsed by the
+        plugin and send with a request to the server to improve make
+        suggestion be more context aware. Can be slow on big files, so it
+        better to limit it to some value.
+        When `0` parsing is disabled (this may lower suggestions quality).
+        When `-1` all lines would be parsed.
+    silent~
+        Boolean.
+        When `true`, then some information messages like "Neocodeium: server
+        started..." would be disabled.
+    log_file~
+        String.
+        Path to a custom log file.
+    filetypes~
+        Table where keys are filetypes and values are booleans.
+        By default the plugin is enabled for all filetypes except defaults
+        mentioned below. To disable NeoCodeium in additional filetypes set
+        them in this table with `false` value.
+
+
+Defaults: >lua
+    require("neocodeium").setup({
+        enabled = true,
+        bin = nil,
+        manual = false,
+        server = {},
+        log_file = nil,
+        show_label = true,
+        debounce = false,
+        max_lines = 10000,
+        silent = false,
+        filetypes = {
+            help = false,
+            gitcommit = false,
+            gitrebase = false,
+            ["."] = false,
+        },
+    })
+<
+==============================================================================
+LOGGING                                                   *NeoCodeium-Logging*
+
+While runnging NeoCodeium logs some messages into a temporary file, which can
+be viewed with `:NeoCodeium open_log` command. By default only errors and
+warnings are logged.
+
+You can set the logging level to one of `trace`, `debug`, `info`, `warn`,
+`error` by exporting `NEOCODEIUM_LOG_LEVEL` environment variable.
+
+Example: >sh
+    NEOCODEIUM_LOG_LEVEL=info nvim
+<
+==============================================================================
+vim:tw=78:ft=help:norl:fen:
