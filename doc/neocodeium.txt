@@ -27,7 +27,7 @@ items, which is rendering as virtual text and can span multiple lines.
 of suggested items.
 
 ==============================================================================
-INSTALLATION                                          *NeoCodeium-Intallation*
+INSTALLATION                                         *NeoCodeium-Installation*
 
 Here’s an example for `lazy`💤 https://github.com/folke/lazy.nvim plugin
 manager. If you're using a different plugin manager, please refer to its
