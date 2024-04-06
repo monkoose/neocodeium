@@ -232,7 +232,7 @@ require("neocodeium").setup({
 
 - [x] Add vimdoc help
 - [x] Add command to open buffer with the log output
-- [ ] Add :checkhealth
+- [x] Add :checkhealth
 - [ ] Add support for Codeium Chat
 - [ ] Add new renderer with floating windows instead of virtual text
 
