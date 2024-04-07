@@ -1,0 +1,74 @@
+name: Bug Report
+description: Report a problem in NeoCodeium
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ❗ **Before reporting:**
+        - Confirm the problem is reproducible on the [**main**](https://github.com/monkoose/neocodeium/tree/main) branch.
+        - Search [existing issues](https://github.com/monkoose/neocodeium/issues?q=is%3Aissue+is%3Aopen+label%3Abug) (including [closed](https://github.com/monkoose/neocodeium/issues?q=is%3Aissue+is%3Aclosed+label%3Abug))
+
+        Usage or "How to" questions belong to [discussions](https://github.com/monkoose/neocodeium/discussions) and will be closed.
+  - type: textarea
+    id: problem
+    attributes:
+      label: "👎 Problem"
+      description: "Describe the current behavior. May include logs, images, or videos."
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: "🔢 Steps to reproduce"
+      description: |
+        Step by step instructions on how to reproduce the problem. Prefer using `nvim --clean` if possible.
+        nvim --clean
+        :set rtp+=~/path/to/plugin/neocodeium (in my case it is `:set rtp+=~/.local/share/nvim/lazy/neocodeium`)
+        :lua require('neocodeium').setup()
+        :lua vim.keymap.set('i', '<A-f>', function() require('neocodeium').accept() end)
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "👍 Expected behavior"
+      description: "Describe the behavior you expect."
+    validations:
+      required: true
+
+  - type: input
+    id: nvim-version
+    attributes:
+      label: "Neovim version (nvim -v)"
+      placeholder: "nightly"
+    validations:
+      required: true
+  - type: dropdown
+    id: os-arch
+    attributes:
+      label: "Operating system (uname -om)"
+      options:
+        - Linux x86_64
+        - Linux arm64
+        - macOS x86_64
+        - macOS arm64
+        - Windows x86_64
+    validations:
+      required: true
+  - type: dropdown
+    id: checkhealth
+    attributes:
+      label: ":checkhealth neocodeium"
+      description: "Result of `:checkhealth neocodeium`. Describe the problem in the problem field if any."
+      options:
+        - "OK"
+        - "Error"
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: "Relevant log output"
+      description: "Please copy and paste the output of `:NeoCodeium open_log`, if it exists."
+      render: shell
