@@ -14,7 +14,7 @@ local function system_info()
   local sys_info = utils.get_system_info()
   health.info(
     string.format(
-      "*%s* *(%s)*\nIf it is not correctly detected, then consider to report a bug to\n%s",
+      "*%s* *(%s)*\nIf it is not correctly detected, then consider to report a bug at\n%s",
       sys_info.os,
       sys_info.arch,
       "https://github.com/monkoose/neocodeium/issues"
@@ -52,9 +52,12 @@ local function check_server()
     health.ok(string.format("*Server* is running on port %s with pid %s", server.port, server.pid))
   else
     if not server.pid then
-      health.error("*Server* is not running")
+      health.error("*Server* have not been started")
     elseif not server.port then
-      health.error("*Server* *port* is not detected")
+      health.error(
+        "*Server* *port* is not detected",
+        "Finding a port can take some time. Please try :checkhealth again later."
+      )
     end
   end
 end
