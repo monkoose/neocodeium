@@ -234,6 +234,7 @@ function Renderer:display(items, index)
   local block_text ---@type string?
   local inline_contents = {} ---@type inline_content[]
   local cummulative_cols = 0
+  local delta = 0
 
   for i, part in ipairs(parts) do
     -- process only correct parts
@@ -255,20 +256,18 @@ function Renderer:display(items, index)
             return false
           end
 
-          local delta = calc_inline_delta(prefix_len, match_prefix_idx, col)
+          delta = calc_inline_delta(prefix_len, match_prefix_idx, col)
           if delta < 0 then
             text = prefix:sub(delta) .. text
           elseif delta > 0 then
             text = text:sub(delta + 1)
           end
-
-          table.insert(
-            inline_contents,
-            { lnum = lnum, col = column + delta, text = text, prefix = "" }
-          )
-        else
-          table.insert(inline_contents, { lnum = lnum, col = column, text = text, prefix = prefix })
+          prefix = ""
         end
+        table.insert(
+          inline_contents,
+          { lnum = lnum, col = column + delta, text = text, prefix = prefix }
+        )
       elseif part.type == types.part.block then
         block_text = text
       end
