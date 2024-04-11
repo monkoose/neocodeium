@@ -139,7 +139,7 @@ function M.auth()
   if ok then
     echo.info("success. Autocompletion now should work")
   else
-    echo.error("could not write api key to confi.json")
+    echo.error("could not write api key to config.json")
     log.error("Could not write api key to config.json\n" .. err)
   end
 end
