@@ -75,6 +75,9 @@ API                                                           *NeoCodeium-API*
     -- Same as `cycle()`, but also tries to show suggestions if none is
     -- visible. Mostly useful with the enabled `manual` option.
     neocodeium.cycle_or_complete(n)
+
+    -- Checks if codeium suggestion is shown or not
+    neocodeium.visible()
 <
 ------------------------------------------------------------------------------
 COMMANDS                                                 *NeoCodeium-Commands*

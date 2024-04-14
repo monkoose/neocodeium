@@ -86,6 +86,9 @@ neocodeium.cycle(n)
 -- Same as `cycle()`, but also tries to show a suggestion if none is visible.
 -- Mostly useful with the enabled `manual` option
 neocodeium.cycle_or_complete(n)
+
+-- Checks if a suggestion's virtual text is visible or not (useful for some complex mappings)
+neocodeium.visible()
 ```
 
 #### ⌨️ Keymaps

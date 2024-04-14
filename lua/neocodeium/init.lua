@@ -231,6 +231,12 @@ end
 function M.accept_line()
   require("neocodeium.completer"):accept_line()
 end
+
+---Returns true if a suggestion's virtual text is visible
+---@return boolean
+function M.visible()
+  return require("neocodeium.completer"):valid()
+end
 -- }}}1
 
 return M

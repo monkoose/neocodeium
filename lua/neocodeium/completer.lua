@@ -56,7 +56,6 @@ end
 -- Completer methods --------------------------------------- {{{1
 
 ---Returns `true` if completion data is present and valid.
----@private
 ---@return boolean
 function Completer:valid()
   return self.data.items ~= nil and self.data.index ~= nil
