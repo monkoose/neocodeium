@@ -26,7 +26,8 @@ local function open_browser(url)
   if obj.code == 0 then
     echo.info("opening " .. url)
   else
-    echo.error(obj.stderr .. "Please go to " .. url)
+    local err = obj.stderr or ""
+    echo.error(err .. "Please go to " .. url)
   end
 end
 
