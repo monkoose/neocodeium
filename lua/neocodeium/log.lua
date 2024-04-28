@@ -8,6 +8,17 @@ local uv = vim.uv
 local logfile = fn.tempname() .. "-neocodeium.log"
 local min_log_level = vim.env.NEOCODEIUM_LOG_LEVEL or "warn"
 
+---Appends newline to `msg` if it doesn't end with it
+---@param msg string
+---@return string
+local function append_newline(msg)
+  if vim.endswith(msg, "\n") then
+    return msg
+  else
+    return msg .. "\n"
+  end
+end
+
 ---@param lvl level
 ---@return fun(msg: string)
 local function log(lvl)
@@ -16,7 +27,7 @@ local function log(lvl)
     return function(msg)
       uv.fs_open(logfile, "a", o644, function(_, fd)
         if fd then
-          uv.fs_write(fd, msg .. "\n", -1, function()
+          uv.fs_write(fd, append_newline(msg), -1, function()
             uv.fs_close(fd)
           end)
         end

@@ -96,6 +96,19 @@ function Server:start()
     end)
   )
 
+  local function log_data(err, data)
+    if err then
+      return
+    end
+
+    if data then
+      log.info(data)
+    end
+  end
+
+  stdout:read_start(log_data)
+  stderr:read_start(log_data)
+
   -- Timer to find and connect to the server port
   timer:start(
     500,
