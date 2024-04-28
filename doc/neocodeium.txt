@@ -97,7 +97,7 @@ COMMANDS                                                 *NeoCodeium-Commands*
     enable_buffer~
         Enables NeoCodeium completion in the current buffer.
     open_log~
-        Opens split with the log output. Read |NeoCodeium-Logging| for more
+        Opens new tab with the log output. Read |NeoCodeium-Logging| for more
         information about logging.
     restart~
         Restarts Codeium server. Useful when server stops responding for any

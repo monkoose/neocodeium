@@ -167,7 +167,7 @@ end
 function M.open_log()
   local log_file = log.get_log_file()
   if stdio.readable(log_file) then
-    vim.cmd.vsplit(log_file)
+    vim.cmd.tabedit(log_file)
     vim.bo.buftype = "nofile"
     vim.bo.bufhidden = "wipe"
     vim.bo.modifiable = false
