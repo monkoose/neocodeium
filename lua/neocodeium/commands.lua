@@ -14,21 +14,15 @@ local json = vim.json
 
 -- Auxiliary functions ------------------------------------- {{{1
 
----Opens url in default browser or dislays an error on failure.
+---Opens url in default browser and notifies a user.
 ---@param url url
 local function open_browser(url)
   local obj = vim.ui.open(url)
-  if not obj then
-    echo.error("Please go to " .. url)
-    return
-  end
-
-  if obj.code == 0 then
-    echo.info("opening " .. url)
-  else
-    local err = obj.stderr or ""
-    echo.error(err .. "Please go to " .. url)
-  end
+  echo.info(
+    "browser should have been opened with the URL (if it doesn't, then open the URL manually):\n"
+      .. url
+      .. "\nLogin and copy a token on the page.\n\n"
+  )
 end
 
 ---Returns user input hiding text with * characters.
@@ -43,7 +37,7 @@ end
 
 ---Fetches and returns codeium api key from the web.
 ---Returns nil on failure.
----@return string?
+---@return string|nil
 local function request_api_key()
   local api_url = options.server.api_url
   local register_user_url = api_url
@@ -68,6 +62,10 @@ local function request_api_key()
   local ssl_error = "The revocation function was unable to check revocation for the certificate."
   local auth_token = secret_input("Paste your token here (it would be hidden): ")
   for _ = 1, 3 do
+    if auth_token == "" then
+      return
+    end
+
     local json_token = fn.shellescape(json.encode({ firebase_id_token = auth_token }) or "")
     local cmd = vim.iter(curl_with_args):totable()
     table.insert(cmd, json_token)
@@ -121,7 +119,7 @@ function M.auth()
   open_browser(url)
   local key = request_api_key()
   if not key then
-    echo.error("Could not retrieve api key")
+    echo.error("could not retrieve api key\nAuthentication is canceled")
     return
   end
 
