@@ -284,7 +284,9 @@ function Completer:initiate(omit_manual)
       end)
     )
   else
-    self:request()
+    vim.schedule(function()
+      self:request()
+    end)
   end
 end
 
