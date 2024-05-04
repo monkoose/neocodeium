@@ -34,11 +34,6 @@ only manually invoke nvim-cmp.
 > [!Warning]
 > Currently, it only works on neovim's nightly build.
 
-> [!Note]
-> The plugin is beta quality. It has not been tested on Windows at all (the code for its support was adopted from [codeium.vim]).
->
-> Please report any issues on the [GitHub repository](https://github.com/monkoose/neocodeium/issues).
-
 ### 📦 Installation
 
 Here’s an example for 💤[lazy](https://github.com/folke/lazy.nvim) plugin manager. If you're using
