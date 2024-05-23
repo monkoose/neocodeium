@@ -109,8 +109,8 @@ end
 ---Returns neovim version
 ---@return string
 function M.get_neovim_version()
-  local obj = vim.version.parse(M.exec("version"))
-  if obj then
+  local ok, obj = pcall(vim.version.parse, M.exec("version"))
+  if ok and obj then
     return string.format("%d.%d.%d", obj.major, obj.minor, obj.patch)
   else
     return "unknown"
