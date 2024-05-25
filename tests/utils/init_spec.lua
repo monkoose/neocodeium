@@ -116,14 +116,6 @@ describe("get_system_info()", function()
   end)
 end)
 
-describe("get_neovim_version()", function()
-  it("should return string in the specified format", function()
-    local regex = vim.regex("^\\%(\\d*\\.\\d*\\.\\d*\\|unknown\\)$")
-
-    assert.is.Truthy(regex:match_str(utils.get_neovim_version()))
-  end)
-end)
-
 describe("with_shell()", function()
   it("should not change shell options after the function is executed", function()
     local shell = vim.o.shell

@@ -106,17 +106,6 @@ function M.get_system_info()
   return system_info_cache
 end
 
----Returns neovim version
----@return string
-function M.get_neovim_version()
-  local obj = vim.version.parse(M.exec("version"))
-  if obj then
-    return string.format("%d.%d.%d", obj.major, obj.minor, obj.patch)
-  else
-    return "unknown"
-  end
-end
-
 ---Executes a function and restores original shell options afterwards
 ---@param func fun(...)
 function M.with_shell(func, ...)

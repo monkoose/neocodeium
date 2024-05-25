@@ -5,7 +5,6 @@ local api_key = require("neocodeium.api_key")
 local options = require("neocodeium.options").options
 local stdio = require("neocodeium.utils.stdio")
 local echo = require("neocodeium.utils.echo")
-local utils = require("neocodeium.utils")
 local Bin = require("neocodeium.binary")
 
 local fn = vim.fn
@@ -235,15 +234,13 @@ function Server:init(timer, manager_dir)
   end
 end
 
-local neovim_version = utils.get_neovim_version()
-
 ---Returns request metadata
 ---@return request_metadata
 function Server:request_metadata()
   return {
     api_key = api_key.get(),
     ide_name = "neovim",
-    ide_version = neovim_version,
+    ide_version = Bin.version,
     extension_name = "neocodeium",
     extension_version = self.bin.version,
   }
