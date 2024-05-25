@@ -31,8 +31,8 @@ only manually invoke nvim-cmp.
 
 </details>
 
-> [!Warning]
-> Currently, it only works on neovim's nightly build.
+> [!Note]
+> Requires neovim 0.10+ to work.
 
 ### 📦 Installation
 
