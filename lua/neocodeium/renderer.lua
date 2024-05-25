@@ -353,11 +353,16 @@ function Renderer:update_horz_move(prev_pos, new_fulltext)
       end
     end
   else -- deleted some text
-    local prefix = self.fulltext:sub(col + 1, col - horz_move)
-    self.inline[1].text = prefix .. self.inline[1].text
-    show_inline(self.inline[1].id, self.inline[1].text, lnum, col)
-    self.timer:stop()
-    self:start_clear_timer()
+    if self.fulltext:match("^%s*$") then
+      self:clear_inline()
+      self:start_clear_timer()
+    else
+      local prefix = self.fulltext:sub(col + 1, col - horz_move)
+      self.inline[1].text = prefix .. self.inline[1].text
+      show_inline(self.inline[1].id, self.inline[1].text, lnum, col)
+      self.timer:stop()
+      self:start_clear_timer()
+    end
   end
 end
 
