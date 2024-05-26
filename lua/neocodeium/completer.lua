@@ -191,7 +191,7 @@ function Completer:accept_regex(regex)
     utils.set_lines(lnum1, lnum1, { "" })
     utils.set_cursor({ lnum1, 0 })
   end
-  nvim_feedkeys(text, "nt", false)
+  nvim_feedkeys(text, "nt", true)
 end
 
 ---Accepts a suggestion till the end of the word.
