@@ -15,7 +15,7 @@ local fn = vim.fn
 ---@field path filepath
 ---@field suffix? string
 ---@field sha? string
-local Bin = { version = "1.8.45" }
+local Bin = { version = "1.10.12" }
 
 -- Auxiliary functions ------------------------------------- {{{1
 
