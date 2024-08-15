@@ -4,18 +4,18 @@ local M = {}
 ---Returns codeium config directory
 ---@return filepath
 function M.dir()
-  local config_dir = os.getenv("XDG_CONFIG_HOME") or os.getenv("HOME") .. "/.config"
+  local config_dir = vim.env.XDG_CONFIG_HOME or vim.env.HOME .. "/.config"
   return config_dir .. "/codeium"
 end
 
 ---Returns codeium data directory
 ---@return filepath
 function M.data_dir()
-  local data_dir = os.getenv("XDG_DATA_HOME")
+  local data_dir = vim.env.XDG_DATA_HOME
   if data_dir then
     return data_dir .. "/codeium"
   else
-    return os.getenv("HOME") .. "/.codeium"
+    return vim.env.HOME .. "/.codeium"
   end
 end
 
