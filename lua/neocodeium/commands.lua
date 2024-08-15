@@ -20,8 +20,8 @@ local function open_browser(url)
   local obj = vim.ui.open(url)
   echo.info(
     "browser should have been opened with the URL (if it doesn't, then open the URL manually):\n"
-    .. url
-    .. "\nLogin and copy a token on the page.\n\n"
+      .. url
+      .. "\nLogin and copy a token on the page.\n\n"
   )
 end
 
@@ -42,7 +42,7 @@ local function request_api_key()
   local api_url = options.server.api_url
   local register_user_url = api_url
       and api_url .. "/exa.seat_management_pb.SeatManagementService/RegisterUser"
-      or "https://api.codeium.com/register_user/"
+    or "https://api.codeium.com/register_user/"
 
   local curl_with_args = {
     "curl",
@@ -75,8 +75,8 @@ local function request_api_key()
       vim.cmd.redraw()
       vim.input({
         prompt = "For Windows systems behind a corporate proxy there "
-            .. "may be trouble verifying the SSL certificates. "
-            .. "Would you like to try auth without checking SSL certificate revocation? (Y/n): ",
+          .. "may be trouble verifying the SSL certificates. "
+          .. "Would you like to try auth without checking SSL certificate revocation? (Y/n): ",
         default = "y",
       }, function(input)
         local lower_input = input:lower()
@@ -182,7 +182,6 @@ end
 function M.toggle()
   options.enabled = not options.enabled
 end
-
 -- }}}1
 
 return M
