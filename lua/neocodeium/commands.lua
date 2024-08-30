@@ -219,9 +219,7 @@ local function launch_chat(response)
       return acc .. key .. "=" .. tostring(value) .. "&"
     end)
 
-  vim.schedule(function()
-    open_browser(url)
-  end)
+  vim.ui.open(url)
 end
 
 local function get_project_root()
