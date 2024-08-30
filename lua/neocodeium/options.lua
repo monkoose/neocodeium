@@ -24,7 +24,7 @@ local defaults = {
     gitrebase = false,
     ["."] = false,
   },
-  root_dir = { ".bzr", ".git", ".hg", ".svn", "_FOSSIL_", "package.json" }
+  root_dir = { ".bzr", ".git", ".hg", ".svn", "_FOSSIL_", "package.json" },
 }
 
 local M = { options = {} }
