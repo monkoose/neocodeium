@@ -56,6 +56,9 @@
 ---| "GetCompletions"
 ---| "CancelRequest"
 ---| "AcceptCompletion"
+---| "RefreshContextForIdeAction"
+---| "GetProcesses"
+---| "AddTrackedWorkspace"
 
 ---@class request_data
 ---@field metadata request_metadata?
