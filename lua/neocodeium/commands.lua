@@ -189,6 +189,12 @@ local function launch_chat(response)
   local processes = vim.json.decode(response.out[1])
   local chat_port = processes["chatClientPort"]
   local ws_port = processes["chatWebServerPort"]
+
+  -- possible, server is not ready
+  if not (chat_port and ws_port) then
+    return
+  end
+
   local server_opts = options.server
   local has_enterprise_extension = (server_opts.api_url and server_opts.api_url ~= "") and true
     or false
