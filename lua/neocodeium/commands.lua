@@ -231,7 +231,12 @@ end
 local function refresh_context()
   local cursor = vim.api.nvim_win_get_cursor(0)
   server:request("RefreshContextForIdeAction", {
-    active_document = doc.get(0, vim.filetype.match({ buf = 0 }) or "", cursor[1], cursor),
+    active_document = doc.get(
+      0,
+      vim.filetype.match({ buf = 0 }) or "",
+      vim.api.nvim_buf_line_count(0),
+      cursor
+    ),
   })
 end
 
