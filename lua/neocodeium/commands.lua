@@ -8,6 +8,7 @@ local options = require("neocodeium.options").options
 local api_key = require("neocodeium.api_key")
 local stdio = require("neocodeium.utils.stdio")
 local server = require("neocodeium.server")
+local doc = require("neocodeium.doc")
 
 local fn = vim.fn
 local json = vim.json
@@ -182,8 +183,55 @@ end
 function M.toggle()
   options.enabled = not options.enabled
 end
+
+local function launch_chat(response)
+  local metadata = server:request_metadata()
+  local processes = vim.json.decode(response.out[1])
+  local chat_port = processes["chatClientPort"]
+  local ws_port = processes["chatWebServerPort"]
+  local server_opts = options.server
+  local has_enterprise_extension = (server_opts.api_url and server_opts.api_url ~= "") and true
+    or false
+
+  local url = string.format(
+    "http://127.0.0.1:%d/?api_key=%s&ide_name=%s&ide_version=%s&extension_name=%s&extension_version=%s&web_server_url=ws://127.0.0.1:%d&has_enterprise_extension=%s&app_name=Vim&locale=en&ide_telemetry_enabled=true&has_index_service=true",
+    chat_port,
+    metadata.api_key,
+    metadata.ide_name,
+    metadata.ide_version,
+    metadata.extension_name,
+    metadata.extension_version,
+    ws_port,
+    has_enterprise_extension
+  )
+
+  vim.schedule(function()
+    open_browser(url)
+  end)
+end
+
 local function get_project_root()
   return vim.fs.root(vim.uv.cwd() or 0, options.root_dir)
+end
+
+local function refresh_context()
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  server:request("RefreshContextForIdeAction", {
+    active_document = doc.get(0, vim.filetype.match({ buf = 0 }) or "", cursor[1], cursor),
+  })
+end
+
+local function add_tracked_workspace()
+  local root = get_project_root()
+  if root then
+    server:request("AddTrackedWorkspace", { workspace = root })
+  end
+end
+
+function M.open_chat()
+  refresh_context()
+  server:request("GetProcesses", { metadata = server:request_metadata() }, launch_chat)
+  add_tracked_workspace()
 end
 -- }}}1
 
