@@ -155,11 +155,11 @@ function M.enable()
 end
 
 function M.disable_buffer()
-  vim.b.neocodeium_enabled = false
+  vim.b.neocodeium_disabled = true
 end
 
 function M.enable_buffer()
-  vim.b.neocodeium_enabled = true
+  vim.b.neocodeium_disabled = false
 end
 
 function M.open_log()
