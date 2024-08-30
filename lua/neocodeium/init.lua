@@ -59,7 +59,7 @@ local function enable_autocmds()
       local cmd = require("neocodeium.commands")
       local server = require("neocodeium.server")
       if server.pid then
-        cmd.refresh_context()
+        pcall(cmd.refresh_context)
       end
 
       completer.allowed_encoding = utf8_or_latin1()
