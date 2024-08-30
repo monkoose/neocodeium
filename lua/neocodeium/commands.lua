@@ -226,7 +226,7 @@ local function get_project_root()
   return vim.fs.root(vim.uv.cwd() or 0, options.root_dir)
 end
 
-local function refresh_context()
+function M.refresh_context()
   local cursor = vim.api.nvim_win_get_cursor(0)
   server:request("RefreshContextForIdeAction", {
     active_document = doc.get(
@@ -246,7 +246,7 @@ local function add_tracked_workspace()
 end
 
 function M.open_chat()
-  refresh_context()
+  M.refresh_context()
   server:request("GetProcesses", { metadata = server:request_metadata() }, launch_chat)
   add_tracked_workspace()
 end
