@@ -182,6 +182,9 @@ end
 function M.toggle()
   options.enabled = not options.enabled
 end
+local function get_project_root()
+  return vim.fs.root(vim.uv.cwd() or 0, options.root_dir)
+end
 -- }}}1
 
 return M

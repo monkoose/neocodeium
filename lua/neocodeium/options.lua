@@ -8,6 +8,7 @@
 ---@field max_lines integer
 ---@field silent boolean
 ---@field filetypes table<string, boolean>
+---@field root_dir string[]
 local defaults = {
   enabled = true,
   bin = nil,
@@ -23,6 +24,7 @@ local defaults = {
     gitrebase = false,
     ["."] = false,
   },
+  root_dir = { ".bzr", ".git", ".hg", ".svn", "_FOSSIL_", "package.json" }
 }
 
 local M = { options = {} }
