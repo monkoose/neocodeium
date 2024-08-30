@@ -130,6 +130,7 @@ NeoCodeium provides `:NeoCodeium` user command, which has some useful actions:
 - `:NeoCodeium disable_buffer` - disables NeoCodeium completion in the current buffer.
 - `:NeoCodeium enable_buffer` - enables NeoCodeium completion in the current buffer.
 - `:NeoCodeium open_log` - opens new tab with the log output. More information is in the [logging](#logging) section.
+- `:NeoCodeium open_chat` - opens brouser with the Codeium Chat.
 - `:NeoCodeium restart` - restarts Codeium server (useful when server stops responding for any reason).
 
 You can also use such commands in your lua scripts by calling
@@ -224,6 +225,7 @@ require("neocodeium").setup({
     gitrebase = false,
     ["."] = false,
   },
+  root_dir = { ".bzr", ".git", ".hg", ".svn", "_FOSSIL_", "package.json" }
 })
 ```
 
@@ -232,7 +234,7 @@ require("neocodeium").setup({
 - [x] Add vimdoc help
 - [x] Add the command to open buffer with the log output
 - [x] Add :checkhealth
-- [ ] Add support for Codeium Chat
+- [x] Add support for Codeium Chat (in browser only)
 
 ### 💐 Credits
 
