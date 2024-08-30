@@ -60,6 +60,12 @@ function Server:start()
     api_url and api_url .. " --enterprise_mode" or "https://server.codeium.com",
     "--manager_dir",
     manager_dir,
+    "--enable_local_search",
+    "--enable_index_service",
+    "--search_max_workspace_file_count",
+    "5000",
+    "--enable_chat_web_server",
+    "--enable_chat_client",
   }
 
   log.info("Starting server with manager_dir " .. manager_dir)
