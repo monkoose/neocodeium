@@ -199,17 +199,25 @@ local function launch_chat(response)
   local has_enterprise_extension = (server_opts.api_url and server_opts.api_url ~= "") and true
     or false
 
-  local url = string.format(
-    "http://127.0.0.1:%d/?api_key=%s&ide_name=%s&ide_version=%s&extension_name=%s&extension_version=%s&web_server_url=ws://127.0.0.1:%d&has_enterprise_extension=%s&app_name=Vim&locale=en&ide_telemetry_enabled=true&has_index_service=true",
-    chat_port,
-    metadata.api_key,
-    metadata.ide_name,
-    metadata.ide_version,
-    metadata.extension_name,
-    metadata.extension_version,
-    ws_port,
-    has_enterprise_extension
-  )
+  local url = vim
+    .iter({
+      api_key = metadata.api_key,
+      ide_name = metadata.ide_name,
+      ide_version = metadata.ide_version,
+      extension_name = metadata.extension_name,
+      extension_version = metadata.extension_version,
+      web_server_url = "ws://127.0.0.1:" .. ws_port,
+      has_enterprise_extension = has_enterprise_extension,
+      locale = "en",
+      ide_telemetry_enabled = true,
+      has_index_service = true,
+      app_name = "Neovim",
+      spen_file_pointer_enabled = true,
+      diff_view_enabled = true,
+    })
+    :fold("http://127.0.0.1:" .. chat_port .. "/?", function(acc, key, value)
+      return acc .. key .. "=" .. tostring(value) .. "&"
+    end)
 
   vim.schedule(function()
     open_browser(url)
