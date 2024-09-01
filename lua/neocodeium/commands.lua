@@ -245,7 +245,7 @@ local function add_tracked_workspace()
   end
 end
 
-function M.open_chat()
+function M.chat()
   M.refresh_context()
   server:request("GetProcesses", { metadata = server:request_metadata() }, launch_chat)
   add_tracked_workspace()

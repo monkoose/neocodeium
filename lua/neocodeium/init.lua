@@ -244,8 +244,8 @@ function M.visible()
   return require("neocodeium.completer"):valid()
 end
 
-function M.open_chat()
-  return require("neocodeium.commands").open_chat()
+function M.chat()
+  return require("neocodeium.commands").chat()
 end
 -- }}}1
 
