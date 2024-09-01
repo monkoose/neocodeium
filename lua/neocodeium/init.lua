@@ -56,6 +56,12 @@ local function enable_autocmds()
 
   create_autocmd("BufEnter", {
     callback = function()
+      local cmd = require("neocodeium.commands")
+      local server = require("neocodeium.server")
+      if server.pid then
+        pcall(cmd.refresh_context)
+      end
+
       completer.allowed_encoding = utf8_or_latin1()
       other_timer:stop()
       other_timer:start(
@@ -236,6 +242,10 @@ end
 ---@return boolean
 function M.visible()
   return require("neocodeium.completer"):valid()
+end
+
+function M.open_chat()
+  return require("neocodeium.commands").open_chat()
 end
 -- }}}1
 
