@@ -56,12 +56,6 @@ local function enable_autocmds()
 
   create_autocmd("BufEnter", {
     callback = function()
-      local cmd = require("neocodeium.commands")
-      local server = require("neocodeium.server")
-      if server.pid then
-        pcall(cmd.refresh_context)
-      end
-
       completer.allowed_encoding = utf8_or_latin1()
       other_timer:stop()
       other_timer:start(

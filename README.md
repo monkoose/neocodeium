@@ -225,6 +225,7 @@ require("neocodeium").setup({
     gitrebase = false,
     ["."] = false,
   },
+  -- List of directories and files to detect workspace root directory for codeium chat
   root_dir = { ".bzr", ".git", ".hg", ".svn", "_FOSSIL_", "package.json" }
 })
 ```

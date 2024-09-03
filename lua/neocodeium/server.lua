@@ -20,9 +20,12 @@ local json = vim.json
 ---@field handle? uv.uv_process_t
 ---@field pid? integer
 ---@field is_restart boolean
+---@field chat_enabled boolean
+---@field callback? fun()
 local Server = {
   bin = Bin.new(),
   is_restart = false,
+  chat_enabled = false,
 }
 
 -- Auxiliary functions ------------------------------------- {{{1
@@ -60,13 +63,15 @@ function Server:start()
     api_url and api_url .. " --enterprise_mode" or "https://server.codeium.com",
     "--manager_dir",
     manager_dir,
-    "--enable_local_search",
-    "--enable_index_service",
-    "--search_max_workspace_file_count",
-    "5000",
-    "--enable_chat_web_server",
-    "--enable_chat_client",
   }
+
+  if self.chat_enabled then
+    table.insert(args, "--enable_local_search")
+    table.insert(args, "--enable_index_service")
+    table.insert(args, "--search_max_workspace_file_count=5000")
+    table.insert(args, "--enable_chat_web_server")
+    table.insert(args, "--enable_chat_client")
+  end
 
   log.info("Starting server with manager_dir " .. manager_dir)
 
@@ -230,6 +235,10 @@ function Server:init(timer, manager_dir)
     log.info("Found port: " .. port)
     echo.info("server started on port " .. port, options.silent)
     self.port = port
+    if self.callback then
+      self.callback()
+      self.callback = nil
+    end
 
     timer:stop()
     local interval = 10000
