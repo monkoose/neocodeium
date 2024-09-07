@@ -12,30 +12,30 @@ local min_log_level = vim.env.NEOCODEIUM_LOG_LEVEL or "warn"
 ---@param msg string
 ---@return string
 local function append_newline(msg)
-  if vim.endswith(msg, "\n") then
-    return msg
-  else
-    return msg .. "\n"
-  end
+   if vim.endswith(msg, "\n") then
+      return msg
+   else
+      return msg .. "\n"
+   end
 end
 
 ---@param lvl level
 ---@return fun(msg: string)
 local function log(lvl)
-  if lvl >= types.level[min_log_level] then
-    local o644 = tonumber(644, 8) ---@diagnostic disable-line: param-type-mismatch
-    return function(msg)
-      uv.fs_open(logfile, "a", o644, function(_, fd)
-        if fd then
-          uv.fs_write(fd, append_newline(msg), -1, function()
-            uv.fs_close(fd)
-          end)
-        end
-      end)
-    end
-  end
+   if lvl >= types.level[min_log_level] then
+      local o644 = tonumber(644, 8) ---@diagnostic disable-line: param-type-mismatch
+      return function(msg)
+         uv.fs_open(logfile, "a", o644, function(_, fd)
+            if fd then
+               uv.fs_write(fd, append_newline(msg), -1, function()
+                  uv.fs_close(fd)
+               end)
+            end
+         end)
+      end
+   end
 
-  return function(_) end
+   return function(_) end
 end
 
 local M = {}
@@ -43,7 +43,7 @@ local M = {}
 ---Returns log file path
 ---@return filepath
 function M.get_log_file()
-  return logfile
+   return logfile
 end
 
 M.trace = log(types.level.trace) ---@type fun(msg: string)
