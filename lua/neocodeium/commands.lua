@@ -145,11 +145,11 @@ function M.auth()
 end
 
 function M.disable()
-   options.enabled = false
+   vim.g.neocodeium_enabled = false
 end
 
 function M.enable()
-   options.enabled = true
+   vim.g.neocodeium_enabled = true
    if not server.pid then
       server:run()
    end
@@ -181,7 +181,10 @@ function M.restart()
 end
 
 function M.toggle()
-   options.enabled = not options.enabled
+   vim.g.neocodeium_enabled = vim.g.neocodeium_enabled == false
+   if vim.g.neocodeium_enabled and not server.pid then
+      server:run()
+   end
 end
 
 function M.chat()

@@ -148,7 +148,7 @@ function M.setup(opts)
    local server = require("neocodeium.server")
    local completer = require("neocodeium.completer")
 
-   if options.enabled then
+   if type(options.enabled) == "function" or options.enabled then
       if vim.v.vim_did_enter == 1 then
          server:run()
       else

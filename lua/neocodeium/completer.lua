@@ -73,10 +73,7 @@ end
 ---Returns `true` if completion for current buffer is enabled.
 ---@return boolean
 function Completer:enabled()
-   if options.enabled and self.allowed_encoding and vim.b.neocodeium_enabled ~= false then
-      return options.filetypes[vim.bo.filetype] ~= false
-   end
-   return false
+   return options.enabled_func() and self.allowed_encoding
 end
 
 ---Cycles completions by amount `n`, wraps around if necessary.
