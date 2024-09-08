@@ -42,26 +42,30 @@ function M.setup(opts)
    end
 
    ---@param bufnr? bufnr
-   ---@return boolean
+   ---@return boolean, integer
    M.options.enabled_func = function(bufnr)
       bufnr = bufnr or 0
-      if
-         vim.g.neocodeium_enabled == false
-         or M.options.filetypes[nvim_get_option_value("filetype", { buf = bufnr })] == false
-      then
-         return false
+      if vim.g.neocodeium_enabled == false then
+         return false, 1 -- globally disabled
+      elseif M.options.filetypes[nvim_get_option_value("filetype", { buf = bufnr })] == false then
+         return false, 3 -- disabled by 'options.filetypes'
       end
 
       local ok, res = pcall(nvim_buf_get_var, bufnr, "neocodeium_enabled")
       if ok and res == false then
-         return false
+         return false, 2 -- locally disabled for current buffer
       end
 
       if type(M.options.enabled) == "function" then
-         return M.options.enabled(bufnr)
+         local result = M.options.enabled(bufnr)
+         if result then
+            return result, 0 -- enabled
+         else
+            return result, 4 -- disabled by 'options.enabled()' function
+         end
       end
 
-      return true
+      return true, 0 -- enabled
    end
 end
 

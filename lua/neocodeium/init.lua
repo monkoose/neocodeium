@@ -199,12 +199,26 @@ function M.setup(opts)
       complete = complete_commands,
    })
 
-   -- TODO: Add into the docs and refactor it
    function M.get_status()
-      if completer:enabled() then
-         return " ON"
+      local server_status
+      if server.port then
+         server_status = 0 -- ON
+      elseif server.pid then
+         server_status = 1 -- CONNECTING
       else
-         return "OFF"
+         server_status = 2 -- OFF
+      end
+
+      local enabled, status = options.enabled_func()
+      if not enabled then
+         return status, server_status
+      end
+
+      if completer.allowed_encoding then
+         return status, server_status
+      else
+         -- disabled by wrong encoding
+         return 5, server_status
       end
    end
 end
