@@ -47,7 +47,7 @@ local function enable_autocmds()
    local doc = require("neocodeium.doc")
 
    local function utf8_or_latin1()
-      local encoding = vim.o.encoding
+      local encoding = vim.o.fileencoding
       return encoding == "utf-8" or encoding == "latin1"
    end
 
