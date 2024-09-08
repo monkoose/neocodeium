@@ -25,7 +25,7 @@ only manually invoke nvim-cmp.
 - Performance improvements have been achieved through cache techniques.
 - The suggestion count label is displayed in the number column, making it closer to the context.
 - Default keymaps have been removed.
-- Possibility to complete only word/line of the suggestion.
+- ~~Possibility to complete only word/line of the suggestion.~~ codeium.vim have added this in [9fa0dee](https://github.com/Exafunction/codeium.vim/commit/9fa0dee67051d8e5d334f7f607e6bab1d6a46d1a).
 - By default, there is no debounce, allowing suggestions to appear while
   typing. If you don't like this behavior, set `debounce = true` in the setup.
 
