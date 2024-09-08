@@ -15,7 +15,7 @@ local fn = vim.fn
 ---@field path filepath
 ---@field suffix? string
 ---@field sha? string
-local Bin = { version = "1.10.12" }
+local Bin = { version = "1.14.15" }
 
 -- Auxiliary functions ------------------------------------- {{{1
 
@@ -87,7 +87,7 @@ function Bin:download(callback)
       )
    end
 
-   echo.info("Downloading binary...")
+   echo.info("Downloading binary... v." .. self.version)
    vim.system(
       { "curl", "-Lo", self.path .. ".gz", url },
       { stdout = false },
