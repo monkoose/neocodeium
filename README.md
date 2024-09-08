@@ -56,6 +56,7 @@ a different plugin manager, please refer to its documentation for installation i
 Now you can use `Alt-f` in insert mode to accept codeium suggestions.
 
 **Note:** To obtain an API token, you’ll need to run `:NeoCodeium auth`.
+On Windows WSL `wslview` `(sudo apt install wslu)` should be installed to properly open the browser.
 
 ### 🚀 Usage
 
