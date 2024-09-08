@@ -9,9 +9,11 @@ local uv = vim.uv
 local nvim_create_autocmd = vim.api.nvim_create_autocmd
 local nvim_create_augroup = vim.api.nvim_create_augroup
 local nvim_win_get_cursor = vim.api.nvim_win_get_cursor
+local nvim_get_option_value = vim.api.nvim_get_option_value
 
 local chat = {}
 
+-- Refresh chat content on buffer change
 nvim_create_autocmd("BufEnter", {
    group = nvim_create_augroup("neocodeium_chat", {}),
    callback = function()
@@ -21,10 +23,13 @@ nvim_create_autocmd("BufEnter", {
    end,
 })
 
+---@return string?
 local function get_project_root()
    return fs.root(uv.cwd() or 0, options.root_dir)
 end
 
+---Opens chat in browser
+---@param response table
 function chat.launch(response)
    local metadata = server:request_metadata()
    local processes = vim.json.decode(response.out[1])
@@ -65,12 +70,16 @@ function chat.launch(response)
    end)
 end
 
+---Sends a request to the server to refresh context
 function chat.refresh_context()
-   local cursor = nvim_win_get_cursor(0)
-   local ft = vim.filetype.match({ buf = 0 }) or ""
-   server:request("RefreshContextForIdeAction", { active_document = doc.get(0, ft, -1, cursor) })
+   if options.enabled_func(0) then
+      local cursor = nvim_win_get_cursor(0)
+      local ft = nvim_get_option_value("filetype", { buf = 0 })
+      server:request("RefreshContextForIdeAction", { active_document = doc.get(0, ft, -1, cursor) })
+   end
 end
 
+---Sends a request to the server to add a tracked workspace
 function chat.add_tracked_workspace()
    local root = get_project_root()
    if root then

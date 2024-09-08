@@ -211,7 +211,6 @@ end
 ---@param index integer
 ---@return boolean
 function Renderer:display(items, index)
-   -- TODO: doesn't work on first line in empty buffer
    if not utils.is_insert() then
       self:reset()
       return true
@@ -366,7 +365,6 @@ function Renderer:update_horz_move(prev_pos, new_fulltext)
    end
 end
 
--- TODO: it shouldn't work in options.filetypes disabled buffers
 function Renderer:update()
    local prev_pos = self.pos
    self.pos = utils.get_cursor()
