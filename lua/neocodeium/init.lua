@@ -199,6 +199,7 @@ function M.setup(opts)
       complete = complete_commands,
    })
 
+   -- TODO: Add into the docs and refactor it
    function M.get_status()
       if completer:enabled() then
          return " ON"

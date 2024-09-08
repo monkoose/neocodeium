@@ -102,6 +102,8 @@ COMMANDS                                                 *NeoCodeium-Commands*
     restart~
         Restarts Codeium server. Useful when server stops responding for any
         reason.
+    chat~
+        Opens browser with the Codeium Chat.
 
 You can also use such commands in your lua scripts:
 >lua
@@ -114,6 +116,7 @@ You can also use such commands in your lua scripts:
     cmds.enable_buffer()
     cmds.open_log()
     cmds.restart()
+    cmds.chat()
 <
 ------------------------------------------------------------------------------
 KEYMAPS                                                  *NeoCodeium-Keymaps*
@@ -193,8 +196,12 @@ CONFIGURATION                                       *NeoCodeium-Configuration*
 
 `setup()` function accepts a table with the following keys:
     enabled~
-        Boolean.
-        When `true`, then the plugin will be enabled on neovim startup.
+        Boolean or Function.
+
+        If it is boolean and `false` then neocodeium disabled at startup,
+        until it is enabled manually. When it is function, it has one argument
+        `bufnr` and should return boolean. With it, you can implement your own
+        logic to disable neocodeium for your requirements.
     bin~
         String.
         Path to a custom Codeium server binary.
@@ -239,6 +246,9 @@ CONFIGURATION                                       *NeoCodeium-Configuration*
         By default the plugin is enabled for all filetypes except defaults
         mentioned below. To disable NeoCodeium in additional filetypes set
         them in this table with a `false` value.
+    root_dir~
+        List of directories and files to detect workspace root directory for
+        codeium chat.
 
 
 Defaults: >lua
@@ -256,6 +266,14 @@ Defaults: >lua
             gitcommit = false,
             gitrebase = false,
             ["."] = false,
+        },
+        root_dir = {
+            ".bzr",
+            ".git",
+            ".hg",
+            ".svn",
+            "_FOSSIL_",
+            "package.json"
         },
     })
 <

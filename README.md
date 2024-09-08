@@ -60,6 +60,7 @@ Now you can use `Alt-f` in insert mode to accept codeium suggestions.
 ### 🚀 Usage
 
 #### 📒 API
+
 In addition to the already mentioned `accept()` function, the plugin also provides a few others:
 
 ```lua
@@ -85,6 +86,65 @@ neocodeium.cycle_or_complete(n)
 -- Checks if a suggestion's virtual text is visible or not (useful for some complex mappings)
 neocodeium.visible()
 ```
+
+#### 🪄 Tips
+
+<details>
+<summary>using alongside nvim-cmp</summary>
+
+If you are using NeoCodeium with `manual = false` (it is default), it is useful
+to set nvim-cmp to manual completion and clear NeoCodeium suggestions on
+opening nvim-cmp popup menu. You can achieve this with following code in the
+place where nvim-cmp is configured:
+
+    local cmp = require("cmp")
+    local neocodeium = require("neocodeium")
+    local commands = require("neocodeium.commands")
+
+    cmp.event:on("menu_opened", function()
+        commands.disable()
+        neocodeium.clear()
+    end)
+
+    cmp.event:on("menu_closed", function()
+        commands.enable()
+    end)
+
+    cmp.setup({
+        completion = {
+            autocomplete = false,
+        },
+    })
+
+</details>
+<details>
+<summary>Disable in telescope prompt and dap repl</summary>
+
+    require("neocodeium").setup({
+        filetypes = {
+            ...
+            TelescopePrompt = false,
+            ["dap-repl"] = false,
+        },
+    })
+
+</details>
+
+<details>
+<summary>Enable NeoCodeium only in specified filetypes</summary>
+
+    local filetyps = { 'lua', 'python' }
+    neocodeium.setup({
+    -- function accepts one argument `bufnr`
+    enabled = function(bufnr)
+        if vim.tbl_contains(filetypes, vim.api.nvim_get_option_value('filetype',  { buf = bufnr})) then
+            return true
+        end
+        return false
+    end
+    })
+
+</details>
 
 #### ⌨️ Keymaps
 
@@ -143,34 +203,6 @@ your preference and to match your chosen color scheme:
 - `NeoCodeiumSuggestion` - virtual text color of the plugin suggestions (default: `#808080`)
 - `NeoCodeiumLabel` - color of the label that indicates the number of suggestions (default: inverted DiagnosticInfo)
 
-#### using alongside nvim-cmp
-
-If you are using NeoCodeium with `manual = false` (it is default), it is useful
-to set nvim-cmp to manual completion and clear NeoCodeium suggestions on
-opening nvim-cmp popup menu. You can achieve this with following code in the
-place where nvim-cmp is configured:
-
-```lua
-local cmp = require("cmp")
-local neocodeium = require("neocodeium")
-local commands = require("neocodeium.commands")
-
-cmp.event:on("menu_opened", function()
-    commands.disable()
-    neocodeium.clear()
-end)
-
-cmp.event:on("menu_closed", function()
-    commands.enable()
-end)
-
-cmp.setup({
-    completion = {
-        autocomplete = false,
-    },
-})
-```
-
 #### 📄 Logging
 
 While running NeoCodeium logs some messages into a temporary file. It can be
@@ -192,7 +224,10 @@ NeoCodeium comes with the following default options:
 ```lua
 -- NeoCodeium Configuration
 require("neocodeium").setup({
-  -- Enable NeoCodeium on startup
+  -- Accepts boolean or function. If it is boolean and false, then neocodeium disabled at
+  -- startup, until it is enabled manually. When it is function, it has one argument
+  -- `bufnr` and should return boolean. With it, you can implement your own logic to disable
+  -- neocodeium for your requirements.
   enabled = true,
   -- Path to a custom Codeium server binary (you can download one from:
   -- https://github.com/Exafunction/codeium/releases)
@@ -229,6 +264,16 @@ require("neocodeium").setup({
   root_dir = { ".bzr", ".git", ".hg", ".svn", "_FOSSIL_", "package.json" }
 })
 ```
+
+#### 💬 Chat
+
+You can chat with AI in the browser with the `:NeoCodeium chat` command.
+The first time you open it, it requires to restart the server with
+some chat-specific flags, so be patient (usually it doesn't take more than a few seconds).
+After that, it should open a chat window in the browser with the context of the current buffer,
+so you can ask some specific questions about your code base.
+When you switch buffers, this context should be updated automatically (it takes some time).
+You can see current chat context in the left bottom corner.
 
 ### 🚗 Roadmap
 
