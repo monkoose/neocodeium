@@ -196,7 +196,7 @@ NeoCodeium provides `:NeoCodeium` user command, which has some useful actions:
 You can also use such commands in your lua scripts by calling
 `require("neocodeium.commands").<command_name>()`.
 
-#### Statusline
+#### 🚃 Statusline
 
 `require("neocodeium").get_status()` can be used to get the some useful information about the current state.
 The best use case for this output is to implement custom statusline component.
