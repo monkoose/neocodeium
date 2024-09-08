@@ -25,7 +25,7 @@ only manually invoke nvim-cmp.
 - Performance improvements have been achieved through cache techniques.
 - The suggestion count label is displayed in the number column, making it closer to the context.
 - Default keymaps have been removed.
-- ~~Possibility to complete only word/line of the suggestion.~~ codeium.vim have added this in [9fa0dee](https://github.com/Exafunction/codeium.vim/commit/9fa0dee67051d8e5d334f7f607e6bab1d6a46d1a).
+- ~~Possibility to complete only word/line of the suggestion.~~ codeium.vim added this feature in [9fa0dee](https://github.com/Exafunction/codeium.vim/commit/9fa0dee67051d8e5d334f7f607e6bab1d6a46d1a).
 - By default, there is no debounce, allowing suggestions to appear while
   typing. If you don't like this behavior, set `debounce = true` in the setup.
 
@@ -204,18 +204,18 @@ The best use case for this output is to implement custom statusline component.
 This function returns two numbers:
 
 1. Status of the plugin
-    
+
         0 - Enabled
         1 - Globally disabled with `:NeoCodeium disable`, `:NeoCodeium toggle` or with `options.enabled = false`
         2 - Buffer is disabled with `:NeoCodeium disable_buffer`
         3 - Buffer is disableld when it's filetype is matching `options.filetypes = { some_filetyps = false }`
         4 - Buffer is disabled when `options.enalbed` is a function and it returns `false`
         5 - Buffer has wrong encoding (codeium can accept only UTF-8 and LATIN-1 encodings)
-        
+
 2. Server status
-    
+
         0 - Server is on (running)
-        1 - Server is connection (not working status)
+        1 - Connecting to the server (not working status)
         2 - Server is off (stopped)
 
 #### 🎨 Highlight groups
