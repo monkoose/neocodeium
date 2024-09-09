@@ -113,14 +113,14 @@ local function enable_autocmds()
       end,
    })
 
-   create_autocmd({ "CursorMovedI", "CompleteChanged" }, {
+   create_autocmd({ "CursorMovedI" }, {
       callback = function()
          completer:initiate()
       end,
    })
 
    create_autocmd("ModeChanged", {
-      pattern = "*:i*",
+      pattern = "[^i]*:i",
       callback = function()
          completer:initiate()
       end,
