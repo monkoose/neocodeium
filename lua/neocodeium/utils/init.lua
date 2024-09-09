@@ -19,6 +19,12 @@ function M.exec(cmd)
    return result.output
 end
 
+--- Trigger a NeoCodeium event
+---@param event string The event pattern
+function M.event(event)
+   vim.api.nvim_exec_autocmds("User", { pattern = "NeoCodeium" .. event, modeline = false })
+end
+
 ---Returns cursor position in the current window
 ---Unlike `vim.api.nvim_win_get_cursor()`, it returns 0-based indexes
 ---@return pos
