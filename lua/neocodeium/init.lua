@@ -119,8 +119,7 @@ local function enable_autocmds()
       end,
    })
 
-   create_autocmd("ModeChanged", {
-      pattern = "[^i]*:i",
+   create_autocmd("InsertEnter", {
       callback = function()
          completer:initiate()
       end,
