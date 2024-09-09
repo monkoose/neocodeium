@@ -109,7 +109,7 @@ place where nvim-cmp is configured:
     neocodeium.setup({
         enabled = function()
             return not cmp.visible()
-        end),
+        end,
     })
 
     cmp.setup({
