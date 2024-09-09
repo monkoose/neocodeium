@@ -69,7 +69,7 @@ local function enable_autocmds()
    })
 
    create_autocmd("OptionSet", {
-      pattern = "encoding",
+      pattern = "fileencoding",
       callback = function()
          completer.allowed_encoding = utf8_or_latin1()
       end,
