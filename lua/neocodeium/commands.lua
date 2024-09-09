@@ -181,9 +181,10 @@ function M.restart()
 end
 
 function M.toggle()
-   vim.g.neocodeium_enabled = vim.g.neocodeium_enabled == false
-   if vim.g.neocodeium_enabled and not server.pid then
-      server:run()
+   if vim.g.neocodeium_enabled == false then
+      M.enable()
+   else
+      M.disable()
    end
 end
 
