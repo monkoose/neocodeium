@@ -29,14 +29,14 @@ local status = {
 ---@field pos pos
 ---@field data compl.data
 ---@field status compl.status
----@field timer uv.uv_timer_t
+---@field debounce_timer uv.uv_timer_t
 ---@field request_id integer
 ---@field allowed_encoding boolean
 ---@field other_docs document[]
 local Completer = {
    data = {},
    status = status.none,
-   timer = assert(uv.new_timer()),
+   debounce_timer = assert(uv.new_timer()),
    request_id = 0,
    allowed_encoding = false,
    other_docs = {},
@@ -242,8 +242,8 @@ end
 function Completer:clear(force)
    if force or options.debounce or self.status ~= status.pending then
       self.status = status.none
-      if options.debounce and self.timer:is_active() then
-         self.timer:stop()
+      if options.debounce and self.debounce_timer:is_active() then
+         self.debounce_timer:stop()
       end
       -- Cancel request if there is one
       if not vim.tbl_isempty(self.data) then
@@ -271,10 +271,10 @@ function Completer:initiate(omit_manual)
    end
 
    if options.debounce then
-      if self.timer:is_active() then
-         self.timer:stop()
+      if self.debounce_timer:is_active() then
+         self.debounce_timer:stop()
       end
-      self.timer:start(
+      self.debounce_timer:start(
          120,
          0,
          vim.schedule_wrap(function()
