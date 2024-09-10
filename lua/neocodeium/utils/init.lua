@@ -21,8 +21,16 @@ end
 
 --- Trigger a NeoCodeium event
 ---@param event string The event pattern
-function M.event(event)
-   vim.api.nvim_exec_autocmds("User", { pattern = "NeoCodeium" .. event, modeline = false })
+---@param scheduled boolean? Whether or not to schedule the event
+function M.event(event, scheduled)
+   local event_opts = { pattern = "NeoCodeium" .. event, modeline = false }
+   if scheduled then
+      vim.schedule(function()
+         vim.api.nvim_exec_autocmds("User", event_opts)
+      end)
+   else
+      vim.api.nvim_exec_autocmds("User", event_opts)
+   end
 end
 
 ---Returns cursor position in the current window

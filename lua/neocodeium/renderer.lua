@@ -279,7 +279,7 @@ function Renderer:display(items, index)
    if block_text or #inline_contents > 0 then
       self:display_label(items, index)
    end
-   utils.event("CompletionDisplayed")
+   utils.event("CompletionDisplayed", true)
    return true
 end
 
@@ -441,7 +441,7 @@ function Renderer:reset()
    self.block.id = nil
    self.block.text = nil
    self.fulltext = ""
-   utils.event("CompletionCleared")
+   utils.event("CompletionCleared", true)
 end
 -- }}}1
 
