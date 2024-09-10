@@ -234,6 +234,52 @@ This function returns two numbers:
         1 - Connecting to the server (not working status)
         2 - Server is off (stopped)
 
+To use output from `get_status()` for in-time update it is required to invoke this function
+from [events](https://github.com/monkoose/neocodeium?tab=readme-ov-file#-user-events)
+Personally, I'm not using statusline plugins, please refer to theirs documentation how to do it.
+But in my statusline, I would do it that way with an buffer local variable, adapt it to your statusline
+plugin requirements:
+
+```lua
+-- function to process get_status() and set buffer variable to that data.
+local neocodeium = require("neocodeium")
+local function get_neocodeium_status(ev)
+    local status, server_status = neocodeium.get_status()
+    -- process this data, convert it to custom string/icon etc and set buffer variable
+    if status == 0 then
+        vim.api.nvim_buf_set_var(ev.buf, "neocodeium_status", "OK")
+    else
+        vim.api.nvim_buf_set_var(ev.buf, "neocodeium_status", "OFF")
+    end
+end
+
+-- Then only some of event fired we invoked this function
+vim.api.nvim_create_autocmd("User", {
+    group = ..., -- set some augroup here
+    pattern = {
+        "NeoCodeiumServerConnecting",
+        "NeoCodeiumServerConnected",
+        "NeoCodeiumServerStopped",
+        "NeoCodeiumEnabled",
+        "NeoCodeiumDisabled",
+        "NeoCodeiumBufEnabled",
+        "NeoCodeiumBufDisabled",
+    }
+    callback = get_neocodeium_status,
+})
+
+vim.o.statusline =
+    -- here some your components
+    -- ...
+
+    -- add neocodeium_status
+    .. "%{get(b:, 'neocodeium_status', '')%}"
+
+    -- another components
+    -- ...
+end
+```
+
 #### 🎨 Highlight groups
 
 NeoCodeium offers a couple of highlight groups. Feel free to adjust them to
