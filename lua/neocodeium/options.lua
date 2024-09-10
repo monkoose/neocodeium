@@ -2,7 +2,7 @@ local nvim_buf_get_var = vim.api.nvim_buf_get_var
 local nvim_get_option_value = vim.api.nvim_get_option_value
 
 ---@class Options
----@field enabled function|boolean
+---@field enabled boolean
 ---@field bin? string
 ---@field manual boolean
 ---@field server { api_url?: string, portal_url?: string }
@@ -12,6 +12,7 @@ local nvim_get_option_value = vim.api.nvim_get_option_value
 ---@field silent boolean
 ---@field filetypes table<string, boolean>
 ---@field root_dir string[]
+---@field filter fun(bufnr: integer)?
 ---@field enabled_func function
 local defaults = {
    enabled = true,
@@ -37,9 +38,15 @@ function M.setup(opts)
    ---@type Options
    M.options = vim.tbl_deep_extend("force", defaults, opts or {})
 
-   if type(M.options.enabled) == "boolean" then
-      vim.g.neocodeium_enabled = M.options.enabled
+   if type(M.options.enabled) == "function" then
+      M.options.filter = M.options.enabled
+      M.options.enabled = true
+      vim.notify(
+         "Using a function for `enabled` is deprecated, please use the `filter` option instead",
+         vim.log.levels.WARN
+      )
    end
+   vim.g.neocodeium_enabled = M.options.enabled
 
    ---@param bufnr? bufnr
    ---@return boolean, integer
@@ -56,8 +63,8 @@ function M.setup(opts)
          return false, 2 -- locally disabled for current buffer
       end
 
-      if type(M.options.enabled) == "function" then
-         local result = M.options.enabled(bufnr)
+      if M.options.filter then
+         local result = M.options.filter(bufnr)
          if result then
             return result, 0 -- enabled
          else
