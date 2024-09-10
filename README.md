@@ -1,5 +1,5 @@
 <div align="center">
-    <img width="450" alt="NeoCodeium" src="https://github.com/monkoose/neocodeium/assets/6261276/67e53b7d-0029-41c0-a903-af0cdf88a65d"/>
+    <img width="450" alt="NeoCodeium" src="https://github.com/user-attachments/assets/f31d5035-ca1c-43f1-b309-fb523ecdfe48"/>
     <p>⚡ Free AI completion plugin powered by <a href="https://codeium.com">codeium</a> ⚡</p>
 </div>
 
