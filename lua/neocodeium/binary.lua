@@ -14,7 +14,6 @@ local fn = vim.fn
 ---@field version string
 ---@field path filepath
 ---@field suffix? string
----@field sha? string
 local Bin = { version = "1.14.12" }
 
 -- Auxiliary functions ------------------------------------- {{{1
@@ -54,8 +53,7 @@ function Bin.new()
          self.suffix = self.suffix .. ".exe"
       end
 
-      self.sha = conf.load(conf.dir()).sha
-      local bin_dir = conf.data_dir() .. "/bin/" .. (self.sha or self.version)
+      local bin_dir = conf.dir .. "/bin/" .. self.version
       self.path = bin_dir .. "/language_server_" .. self.suffix
    end
 
@@ -63,29 +61,21 @@ function Bin.new()
 end
 
 ---Downloads language server binary. Should be used only after `Bin:set()`,
----so that `Bin.path`, `Bin.suffix` and `Bin.sha` are properly set.
+---so that `Bin.path` and `Bin.suffix` are properly set.
 ---@async
 ---@param callback fun()
 function Bin:download(callback)
-   local url ---@type url
-   if self.sha then
-      url = string.format(
-         "https://storage.googleapis.com/exafunction-dist/codeium/%s/language_server_%s.gz",
-         self.sha,
-         self.suffix
-      )
-   else
-      local base_url = "https://github.com/Exafunction/codeium/releases/download"
-      if options.server.portal_url then
-         base_url = options.server.portal_url:gsub("/$", "")
-      end
-      url = string.format(
-         "%s/language-server-v%s/language_server_%s.gz",
-         base_url,
-         self.version,
-         self.suffix
-      )
+   local base_url = "https://github.com/Exafunction/codeium/releases/download"
+   if options.server.portal_url then
+      base_url = options.server.portal_url:gsub("/$", "")
    end
+   ---@type url
+   local url = string.format(
+      "%s/language-server-v%s/language_server_%s.gz",
+      base_url,
+      self.version,
+      self.suffix
+   )
 
    echo.info("Downloading binary... v." .. self.version)
    vim.system(

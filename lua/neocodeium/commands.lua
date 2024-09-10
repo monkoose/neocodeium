@@ -10,7 +10,6 @@ local stdio = require("neocodeium.utils.stdio")
 local server = require("neocodeium.server")
 
 local fn = vim.fn
-local uv = vim.uv
 local json = vim.json
 
 -- Auxiliary functions ------------------------------------- {{{1
@@ -18,7 +17,7 @@ local json = vim.json
 ---Opens url in the default browser and notifies a user.
 ---@param url url
 local function open_browser(url)
-   local obj = vim.ui.open(url)
+   vim.ui.open(url)
    echo.info(
       "browser should have been opened with the URL (if it doesn't, then open the URL manually):\n"
          .. url
@@ -126,14 +125,12 @@ function M.auth()
 
    api_key.set(key)
 
-   local config_dir = conf.data_dir()
-   local config_path = config_dir .. "/config.json"
-   local config = conf.load(config_dir)
+   local config = conf.load()
    config.api_key = key
 
    local ok, err = pcall(function()
-      fn.mkdir(config_dir, "p")
-      fn.writefile({ json.encode(config) }, config_path)
+      fn.mkdir(conf.dir, "p")
+      fn.writefile({ json.encode(config) }, conf.file)
    end)
 
    if ok then

@@ -11,7 +11,6 @@
 ---Ex command
 ---@alias ex_cmd string
 ---Decoded json table
----@alias json_tbl table
 ---Encoded json string
 ---@alias json_str string
 ---Represenation of the url string, must start with http:// or https://.
@@ -38,10 +37,6 @@
 ---@field absolute_path string
 ---@field relative_path string
 ---@field line_ending string
-
----@class binary_info
----@field version string
----@field sha string
 
 ---@class request_metadata
 ---@field ide_name string

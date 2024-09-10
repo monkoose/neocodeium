@@ -2,7 +2,7 @@ local conf = require("neocodeium.utils.conf")
 local echo = require("neocodeium.utils.echo")
 
 ---@type string?
-local api_key = conf.load(conf.data_dir()).api_key
+local api_key = conf.load().api_key
 
 local M = {}
 
