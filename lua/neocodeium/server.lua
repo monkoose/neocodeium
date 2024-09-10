@@ -158,14 +158,12 @@ end
 function Server:stop()
    if self.pid then
       uv.kill(self.pid, "sigint")
-      echo.info("server stopped", options.silent)
-   else
-      echo.warn("server is not running")
    end
 end
 
 ---Restarts the server
 function Server:restart()
+   echo.info("restarting server...", options.silent)
    if self.handle and not uv.is_closing(self.handle) then
       self.is_restart = true
       self:stop()
