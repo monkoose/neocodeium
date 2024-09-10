@@ -34,6 +34,14 @@ only manually invoke nvim-cmp.
 > [!Note]
 > Requires neovim 0.10+ to work.
 
+> [!Warning]
+> Using this plugin your code is constantly sending to some codeium server
+> with the help of their running instance of LSP on your machine.
+> You can get acquainted with their [Codeium Privacy Policy](https://codeium.com/privacy-policy)
+> From the plugin side, I have made all the possibility for it to not send requests to the server from the disabled buffers,
+> but codeium server is still running behind the scenes and I can't guarantee that it doesn't send something in that time (I have
+> not inspected its behaviour with some network packets analyzer).
+
 ### 📦 Installation
 
 Here’s an example for 💤[lazy](https://github.com/folke/lazy.nvim) plugin manager. If you're using
