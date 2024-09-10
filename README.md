@@ -265,6 +265,7 @@ local function get_neocodeium_status(ev)
     else
         vim.api.nvim_buf_set_var(ev.buf, "neocodeium_status", "OFF")
     end
+    vim.cmd.redrawstatus()
 end
 
 -- Then only some of event fired we invoked this function
