@@ -198,6 +198,20 @@ NeoCodeium provides `:NeoCodeium` user command, which has some useful actions:
 You can also use such commands in your lua scripts by calling
 `require("neocodeium.commands").<command_name>()`.
 
+#### 📆 User Events
+
+NeoCodeium triggers several user events which can be used to trigger code. These can be used to optimize when statusline elements are updated, creating mappings only when the server is available, or modifying completion engine settings when AI completion is started or displaying hints.
+
+- `NeoCodeiumServerConnecting` - triggers when a connection to the Codeium server is starting
+- `NeoCodeiumServerConnected` - triggers when a successful connection to the Codeium server is made
+- `NeoCodeiumServerStopped` - triggers when the Codeium server is stopped
+- `NeoCodeiumEnabled` - triggers when the NeoCodeium plugin is enabled globally
+- `NeoCodeiumDisabled` - triggers when the NeoCodeium plugin is disabled globally
+- `NeoCodeiumBufEnabled` - triggers when the NeoCodeium plugin is enabled for a buffer
+- `NeoCodeiumBufDisabled` - triggers when the NeoCodeium plugin is disabled for a buffer
+- `NeoCodeiumCompletionDisplayed` - triggers when NeoCodeium successfully displays a completion item as virtual text
+- `NeoCodeiumCompletionCleared` - triggers when NeoCodeium clears virtual text and completions
+
 #### 🚃 Statusline
 
 `require("neocodeium").get_status()` can be used to get the some useful information about the current state.

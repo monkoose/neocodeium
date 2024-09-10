@@ -146,10 +146,12 @@ end
 
 function M.disable()
    vim.g.neocodeium_enabled = false
+   utils.event("Disabled")
 end
 
 function M.enable()
    vim.g.neocodeium_enabled = true
+   utils.event("Enabled")
    if not server.pid then
       server:run()
    end
@@ -157,10 +159,12 @@ end
 
 function M.disable_buffer()
    vim.b.neocodeium_enabled = false
+   utils.event("BufDisabled")
 end
 
 function M.enable_buffer()
    vim.b.neocodeium_enabled = true
+   utils.event("BufEnabled")
 end
 
 function M.open_log()
@@ -181,9 +185,10 @@ function M.restart()
 end
 
 function M.toggle()
-   vim.g.neocodeium_enabled = vim.g.neocodeium_enabled == false
-   if vim.g.neocodeium_enabled and not server.pid then
-      server:run()
+   if vim.g.neocodeium_enabled == false then
+      M.enable()
+   else
+      M.disable()
    end
 end
 
