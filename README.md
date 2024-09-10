@@ -4,43 +4,42 @@
 </div>
 
 ---
+
+NeoCodeium is a plugin that provides AI completion powered by [Codeium]. The
+primary reason for creating NeoCodeium was to address the issue of flickering
+suggestions in the official plugin which was particularly annoying when dealing
+with multi-line virtual text. Additionally, I desired a feature that would
+allow accepting Codeium suggestions to be repeatable using the `.` command
+because I use it as my main completion plugin and only manually invoke
+nvim-cmp.
+
 <details>
+<summary>Differences with <a href="https://github.com/Exafunction/codeium.vim">codeium.vim</a></summary>
 
-<summary>Motivation and differences with <a href="https://github.com/Exafunction/codeium.vim">codeium.vim</a></summary>
-
-**Motivation**
-
-The primary reason for creating NeoCodeium was to address the
-issue of flickering suggestions in the official plugin. This flickering was
-particularly annoying when dealing with multiline virtual text. Additionally,
-I desired a feature that would allow accepted Codeium suggestions to be
-repeatable using the `.`, because I use it as my main completion plugin and
-only manually invoke nvim-cmp.
-
-**Differences**
-
-- Supports only neovim (written in lua).
-- Flickering has been removed in most scenarios, resulting in a snappier experience.
-- Completions on the current line can now be repeated using the `.` key.
-- Performance improvements have been achieved through cache techniques.
-- The suggestion count label is displayed in the number column, making it closer to the context.
-- Default keymaps have been removed.
-- ~~Possibility to complete only word/line of the suggestion.~~ codeium.vim added this feature in [9fa0dee](https://github.com/Exafunction/codeium.vim/commit/9fa0dee67051d8e5d334f7f607e6bab1d6a46d1a).
-- By default, there is no debounce, allowing suggestions to appear while
-  typing. If you don't like this behavior, set `debounce = true` in the setup.
+- Supports only Neovim (written in Lua)
+- Flickering has been removed in most scenarios, resulting in a snappier experience
+- Completions on the current line can now be repeated using the `.` key
+- Performance improvements have been achieved through cache techniques
+- The suggestion count label is displayed in the number column, making it closer to the context
+- Default keymaps have been removed
+- ~~Possibility to complete only word/line of the suggestion~~ (codeium.vim added this feature in [9fa0dee](https://github.com/Exafunction/codeium.vim/commit/9fa0dee67051d8e5d334f7f607e6bab1d6a46d1a))
+- No debounce by default, allowing suggestions to appear while typing (this behavior can be disabled with `debounce = true` in the setup)
 
 </details>
 
-> [!Note]
-> Requires neovim 0.10+ to work.
-
 > [!Warning]
-> Using this plugin your code is constantly sending to some codeium server
-> with the help of their running instance of LSP on your machine.
-> You can get acquainted with their [Codeium Privacy Policy](https://codeium.com/privacy-policy)
-> From the plugin side, I have made all the possibility for it to not send any data from the disabled buffers,
-> but codeium server is still running behind the scenes and I can't guarantee that it doesn't send something in that time (I have
-> not inspected its behaviour with some network packets analyzer).
+> While using this plugin, your code is constantly being sent to
+> Codeium servers by their own language server in order to evaluate and return
+> completions. Before using make sure you have read and accept the [Codeium
+> Privacy Policy](https://codeium.com/privacy-policy). NeoCodeium has the
+> ability to disable the server globally or for individual buffers. This plugin
+> does not send any data to the server from disabled buffers, but the Codeium
+> server is still running behind the scenes and we cannot guarantee that it
+> doesn't send information while running.
+
+### ⚡️ Requirements
+
+- Neovim >= **0.10.0**
 
 ### 📦 Installation
 
@@ -99,12 +98,12 @@ neocodeium.visible()
 #### 🪄 Tips
 
 <details>
-<summary>using alongside nvim-cmp</summary>
+<summary><b>Using alongside nvim-cmp</b></summary>
 
-If you are using NeoCodeium with `manual = false` (it is default), it is useful
-to set nvim-cmp to manual completion and clear NeoCodeium suggestions on
-opening nvim-cmp popup menu. You can achieve this with following code in the
-place where nvim-cmp is configured:
+If you are using NeoCodeium with `manual = false` (the default), it is
+recommended to set nvim-cmp to manual completion and clear NeoCodeium
+suggestions on opening of the nvim-cmp pop-up menu. You can achieve this with
+following code in the place where nvim-cmp is configured:
 
 ```lua
 local cmp = require("cmp")
@@ -127,10 +126,35 @@ cmp.setup({
     },
 })
 ```
+
+If you want to use autocompletion with nvim-cmp, then it is recommended to use
+NeoCodeium with `manual = true`, add a binding for triggering NeoCodeium
+completion, and make sure to close the nvim-cmp window when completions are
+rendered. You can achieve this with the following code where you setup
+NeoCodeium:
+
+```lua
+local neocodeium = require("neocodeium")
+
+neocodeium.setup({
+  manual = true, -- recommended to not conflict with nvim-cmp
+})
+
+-- create an autocommand which closes cmp when ai completions are displayed
+vim.api.nvim_create_autocmd("User", {
+  pattern = "NeoCodeiumCompletionDisplayed",
+  callback = function() require("cmp").abort() end
+})
+
+-- set up some sort of keymap to cycle and complete to trigger completion
+vim.keymap.set("i", "<A-e>", function() neocodeium.cycle_or_complete() end)
+-- make sure to have a mapping to accept a completion
+vim.keymap.set("i", "<A-f>", function() neocodeium.accept() end)
+```
 </details>
 
 <details>
-<summary>Disable in telescope prompt and dap repl</summary>
+<summary><b>Disable in Telescope prompt and DAP REPL</b></summary>
 
 ```lua
 require("neocodeium").setup({
@@ -144,14 +168,14 @@ require("neocodeium").setup({
 </details>
 
 <details>
-<summary>Enable NeoCodeium only in specified filetypes</summary>
+<summary><b>Enable NeoCodeium only in specified filetypes</b></summary>
 
 ```lua
-local filetyps = { 'lua', 'python' }
+local filetypes = { 'lua', 'python' }
 neocodeium.setup({
 -- function accepts one argument `bufnr`
 enabled = function(bufnr)
-    if vim.tbl_contains(filetypes, vim.api.nvim_get_option_value('filetype',  { buf = bufnr})) then
+    if vim.tbl_contains(filetypes, vim.api.nvim_get_option_value('filetype', { buf = bufnr })) then
         return true
     end
     return false
@@ -162,14 +186,16 @@ end
 
 #### ⌨️ Keymaps
 
-NeoCodeium doesn’t enforce any keymaps, which means you’ll need to add them
+NeoCodeium doesn’t provide any keymaps, which means you’ll need to add them
 yourself. While [codeium.vim] and
-[copilot.vim](https://github.com/github/copilot.vim) set the `<Tab>` keymap as
-the default key for accepting a suggestion, but `<Tab>` has some downsides to
-consider (but nothing stops you from using it):
-- **Risk of Interference:** There’s a high chance of it conflicting with other plugins (such as snippets, nvim-cmp, etc.).
+[copilot.vim](https://github.com/github/copilot.vim) set the `<Tab>` key as the
+default key for accepting a suggestion, we recommend avoiding it as it has some
+downsides to consider (although nothing is stopping you from using it):
+- **Risk of Interference:** There’s a high chance of it conflicting with other
+  plugins (such as snippets, nvim-cmp, etc.).
 - **Not Consistent:** It doesn’t work in the `:h command-line-window`.
-- **Indentation Challenges:** It is harder to indent with the tab at the start of a line.
+- **Indentation Challenges:** It is harder to indent with the tab at the start
+  of a line.
 
 Suggested keymaps:
 
@@ -206,10 +232,13 @@ NeoCodeium provides `:NeoCodeium` user command, which has some useful actions:
 - `:NeoCodeium toggle_buffer` - toggles NeoCodeium completion in the current buffer.
 - `:NeoCodeium open_log` - opens new tab with the log output. More information is in the [logging](#logging) section.
 - `:NeoCodeium chat` - opens browser with the Codeium Chat.
-- `:NeoCodeium restart` - restarts Codeium server (useful when server stops responding for any reason).
+- `:NeoCodeium restart` - restarts Codeium server (useful if the server stops responding for any reason).
 
-You can also use such commands in your lua scripts by calling
-`require("neocodeium.commands").<command_name>()`.
+You can also use the same commands in your Lua scripts by calling:
+
+```lua
+require("neocodeium.commands").<command_name>()`
+```
 
 #### 📆 User Events
 
@@ -249,7 +278,7 @@ This function returns two numbers:
 To use output from `get_status()` for in-time update it is required to invoke this function
 from [events](https://github.com/monkoose/neocodeium?tab=readme-ov-file#-user-events)
 
-Few examples:
+**Statusline Examples**
 
 <details>
 <summary>Without statusline plugins</summary>
@@ -270,7 +299,7 @@ end
 
 -- Then only some of event fired we invoked this function
 vim.api.nvim_create_autocmd("User", {
-    group = ..., -- set some augroup here
+    -- group = ..., -- set some augroup here
     pattern = {
         "NeoCodeiumServer*",
         "NeoCodeium*Enabled",
@@ -279,16 +308,8 @@ vim.api.nvim_create_autocmd("User", {
     callback = get_neocodeium_status,
 })
 
-vim.o.statusline =
-    -- here some your components
-    -- ...
-
-    -- add neocodeium_status
-    .. "%{get(b:, 'neocodeium_status', '')%}"
-
-    -- another components
-    -- ...
-end
+-- add neocodeium_status to your statusline
+vim.opt.statusline:append("%{get(b:, 'neocodeium_status', '')%}")
 ```
 </details>
 
@@ -338,7 +359,7 @@ your preference and to match your chosen color scheme:
 
 #### 📄 Logging
 
-While running NeoCodeium logs some messages into a temporary file. It can be
+While running, NeoCodeium logs some messages into a temporary file. It can be
 viewed with the `:NeoCodeium open_log` command. By default only errors and
 warnings are logged.
 
@@ -375,8 +396,7 @@ require("neocodeium").setup({
     -- Portal URL to use (for registering a user and downloading the binary)
     portal_url = nil,
   },
-  -- Set to `false` to disable showing the number of suggestions label
-  -- at the line column
+  -- Set to `false` to disable showing the number of suggestions label in the line column
   show_label = true,
   -- Set to `true` to enable suggestions debounce
   debounce = false,
@@ -393,20 +413,21 @@ require("neocodeium").setup({
     gitrebase = false,
     ["."] = false,
   },
-  -- List of directories and files to detect workspace root directory for codeium chat
+  -- List of directories and files to detect workspace root directory for Codeium chat
   root_dir = { ".bzr", ".git", ".hg", ".svn", "_FOSSIL_", "package.json" }
 })
 ```
 
 #### 💬 Chat
 
-You can chat with AI in the browser with the `:NeoCodeium chat` command.
-The first time you open it, it requires to restart the server with
-some chat-specific flags, so be patient (usually it doesn't take more than a few seconds).
-After that, it should open a chat window in the browser with the context of the current buffer,
-so you can ask some specific questions about your code base.
-When you switch buffers, this context should be updated automatically (it takes some time).
-You can see current chat context in the left bottom corner.
+You can chat with AI in the browser with the `:NeoCodeium chat` command. The
+first time you open it, it requires the server to restart with some
+chat-specific flags, so be patient (this usually doesn't take more than a few
+seconds). After that, it should open a chat window in the browser with the
+context of the current buffer. Here, you can ask some specific questions about
+your code base. When you switch buffers, this context should be updated
+automatically (it takes some time). You can see current chat context in the
+left bottom corner.
 
 ### 🚗 Roadmap
 
@@ -424,3 +445,4 @@ You can see current chat context in the left bottom corner.
 MIT license
 
 [codeium.vim]: https://github.com/Exafunction/codeium.vim
+[Codeium]: https://codeium.com
