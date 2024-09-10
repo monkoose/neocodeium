@@ -96,6 +96,8 @@ COMMANDS                                                 *neocodeium-commands*
         Disables NeoCodeium completion in the current buffer.
     enable_buffer~
         Enables NeoCodeium completion in the current buffer.
+    toggle_buffer~
+        Toggles NeoCodeium completion in the current buffer.
     open_log~
         Opens new tab with the log output. Read |neocodeium-logging| for more
         information about logging.

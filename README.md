@@ -191,6 +191,7 @@ NeoCodeium provides `:NeoCodeium` user command, which has some useful actions:
 - `:NeoCodeium toggle` - toggles NeoCodeium completion.
 - `:NeoCodeium disable_buffer` - disables NeoCodeium completion in the current buffer.
 - `:NeoCodeium enable_buffer` - enables NeoCodeium completion in the current buffer.
+- `:NeoCodeium toggle_buffer` - toggles NeoCodeium completion in the current buffer.
 - `:NeoCodeium open_log` - opens new tab with the log output. More information is in the [logging](#logging) section.
 - `:NeoCodeium chat` - opens browser with the Codeium Chat.
 - `:NeoCodeium restart` - restarts Codeium server (useful when server stops responding for any reason).

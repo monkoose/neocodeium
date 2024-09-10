@@ -157,6 +157,14 @@ function M.enable()
    end
 end
 
+function M.toggle()
+   if vim.g.neocodeium_enabled == false then
+      M.enable()
+   else
+      M.disable()
+   end
+end
+
 function M.disable_buffer()
    vim.b.neocodeium_enabled = false
    utils.event("BufDisabled")
@@ -165,6 +173,14 @@ end
 function M.enable_buffer()
    vim.b.neocodeium_enabled = true
    utils.event("BufEnabled")
+end
+
+function M.toggle_buffer()
+   if vim.b.neocodeium_enabled == false then
+      M.enable_buffer()
+   else
+      M.disable_buffer()
+   end
 end
 
 function M.open_log()
@@ -182,14 +198,6 @@ end
 
 function M.restart()
    server:restart()
-end
-
-function M.toggle()
-   if vim.g.neocodeium_enabled == false then
-      M.enable()
-   else
-      M.disable()
-   end
 end
 
 function M.chat()
