@@ -288,6 +288,43 @@ vim.o.statusline =
 end
 ```
 
+<details>
+<summary>Heirline.nvim</summary>
+
+```lua
+local NeoCodeium = {
+  static = {
+    symbols = {
+      status = {
+        [0] = "󰚩 ", -- Enabled
+        [1] = "󱚧 ", -- Disabled Globally
+        [2] = "󱙻 ", -- Disabled for Buffer
+        [3] = "󱙺 ", -- Disabled for Buffer filetype
+        [4] = "󱙺 ", -- Disabled for Buffer with enabled function
+        [5] = "󱚠 ", -- Disabled for Buffer encoding
+      },
+      server_status = {
+        [0] = "󰣺 ", -- Connected
+        [1] = "󰣻 ", -- Connecting
+        [2] = "󰣽 ", -- Disconnected
+      },
+    },
+  },
+  update = {
+    "User",
+    pattern = { "NeoCodeiumServer*", "NeoCodeium*{En,Dis}abled" },
+    callback = function() vim.cmd.redrawstatus() end,
+  },
+  provider = function(self)
+    local symbols = self.symbols
+    local status, server_status = require("neocodium").get_status()
+    return symbols.status[status] .. symbols.server_status[server_status]
+  end,
+  hl = { fg = "yellow" },
+}
+```
+</details>
+
 #### 🎨 Highlight groups
 
 NeoCodeium offers a couple of highlight groups. Feel free to adjust them to
