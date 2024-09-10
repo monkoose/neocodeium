@@ -106,54 +106,58 @@ to set nvim-cmp to manual completion and clear NeoCodeium suggestions on
 opening nvim-cmp popup menu. You can achieve this with following code in the
 place where nvim-cmp is configured:
 
-    local cmp = require("cmp")
-    local neocodeium = require("neocodeium")
-    local commands = require("neocodeium.commands")
+```lua
+local cmp = require("cmp")
+local neocodeium = require("neocodeium")
+local commands = require("neocodeium.commands")
 
-    cmp.event:on("menu_opened", function()
-        neocodeium.clear()
-    end)
+cmp.event:on("menu_opened", function()
+    neocodeium.clear()
+end)
 
-    neocodeium.setup({
-        enabled = function()
-            return not cmp.visible()
-        end,
-    })
+neocodeium.setup({
+    enabled = function()
+        return not cmp.visible()
+    end,
+})
 
-    cmp.setup({
-        completion = {
-            autocomplete = false,
-        },
-    })
-
+cmp.setup({
+    completion = {
+        autocomplete = false,
+    },
+})
+```
 </details>
+
 <details>
 <summary>Disable in telescope prompt and dap repl</summary>
 
-    require("neocodeium").setup({
-        filetypes = {
-            ...
-            TelescopePrompt = false,
-            ["dap-repl"] = false,
-        },
-    })
-
+```lua
+require("neocodeium").setup({
+    filetypes = {
+        ...
+        TelescopePrompt = false,
+        ["dap-repl"] = false,
+    },
+})
+```
 </details>
 
 <details>
 <summary>Enable NeoCodeium only in specified filetypes</summary>
 
-    local filetyps = { 'lua', 'python' }
-    neocodeium.setup({
-    -- function accepts one argument `bufnr`
-    enabled = function(bufnr)
-        if vim.tbl_contains(filetypes, vim.api.nvim_get_option_value('filetype',  { buf = bufnr})) then
-            return true
-        end
-        return false
+```lua
+local filetyps = { 'lua', 'python' }
+neocodeium.setup({
+-- function accepts one argument `bufnr`
+enabled = function(bufnr)
+    if vim.tbl_contains(filetypes, vim.api.nvim_get_option_value('filetype',  { buf = bufnr})) then
+        return true
     end
-    })
-
+    return false
+end
+})
+```
 </details>
 
 #### ⌨️ Keymaps
@@ -244,9 +248,11 @@ This function returns two numbers:
 
 To use output from `get_status()` for in-time update it is required to invoke this function
 from [events](https://github.com/monkoose/neocodeium?tab=readme-ov-file#-user-events)
-Personally, I'm not using statusline plugins, please refer to theirs documentation how to do it.
-But in my statusline, I would do it that way with an buffer local variable, adapt it to your statusline
-plugin requirements:
+
+Few examples:
+
+<details>
+<summary>Without statusline plugins</summary>
 
 ```lua
 -- function to process get_status() and set buffer variable to that data.
@@ -265,13 +271,9 @@ end
 vim.api.nvim_create_autocmd("User", {
     group = ..., -- set some augroup here
     pattern = {
-        "NeoCodeiumServerConnecting",
-        "NeoCodeiumServerConnected",
-        "NeoCodeiumServerStopped",
-        "NeoCodeiumEnabled",
-        "NeoCodeiumDisabled",
-        "NeoCodeiumBufEnabled",
-        "NeoCodeiumBufDisabled",
+        "NeoCodeiumServer*",
+        "NeoCodeium*Enabled",
+        "NeoCodeium*Disabled",
     }
     callback = get_neocodeium_status,
 })
@@ -287,6 +289,7 @@ vim.o.statusline =
     -- ...
 end
 ```
+</details>
 
 <details>
 <summary>Heirline.nvim</summary>
