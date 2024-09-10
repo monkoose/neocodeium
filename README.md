@@ -115,7 +115,7 @@ cmp.event:on("menu_opened", function()
 end)
 
 neocodeium.setup({
-    enabled = function()
+    filter = function()
         return not cmp.visible()
     end,
 })
@@ -173,13 +173,13 @@ require("neocodeium").setup({
 ```lua
 local filetypes = { 'lua', 'python' }
 neocodeium.setup({
--- function accepts one argument `bufnr`
-enabled = function(bufnr)
-    if vim.tbl_contains(filetypes, vim.api.nvim_get_option_value('filetype', { buf = bufnr })) then
+  -- function accepts one argument `bufnr`
+  filter = function(bufnr)
+    if vim.tbl_contains(filetypes, vim.api.nvim_get_option_value('filetype',  { buf = bufnr})) then
         return true
     end
     return false
-end
+  end
 })
 ```
 </details>
@@ -406,6 +406,9 @@ require("neocodeium").setup({
   max_lines = 10000,
   -- Set to `true` to disable some non-important messages, like "NeoCodeium: server started..."
   silent = false,
+  -- Set to a function that returns `true` if a buffer should be enabled
+  -- and `false` if the buffer should be disabled
+  filter = function(bufnr) return true end,
   -- Set to `false` to disable suggestions in buffers with specific filetypes
   filetypes = {
     help = false,

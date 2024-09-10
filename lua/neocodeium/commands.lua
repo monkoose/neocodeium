@@ -170,10 +170,13 @@ end
 function M.enable_buffer()
    vim.b.neocodeium_enabled = true
    utils.event("BufEnabled")
+   if not server.pid then
+      server:run()
+   end
 end
 
 function M.toggle_buffer()
-   if vim.b.neocodeium_enabled == false then
+   if vim.F.if_nil(vim.b.neocodeium_enabled, vim.g.neocodeium_enabled) == false then
       M.enable_buffer()
    else
       M.disable_buffer()
