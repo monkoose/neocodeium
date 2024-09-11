@@ -1,5 +1,4 @@
-local options = require("neocodeium.options").options
-local types = require("neocodeium.types")
+local types = require("neocodeium._types")
 
 local fn = vim.fn
 local uv = vim.uv

@@ -1,7 +1,7 @@
 -- Imports ------------------------------------------------- {{{1
 
 local utils = require("neocodeium.utils")
-local types = require("neocodeium.types")
+local types = require("neocodeium._types")
 local options = require("neocodeium.options").options
 
 local fn = vim.fn
@@ -212,11 +212,11 @@ end
 ---@return boolean
 function Renderer:display(items, index)
    if not utils.is_insert() then
-      self:reset()
+      self:clear(true)
       return true
    end
 
-   local lnum, col = self.pos[1], self.pos[2]
+   local lnum, col = unpack(self.pos)
    local item = items[index] or {}
    local parts = item.completionParts or {}
 
@@ -290,7 +290,7 @@ function Renderer:start_clear_timer()
          350,
          0,
          vim.schedule_wrap(function()
-            self:clear_all()
+            self:clear()
          end)
       )
    end
@@ -302,18 +302,19 @@ function Renderer:update_forward_line()
       -- find if block.text has multiple lines
       local index = self.block.text:find("\n")
       self.inline = { { prefix = "" } }
+      local lnum, col = unpack(self.pos)
       if index then
          -- starting index `self.pos[2] + 1` is start of the line with indentation
          -- prevents shifting of the inline text
-         self.inline[1].text = self.block.text:sub(self.pos[2] + 1, index - 1)
+         self.inline[1].text = self.block.text:sub(col + 1, index - 1)
          self.block.text = self.block.text:sub(index + 1)
          -- self.block.id already exists, no need to set it
-         show_block(self.block.id, self.block.text, self.pos[1])
+         show_block(self.block.id, self.block.text, lnum)
       else
-         self.inline[1].text = self.block.text:sub(self.pos[2] + 1)
+         self.inline[1].text = self.block.text:sub(col + 1)
          self:clear_block()
       end
-      self.inline[1].id = show_inline(nil, self.inline[1].text, self.pos[1], self.pos[2])
+      self.inline[1].id = show_inline(nil, self.inline[1].text, lnum, col)
    end
    self:start_clear_timer()
 end
@@ -339,15 +340,16 @@ function Renderer:update_horz_move(prev_pos, new_fulltext)
    local lnum, col = unpack(self.pos)
    local prev_col = prev_pos[2]
    local horz_move = col - prev_col
+   local first_inline = self.inline[1]
 
    if horz_move >= 0 then -- added some text
-      if horz_move > #self.inline[1].text then
+      if horz_move > #first_inline.text then
          self:clear_inline()
          self:start_clear_timer()
       else
-         local prefix = self.inline[1].text:sub(1, horz_move)
-         self.inline[1].text = self.inline[1].text:sub(horz_move + 1)
-         show_inline(self.inline[1].id, self.inline[1].text, lnum, col)
+         local prefix = first_inline.text:sub(1, horz_move)
+         self.inline[1].text = first_inline.text:sub(horz_move + 1)
+         show_inline(first_inline.id, first_inline.text, lnum, col)
          if new_fulltext:sub(prev_col) ~= prefix then
             self:start_clear_timer()
          end
@@ -358,8 +360,8 @@ function Renderer:update_horz_move(prev_pos, new_fulltext)
          self:start_clear_timer()
       else
          local prefix = self.fulltext:sub(col + 1, col - horz_move)
-         self.inline[1].text = prefix .. self.inline[1].text
-         show_inline(self.inline[1].id, self.inline[1].text, lnum, col)
+         self.inline[1].text = prefix .. first_inline.text
+         show_inline(first_inline.id, first_inline.text, lnum, col)
          self.timer:stop()
          self:start_clear_timer()
       end
@@ -373,7 +375,7 @@ function Renderer:update()
 
    if self.tick == vim.b.changedtick or math.abs(vert_move) > 1 then
       self.timer:stop()
-      self:clear_all()
+      self:clear()
       self.fulltext = nvim_get_current_line()
    else
       local fulltext = nvim_get_current_line()
@@ -425,23 +427,23 @@ function Renderer:clear_label()
    self.label.id = nil
 end
 
----Clears all virtual text
-function Renderer:clear_all()
-   self:clear_label()
-   self:clear_inline()
-   self:clear_block()
-end
-
 ---Clears plugin's namespace and resets cache
-function Renderer:reset()
-   self.timer:stop()
-   nvim_buf_clear_namespace(0, ns, 0, -1)
-   self.label.id = nil
-   self.inline = {}
-   self.block.id = nil
-   self.block.text = nil
-   self.fulltext = ""
-   utils.event("CompletionCleared", true)
+---@param with_reset? boolean
+function Renderer:clear(with_reset)
+   if with_reset then
+      self.timer:stop()
+      nvim_buf_clear_namespace(0, ns, 0, -1)
+      self.label.id = nil
+      self.inline = {}
+      self.block.id = nil
+      self.block.text = nil
+      self.fulltext = ""
+      utils.event("CompletionCleared", true)
+   else
+      self:clear_label()
+      self:clear_inline()
+      self:clear_block()
+   end
 end
 -- }}}1
 

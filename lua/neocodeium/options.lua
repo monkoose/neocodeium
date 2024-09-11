@@ -1,6 +1,5 @@
 local echo = require("neocodeium.utils.echo")
 
-local nvim_buf_get_var = vim.api.nvim_buf_get_var
 local nvim_get_option_value = vim.api.nvim_get_option_value
 
 ---@class Options

@@ -1,4 +1,4 @@
-local types = require("neocodeium.types")
+local types = require("neocodeium._types")
 
 ---@param lvl level one of vim.log.levels
 ---@return fun(msg: string, silent?: boolean)

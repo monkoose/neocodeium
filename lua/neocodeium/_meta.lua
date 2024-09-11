@@ -94,7 +94,7 @@
 ---@alias completionId string
 ---@class compl.item
 ---@field completion { completionId: completionId, text: string }
----@field completionParts compl.part[]
+---@field completionParts? compl.part[]
 ---@field range compl.range
 ---@field source compl.source
 ---@field suffix compl.suffix

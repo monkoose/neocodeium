@@ -4,7 +4,7 @@ local log = require("neocodeium.log")
 local doc = require("neocodeium.doc")
 local utils = require("neocodeium.utils")
 local options = require("neocodeium.options").options
-local types = require("neocodeium.types")
+local types = require("neocodeium._types")
 local server = require("neocodeium.server")
 local renderer = require("neocodeium.renderer")
 
@@ -255,7 +255,7 @@ function Completer:clear(force)
    end
 
    if force then
-      renderer:reset()
+      renderer:clear(true)
    end
 end
 
@@ -266,7 +266,7 @@ function Completer:initiate(omit_manual)
    self:clear()
 
    if options.manual and not omit_manual then
-      renderer:clear_all()
+      renderer:clear()
       return
    end
 
@@ -339,7 +339,7 @@ function Completer:accept()
    end
    -- defer to prevent pasting block before accept_line()
    vim.defer_fn(function()
-      renderer:reset()
+      renderer:clear(true)
       if block then
          utils.set_lines(lnum, lnum, block)
          utils.set_cursor(pos)
