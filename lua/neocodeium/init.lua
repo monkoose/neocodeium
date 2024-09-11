@@ -101,7 +101,7 @@ local function enable_autocmds()
    })
 
    create_autocmd("ModeChanged", {
-      pattern = "i*:*",
+      pattern = "i*:[^i]*",
       callback = function()
          completer:clear(true)
       end,
@@ -121,6 +121,7 @@ local function enable_autocmds()
 
    create_autocmd("InsertEnter", {
       callback = function()
+         completer:emit_status()
          completer:initiate()
       end,
    })

@@ -98,7 +98,7 @@ function Server:start()
             self.handle = nil
          end
          log.info("Server stopped")
-         utils.event("ServerStopped")
+         utils.event("NeoCodeiumServerStopped")
          self.pid = nil
          self.port = nil
          if self.is_restart then
@@ -107,7 +107,7 @@ function Server:start()
          end
       end)
    )
-   utils.event("ServerConnecting")
+   utils.event("NeoCodeiumServerConnecting")
    local function log_data(err, data)
       if err then
          return
@@ -240,7 +240,7 @@ function Server:init(timer, manager_dir)
          self.callback()
          self.callback = nil
       end
-      utils.event("ServerConnected")
+      utils.event("NeoCodeiumServerConnected")
 
       timer:stop()
       local interval = 10000
