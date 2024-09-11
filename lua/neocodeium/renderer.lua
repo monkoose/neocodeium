@@ -13,9 +13,12 @@ local nvim_get_hl_id_by_name = vim.api.nvim_get_hl_id_by_name
 local nvim_create_namespace = vim.api.nvim_create_namespace
 local nvim_buf_del_extmark = vim.api.nvim_buf_del_extmark
 local nvim_buf_clear_namespace = vim.api.nvim_buf_clear_namespace
+local nvim_create_autocmd = vim.api.nvim_create_autocmd
+local nvim_create_augroup = vim.api.nvim_create_augroup
 
 local hlgroup = nvim_get_hl_id_by_name("NeoCodeiumSuggestion")
 local ns = nvim_create_namespace("neocodeium_compl")
+local augroup = nvim_create_augroup("neocodeium_renderer", {})
 
 -- Renderer ------------------------------------------------- {{{1
 
@@ -145,10 +148,6 @@ end
 ---@param id extmark_id
 ---@param text string
 function Renderer:show_label(id, text)
-   if not (options.show_label and self.label.enabled) then
-      return
-   end
-
    self.label.id = nvim_buf_set_extmark(0, ns, self.pos[1], 0, {
       id = id,
       virt_text = { { text, "NeoCodeiumLabel" } },
@@ -198,8 +197,15 @@ end
 ---@private
 ---@param items compl.item[]
 ---@param index integer
-function Renderer:display_label(items, index)
-   if utils.is_empty(items) then
+---@param pending boolean?
+function Renderer:display_label(items, index, pending)
+   if not (options.show_label and self.label.enabled) then
+      return
+   end
+
+   if pending then
+      self:show_label(self.label.id, " * ")
+   elseif utils.is_empty(items) then
       self:show_label(self.label.id, " 0 ")
    else
       self:show_label(self.label.id, index .. "/" .. #items)
@@ -209,11 +215,10 @@ end
 ---Displays completion item
 ---@param items compl.item[]
 ---@param index integer
----@return boolean
 function Renderer:display(items, index)
    if not utils.is_insert() then
       self:clear(true)
-      return true
+      return
    end
 
    local lnum, col = unpack(self.pos)
@@ -221,13 +226,14 @@ function Renderer:display(items, index)
    local parts = item.completionParts or {}
 
    if utils.is_empty(parts) then
-      return true
+      return
    end
 
    -- When only block part is present and text was changed compared to when
    -- request was sent, return false, so it will dispatch new request
    if not self.fulltext:match("^%s*$") and item.completion.text:match("^\n") then
-      return false
+      utils.event("_NeoCodeiumCompleterRequest", nil, true)
+      return
    end
 
    local block_text ---@type string?
@@ -252,7 +258,8 @@ function Renderer:display(items, index)
                -- When actual text doesn't match prefix return false, so it will
                -- dispatch new request for the completion
                if match_prefix_idx ~= col then
-                  return false
+                  utils.event("_NeoCodeiumCompleterRequest", nil, true)
+                  return
                end
 
                delta = calc_inline_delta(prefix_len, match_prefix_idx, col)
@@ -279,8 +286,7 @@ function Renderer:display(items, index)
    if block_text or #inline_contents > 0 then
       self:display_label(items, index)
    end
-   utils.event("CompletionDisplayed", true)
-   return true
+   utils.event("NeoCodeiumCompletionDisplayed", nil, true)
 end
 
 ---@private
@@ -438,13 +444,51 @@ function Renderer:clear(with_reset)
       self.block.id = nil
       self.block.text = nil
       self.fulltext = ""
-      utils.event("CompletionCleared", true)
+      utils.event("NeoCodeiumCompletionCleared", nil, true)
    else
-      self:clear_label()
+      -- self:clear_label()
       self:clear_inline()
       self:clear_block()
    end
 end
+
+-- Subscribed events --------------------------------------- {{{1
+
+nvim_create_autocmd("User", {
+   pattern = "_NeoCodeiumCompleterDisplay",
+   group = augroup,
+   callback = function(ev)
+      local data = ev.data
+      Renderer:display(data.items, data.index)
+   end,
+})
+
+nvim_create_autocmd("User", {
+   pattern = "_NeoCodeiumCompleterClear",
+   group = augroup,
+   callback = function(ev)
+      Renderer:clear(ev.data)
+   end,
+})
+
+nvim_create_autocmd("User", {
+   pattern = "_NeoCodeiumCompleterUpdate",
+   group = augroup,
+   callback = function(_)
+      Renderer:update()
+   end,
+})
+
+nvim_create_autocmd("User", {
+   pattern = "_NeoCodeiumCompleterStatus",
+   group = augroup,
+   callback = function(ev)
+      if utils.is_insert() and utils.is_empty(Renderer.inline) and not Renderer.block.text then
+         local pending = ev.data == 1
+         Renderer:display_label({}, 1, pending)
+      end
+   end,
+})
 -- }}}1
 
 return Renderer

@@ -147,12 +147,12 @@ function M.disable(bang)
       server:stop()
       echo.info("the server has been halted")
    end
-   utils.event("Disabled")
+   utils.event("NeoCodeiumDisabled")
 end
 
 function M.enable()
    options.enabled = true
-   utils.event("Enabled")
+   utils.event("NeoCodeiumEnabled")
    if not server.pid then
       server:run()
    end
@@ -168,12 +168,12 @@ end
 
 function M.disable_buffer()
    vim.b.neocodeium_enabled = false
-   utils.event("BufDisabled")
+   utils.event("NeoCodeiumBufDisabled")
 end
 
 function M.enable_buffer()
    vim.b.neocodeium_enabled = true
-   utils.event("BufEnabled")
+   utils.event("NeoCodeiumBufEnabled")
 end
 
 function M.toggle_buffer()
