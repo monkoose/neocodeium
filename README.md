@@ -443,7 +443,7 @@ left bottom corner.
 - [x] Add the command to open buffer with the log output
 - [x] Add :checkhealth
 - [x] Add support for Codeium Chat (in browser only)
-- [x] Completely decouple renderer from completer.
+- [ ] Completely decouple renderer from completer.
 Add an custom renderer setup option.
 Renderer is already pretty much decoupled, but still transforms data it receives and
 so completer receives from it more data than required. Its API should
