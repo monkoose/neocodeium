@@ -443,13 +443,14 @@ left bottom corner.
 - [x] Add the command to open buffer with the log output
 - [x] Add :checkhealth
 - [x] Add support for Codeium Chat (in browser only)
-- [x] Completely decouple renderer from completer and add an custom renderer setup option
-Renderer is already almost decoupled, but still transforms data it receives and
-so completer receives form it more data back that needed. Its API should
-consist of: display(), update() and clear() methods and not pass any data to
+- [x] Completely decouple renderer from completer.
+Add an custom renderer setup option.
+Renderer is already pretty much decoupled, but still transforms data it receives and
+so completer receives from it more data than required. Its API should
+consist of: display(), update() and clear() methods and do not pass any data to
 the completer. Not sure if someone will use it, but there are always some enthusiasts and hackers.
 With this feature implementing some custom renderer (like for any extendable completion engine) would be easy.
-Provide an example of implementation with built-in completion (omnifunc).
+Provide an example of custom renderer with built-in completion (omnifunc).
 
 ### 💐 Credits
 
