@@ -165,11 +165,12 @@ end
 
 ---Restarts the server
 function Server:restart()
-   echo.info("restarting server...", options.silent)
    if self.handle and not uv.is_closing(self.handle) then
+      echo.info("restarting the server...", options.silent)
       self.is_restart = true
       self:stop()
    else
+      echo.info("starting the server...", options.silent)
       self:run()
    end
 end
