@@ -54,11 +54,11 @@ local function check_server()
       )
    else
       if not server.pid then
-         health.error("*Server* have not been started")
+         health.error("*Server* has not been started")
       elseif not server.port then
          health.error(
             "*Server* *port* is not detected",
-            "Finding a port can take some time. Please try :checkhealth again later."
+            "Finding a port can take some time (up to 20 seconds).\nPlease try `:checkhealth` again later."
          )
       end
    end

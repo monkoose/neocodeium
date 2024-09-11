@@ -87,7 +87,7 @@ COMMANDS                                                 *neocodeium-commands*
     auth~
         Authenticates the user and saves the API token.
     disable~
-        Disables NeoCodeium completion.
+        Disables NeoCodeium completion. With the <bang> also stops the server.
     enable~
         Enables NeoCodeium completion.
     toggle~
@@ -198,12 +198,9 @@ CONFIGURATION                                       *neocodeium-configuration*
 
 `setup()` function accepts a table with the following keys:
     enabled~
-        Boolean or Function.
+        Boolean.
 
-        If it is boolean and `false` then neocodeium disabled at startup,
-        until it is enabled manually. When it is function, it has one argument
-        `bufnr` and should return boolean. With it, you can implement your own
-        logic to disable neocodeium for your requirements.
+        When `false` doesn't start the server at startup.
     bin~
         String.
         Path to a custom Codeium server binary.
@@ -243,6 +240,11 @@ CONFIGURATION                                       *neocodeium-configuration*
         Boolean.
         When `true`, then some information messages like "Neocodeium: server
         started..." would be disabled.
+    filter~
+        Function.
+
+        Function that if returns `false` then disables completions for the
+        current buffer.
     filetypes~
         Table where keys are filetypes and values are booleans.
         By default the plugin is enabled for all filetypes except defaults
@@ -263,6 +265,7 @@ Defaults: >lua
         debounce = false,
         max_lines = 10000,
         silent = false,
+        filter = nil,
         filetypes = {
             help = false,
             gitcommit = false,
@@ -278,6 +281,35 @@ Defaults: >lua
             "package.json"
         },
     })
+
+==============================================================================
+EVENTS                                               *neocodeium-autocommands*
+
+NeoCodeium triggers several user events which can be used to trigger code.
+These can be used to optimize when statusline elements are updated, creating
+mappings only when the server is available, or modifying completion engine
+settings when AI completion is started or displaying hints.
+
+    `NeoCodeiumServerConnecting`
+        Triggers when a connection to the Codeium server is starting.
+    `NeoCodeiumServerConnected`
+        Triggers when a successful connection to the Codeium server is made.
+    `NeoCodeiumServerStopped`
+        Triggers when the Codeium server is stopped.
+    `NeoCodeiumEnabled`
+        Triggers when the NeoCodeium plugin is enabled globally
+    `NeoCodeiumDisabled`
+        Triggers when the NeoCodeium plugin is disabled globally.
+    `NeoCodeiumBufEnabled`
+        Triggers when the NeoCodeium plugin is enabled for a buffer.
+    `NeoCodeiumBufDisabled`
+        Triggers when the NeoCodeium plugin is disabled for a buffer.
+    `NeoCodeiumCompletionDisplayed`
+        Triggers when NeoCodeium successfully displays a completion item as
+        virtual text.
+    `NeoCodeiumCompletionCleared`
+        Triggers when NeoCodeium clears virtual text and completions.
+
 ==============================================================================
 STATUSLINE                                             *neocodeium-statusline*
 
