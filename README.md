@@ -226,7 +226,7 @@ NeoCodeium provides `:NeoCodeium` user command, which has some useful actions:
 - `:NeoCodeium auth` - authenticates the user and saves the API token.
 - `:NeoCodeium[!] disable` - disables completions. With the bang also stops the codeium server.
 - `:NeoCodeium enable` - enables NeoCodeium completion.
-- `:NeoCodeium toggle` - toggles NeoCodeium completion.
+- `:NeoCodeium[!] toggle` - toggles NeoCodeium completion. Convey the bang to disable command.
 - `:NeoCodeium disable_buffer` - disables NeoCodeium completion in the current buffer.
 - `:NeoCodeium enable_buffer` - enables NeoCodeium completion in the current buffer.
 - `:NeoCodeium toggle_buffer` - toggles NeoCodeium completion in the current buffer.

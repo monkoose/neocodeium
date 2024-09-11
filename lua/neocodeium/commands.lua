@@ -158,9 +158,9 @@ function M.enable()
    end
 end
 
-function M.toggle()
+function M.toggle(bang)
    if options.enabled then
-      M.disable()
+      M.disable(bang)
    else
       M.enable()
    end
