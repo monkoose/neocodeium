@@ -72,7 +72,7 @@ end
 
 ---Sends a request to the server to refresh context
 function chat.refresh_context()
-   if options.enabled_func(0) then
+   if options.is_enabled(0) then
       local cursor = nvim_win_get_cursor(0)
       local ft = nvim_get_option_value("filetype", { buf = 0 })
       server:request("RefreshContextForIdeAction", { active_document = doc.get(0, ft, -1, cursor) })

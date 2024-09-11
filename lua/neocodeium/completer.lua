@@ -73,7 +73,7 @@ end
 ---Returns `true` if completion for current buffer is enabled.
 ---@return boolean
 function Completer:enabled()
-   return options.enabled_func() and self.allowed_encoding
+   return options.is_enabled() and self.allowed_encoding
 end
 
 ---Cycles completions by amount `n`, wraps around if necessary.

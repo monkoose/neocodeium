@@ -142,12 +142,12 @@ function M.auth()
 end
 
 function M.disable()
-   vim.g.neocodeium_enabled = false
+   options.enabled = false
    utils.event("Disabled")
 end
 
 function M.enable()
-   vim.g.neocodeium_enabled = true
+   options.enabled = true
    utils.event("Enabled")
    if not server.pid then
       server:run()
@@ -155,10 +155,10 @@ function M.enable()
 end
 
 function M.toggle()
-   if vim.g.neocodeium_enabled == false then
-      M.enable()
-   else
+   if options.enabled then
       M.disable()
+   else
+      M.enable()
    end
 end
 

@@ -1,3 +1,5 @@
+local echo = require("neocodeium.utils.echo")
+
 local nvim_buf_get_var = vim.api.nvim_buf_get_var
 local nvim_get_option_value = vim.api.nvim_get_option_value
 
@@ -12,8 +14,8 @@ local nvim_get_option_value = vim.api.nvim_get_option_value
 ---@field silent boolean
 ---@field filetypes table<string, boolean>
 ---@field root_dir string[]
----@field filter fun(bufnr: integer)?
----@field enabled_func function
+---@field filter? fun(bufnr: integer)
+---@field is_enabled function
 local defaults = {
    enabled = true,
    bin = nil,
@@ -38,41 +40,36 @@ function M.setup(opts)
    ---@type Options
    M.options = vim.tbl_deep_extend("force", defaults, opts or {})
 
+   -- TODO: remove after some time
    if type(M.options.enabled) == "function" then
+      ---@diagnostic disable-next-line: assign-type-mismatch
       M.options.filter = M.options.enabled
       M.options.enabled = true
-      vim.notify(
-         "Using a function for `enabled` is deprecated, please use the `filter` option instead",
-         vim.log.levels.WARN
+      echo.warn(
+         "using a function for `enabled` is deprecated, please use the `filter` option instead"
       )
    end
-   vim.g.neocodeium_enabled = M.options.enabled
 
    ---@param bufnr? bufnr
    ---@return boolean, integer
-   M.options.enabled_func = function(bufnr)
+   M.options.is_enabled = function(bufnr)
       bufnr = bufnr or 0
-      if vim.g.neocodeium_enabled == false then
+      if not M.options.enabled then
          return false, 1 -- globally disabled
+      -- Buffer variable should enable neocodeium even if it is disabled
+      -- by 'options.filetypes' or 'options.filter()'
+      elseif vim.b[bufnr].neocodeium_enabled then
+         return true, 0 -- enabled
+      elseif vim.b[bufnr].neocodeium_enabled == false then
+         return false, 2 -- locally disabled
+      -- The same as vim.b[bunfr].neocodeium_enabled == nil and ...
       elseif M.options.filetypes[nvim_get_option_value("filetype", { buf = bufnr })] == false then
          return false, 3 -- disabled by 'options.filetypes'
+      elseif M.options.filter and M.options.filter(bufnr) == false then
+         return false, 4 -- disabled by 'options.filter()'
+      else
+         return true, 0 -- enabled
       end
-
-      local ok, res = pcall(nvim_buf_get_var, bufnr, "neocodeium_enabled")
-      if ok and res == false then
-         return false, 2 -- locally disabled for current buffer
-      end
-
-      if M.options.filter then
-         local result = M.options.filter(bufnr)
-         if result then
-            return result, 0 -- enabled
-         else
-            return result, 4 -- disabled by 'options.enabled()' function
-         end
-      end
-
-      return true, 0 -- enabled
    end
 end
 

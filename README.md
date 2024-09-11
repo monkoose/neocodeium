@@ -378,10 +378,8 @@ NeoCodeium comes with the following default options:
 ```lua
 -- NeoCodeium Configuration
 require("neocodeium").setup({
-  -- Accepts boolean or function. If it is boolean and false, then neocodeium disabled at
-  -- startup, until it is enabled manually. When it is function, it has one argument
-  -- `bufnr` and should return boolean. With it, you can implement your own logic to disable
-  -- neocodeium for your requirements.
+  -- If `false`, then would not start codeium server (disabled state)
+  -- You can manually enable it at runtime with `:NeoCodeium enable`
   enabled = true,
   -- Path to a custom Codeium server binary (you can download one from:
   -- https://github.com/Exafunction/codeium/releases)
@@ -408,8 +406,10 @@ require("neocodeium").setup({
   silent = false,
   -- Set to a function that returns `true` if a buffer should be enabled
   -- and `false` if the buffer should be disabled
+  -- You can still enable disabled by this option buffer with `:NeoCodeium enable_buffer`
   filter = function(bufnr) return true end,
   -- Set to `false` to disable suggestions in buffers with specific filetypes
+  -- You can still enable disabled by this option buffer with `:NeoCodeium enable_buffer`
   filetypes = {
     help = false,
     gitcommit = false,

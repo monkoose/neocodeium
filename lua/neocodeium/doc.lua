@@ -95,7 +95,7 @@ function M.get_all_loaded(cur_bufnr)
    local pos = { 0, 0 }
    for b in loaded_bufs() do
       local buf_ft = nvim_get_option_value("filetype", { buf = b })
-      if b ~= cur_bufnr and buf_ft ~= "" and is_normal_buf(b) and options.enabled_func(b) then
+      if b ~= cur_bufnr and buf_ft ~= "" and is_normal_buf(b) and options.is_enabled(b) then
          local buf_cache = cached_data[b]
          local buf_tick = nvim_buf_get_var(b, "changedtick") ---@type integer
          -- use new data only when buffer's content has changed
