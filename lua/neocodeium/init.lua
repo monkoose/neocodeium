@@ -147,11 +147,12 @@ function M.setup(opts)
    local server = require("neocodeium.server")
    local completer = require("neocodeium.completer")
 
-   if type(options.enabled) == "function" or options.enabled then
+   if options.enabled then
       if vim.v.vim_did_enter == 1 then
          server:run()
       else
          nvim_create_autocmd("VimEnter", {
+            once = true,
             callback = function()
                server:run()
             end,
@@ -181,10 +182,10 @@ function M.setup(opts)
 
    ---Calls a function mapped to the command
    ---@param cmd string
-   local function run_command(cmd)
+   local function run_command(cmd, bang)
       local func = commands[cmd]
       if func then
-         func()
+         func(bang)
       else
          local echo = require("neocodeium.utils.echo")
          echo.warn("command '" .. cmd .. "' not found")
@@ -192,9 +193,10 @@ function M.setup(opts)
    end
 
    nvim_create_user_command("NeoCodeium", function(t)
-      run_command(t.args)
+      run_command(t.args, t.bang)
    end, {
       nargs = 1,
+      bang = true,
       complete = complete_commands,
    })
 
@@ -208,17 +210,11 @@ function M.setup(opts)
          server_status = 2 -- OFF
       end
 
-      local enabled, status = options.enabled_func()
-      if not enabled then
-         return status, server_status
+      if not completer.allowed_encoding then
+         return 5, server_status -- disabled by wrong encoding
       end
 
-      if completer.allowed_encoding then
-         return status, server_status
-      else
-         -- disabled by wrong encoding
-         return 5, server_status
-      end
+      return options.status(), server_status
    end
 end
 

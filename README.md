@@ -224,7 +224,7 @@ end)
 
 NeoCodeium provides `:NeoCodeium` user command, which has some useful actions:
 - `:NeoCodeium auth` - authenticates the user and saves the API token.
-- `:NeoCodeium disable` - disables NeoCodeium completion.
+- `:NeoCodeium[!] disable` - disables completions. With the bang also stops the codeium server.
 - `:NeoCodeium enable` - enables NeoCodeium completion.
 - `:NeoCodeium toggle` - toggles NeoCodeium completion.
 - `:NeoCodeium disable_buffer` - disables NeoCodeium completion in the current buffer.
@@ -238,6 +238,11 @@ You can also use the same commands in your Lua scripts by calling:
 
 ```lua
 require("neocodeium.commands").<command_name>()`
+-- Examples
+-- disable completions
+require("neocodeium.commands").disable()
+-- disable completions and stop the server
+require("neocodeium.commands").disable(true)
 ```
 
 #### 📆 User Events

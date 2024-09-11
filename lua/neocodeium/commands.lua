@@ -141,8 +141,12 @@ function M.auth()
    end
 end
 
-function M.disable()
+function M.disable(bang)
    options.enabled = false
+   if bang and server.pid then
+      server:stop()
+      echo.info("the server has been halted")
+   end
    utils.event("Disabled")
 end
 

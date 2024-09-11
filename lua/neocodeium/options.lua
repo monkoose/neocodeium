@@ -15,7 +15,7 @@ local nvim_get_option_value = vim.api.nvim_get_option_value
 ---@field filetypes table<string, boolean>
 ---@field root_dir string[]
 ---@field filter? fun(bufnr: integer)
----@field is_enabled function
+---@field status function
 local defaults = {
    enabled = true,
    bin = nil,
@@ -51,24 +51,24 @@ function M.setup(opts)
    end
 
    ---@param bufnr? bufnr
-   ---@return boolean, integer
-   M.options.is_enabled = function(bufnr)
+   ---@return integer
+   M.options.status = function(bufnr)
       bufnr = bufnr or 0
       if not M.options.enabled then
-         return false, 1 -- globally disabled
+         return 1 -- globally disabled
       -- Buffer variable should enable neocodeium even if it is disabled
       -- by 'options.filetypes' or 'options.filter()'
       elseif vim.b[bufnr].neocodeium_enabled then
-         return true, 0 -- enabled
+         return 0 -- enabled
       elseif vim.b[bufnr].neocodeium_enabled == false then
-         return false, 2 -- locally disabled
+         return 2 -- locally disabled
       -- The same as vim.b[bunfr].neocodeium_enabled == nil and ...
       elseif M.options.filetypes[nvim_get_option_value("filetype", { buf = bufnr })] == false then
-         return false, 3 -- disabled by 'options.filetypes'
+         return 3 -- disabled by 'options.filetypes'
       elseif M.options.filter and M.options.filter(bufnr) == false then
-         return false, 4 -- disabled by 'options.filter()'
+         return 4 -- disabled by 'options.filter()'
       else
-         return true, 0 -- enabled
+         return 0 -- enabled
       end
    end
 end
