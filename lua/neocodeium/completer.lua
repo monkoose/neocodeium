@@ -364,7 +364,9 @@ function Completer:accept()
          utils.set_cursor(pos)
       end
       -- required to update label position
-      renderer.pos = pos
+      if pos then
+         renderer.pos = pos
+      end
    end, 0)
 end
 
