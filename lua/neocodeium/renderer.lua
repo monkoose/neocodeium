@@ -56,7 +56,7 @@ local Renderer = {
 
 ---Adds virtual text into the `lnum` line number and `col` column.
 ---If `id` is nil then a new id will be generated.
----@param id extmark_id?
+---@param id? extmark_id
 ---@param str string text to display
 ---@param lnum lnum
 ---@param col col
@@ -88,7 +88,7 @@ end
 
 ---Adds virtual text below the line with `lnum` number.
 ---If `id` is nil then a new id will be generated.
----@param id extmark_id?
+---@param id? extmark_id
 ---@param text string text to display, will be split into lines at "\n"
 ---@param lnum lnum
 ---@return extmark_id
@@ -182,7 +182,7 @@ end
 
 ---@private
 ---@param lnum lnum
----@param text string?
+---@param text? string
 function Renderer:display_block(text, lnum)
    if text then
       if not self.block.id or self.block.text ~= text then
@@ -197,7 +197,7 @@ end
 ---@private
 ---@param items compl.item[]
 ---@param index integer
----@param pending boolean?
+---@param pending? boolean
 function Renderer:display_label(items, index, pending)
    if not (options.show_label and self.label.enabled) then
       return

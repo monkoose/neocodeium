@@ -18,7 +18,7 @@ end
 
 ---Reads file content into string, on failure returns nil
 ---@param path filepath
----@return string?
+---@return string|nil
 function M.read(path)
    local f = io.open(path, "rb")
    if f then

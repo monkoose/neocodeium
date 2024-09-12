@@ -23,7 +23,7 @@ nvim_create_autocmd("BufEnter", {
    end,
 })
 
----@return string?
+---@return string|nil
 local function get_project_root()
    return fs.root(uv.cwd() or 0, options.root_dir)
 end

@@ -13,7 +13,7 @@ function M.check()
    end
 end
 
----@return string?
+---@return string|nil
 function M.get()
    return api_key
 end

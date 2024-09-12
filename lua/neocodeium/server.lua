@@ -32,7 +32,7 @@ local Server = {
 -- Auxiliary functions ------------------------------------- {{{1
 
 ---@param path filepath
----@return filepath?
+---@return filepath|nil
 local function find_port_file(path)
    return fs.find(function(name)
       return name:match("^%d%d%d%d%d?$")
@@ -40,7 +40,7 @@ local function find_port_file(path)
 end
 
 ---@param t table list to append data
----@return fun(_, data: string?)
+---@return fun(_, data?: string)
 local function data_appender(t)
    return function(_, data)
       if data then
@@ -178,7 +178,7 @@ end
 ---Sends request to the server
 ---@param type request_type
 ---@param data request_data
----@param on_exit fun(response: response)?
+---@param on_exit? fun(response: response)
 function Server:request(type, data, on_exit)
    ---@type url
    local uri = "http://127.0.0.1:"
