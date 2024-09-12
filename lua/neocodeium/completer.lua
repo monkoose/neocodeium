@@ -362,9 +362,7 @@ function Completer:accept()
       if block then
          utils.set_lines(lnum, lnum, block)
          utils.set_cursor(pos)
-      end
-      -- required to update label position
-      if pos then
+         -- required to update label position
          renderer.pos = pos
       end
    end, 0)
