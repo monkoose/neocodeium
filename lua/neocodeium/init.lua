@@ -121,7 +121,9 @@ local function enable_autocmds()
 
    create_autocmd("InsertEnter", {
       callback = function()
-         completer:emit_status()
+         if completer:enabled() then
+            completer:emit_status()
+         end
          completer:initiate()
       end,
    })
