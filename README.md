@@ -268,10 +268,10 @@ This function returns two numbers:
 1. Status of the plugin
 
         0 - Enabled
-        1 - Globally disabled with `:NeoCodeium disable`, `:NeoCodeium toggle` or with `options.enabled = false`
+        1 - Globally disabled with `:NeoCodeium disable`, `:NeoCodeium toggle` or with `setup.enabled = false`
         2 - Buffer is disabled with `:NeoCodeium disable_buffer`
-        3 - Buffer is disableld when it's filetype is matching `options.filetypes = { some_filetyps = false }`
-        4 - Buffer is disabled when `options.enalbed` is a function and it returns `false`
+        3 - Buffer is disableld when it's filetype is matching `setup.filetypes = { some_filetyps = false }`
+        4 - Buffer is disabled when `setup.filter` returns `false` for the current buffer
         5 - Buffer has wrong encoding (codeium can accept only UTF-8 and LATIN-1 encodings)
 
 2. Server status
