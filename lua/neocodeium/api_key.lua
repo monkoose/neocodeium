@@ -7,10 +7,14 @@ local api_key = conf.load().api_key
 local M = {}
 
 ---Checks if api key is set
+---@return string|nil
 function M.check()
    if not api_key then
       echo.warn("No API key found. Run `:NeoCodeium auth` to set it")
+      return
    end
+
+   return api_key
 end
 
 ---@return string|nil

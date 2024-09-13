@@ -13,6 +13,7 @@ events.event = {
    update = "_NeoCodeiumUpdate",
    status = "_NeoCodeiumStatus",
    request = "_NeoCodeiumRequest",
+   accept = "_NeoCodeiumAccept",
 }
 
 ---Trigger an event

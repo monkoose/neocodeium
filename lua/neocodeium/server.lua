@@ -6,6 +6,7 @@ local options = require("neocodeium.options").options
 local stdio = require("neocodeium.utils.stdio")
 local echo = require("neocodeium.utils.echo")
 local events = require("neocodeium.events")
+local event = events.event
 local Bin = require("neocodeium.binary")
 
 local fn = vim.fn
@@ -27,6 +28,13 @@ local Server = {
    bin = Bin.new(),
    is_restart = false,
    chat_enabled = false,
+   metadata = {
+      api_key = api_key.get(),
+      ide_name = "neovim",
+      ide_version = Bin.version,
+      extension_name = "neocodeium",
+      extension_version = Bin.version,
+   },
 }
 
 -- Auxiliary functions ------------------------------------- {{{1
@@ -139,7 +147,9 @@ function Server:run()
       return
    end
 
-   api_key.check()
+   if not api_key.check() then
+      return
+   end
 
    if stdio.executable(self.bin.path) then
       self:start()
@@ -245,25 +255,22 @@ function Server:init(timer, manager_dir)
       events.emit("NeoCodeiumServerConnected")
 
       timer:stop()
-      local interval = 10000
+      local interval = 10000 -- 10 seconds
       -- constantly send heartbeats
       timer:start(interval, interval, function()
-         self:request("Heartbeat", { metadata = self:request_metadata() })
+         self:request("Heartbeat", { metadata = self.metadata })
       end)
    end
 end
 
----Returns request metadata
----@return request_metadata
-function Server:request_metadata()
-   return {
-      api_key = api_key.get(),
-      ide_name = "neovim",
-      ide_version = Bin.version,
-      extension_name = "neocodeium",
-      extension_version = self.bin.version,
-   }
-end
+-- Subscribed events --------------------------------------- {{{1
+events.subscribe(event.accept, function(data)
+   Server:request("AcceptCompletion", {
+      metadata = Server.metadata,
+      completion_id = data,
+   })
+end)
+
 -- }}}1
 
 return Server

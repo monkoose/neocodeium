@@ -125,6 +125,7 @@ function M.auth()
    end
 
    api_key.set(key)
+   server.metadata.api_key = key
 
    local config = conf.load()
    config.api_key = key
@@ -135,7 +136,8 @@ function M.auth()
    end)
 
    if ok then
-      echo.info("success. Autocompletion now should work")
+      server:run()
+      echo.info("success. Launching the server...")
    else
       echo.error("could not write api key to config.json")
       log.error("Could not write api key to config.json\n" .. err)
@@ -206,7 +208,7 @@ function M.chat()
    local chat = require("neocodeium.chat")
    local function launch_chat()
       chat.refresh_context()
-      server:request("GetProcesses", { metadata = server:request_metadata() }, chat.launch)
+      server:request("GetProcesses", { metadata = server.metadata }, chat.launch)
       chat.add_tracked_workspace()
    end
 

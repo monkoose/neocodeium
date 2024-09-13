@@ -218,7 +218,7 @@ function Completer:request()
    self.request_id = self.request_id + 1
    local curr_bufnr = nvim_get_current_buf()
    local pos = renderer.pos
-   local metadata = server:request_metadata()
+   local metadata = server.metadata
    metadata.request_id = self.request_id
    local data = {
       metadata = metadata,
@@ -317,10 +317,7 @@ function Completer:accept()
       return
    end
 
-   server:request("AcceptCompletion", {
-      metadata = server:request_metadata(),
-      completion_id = curr_item.completion.completionId,
-   })
+   events.emit(event.accept, curr_item.completion.completionId)
 
    local pos ---@type pos
    local lnum = renderer.pos[1] + 1
