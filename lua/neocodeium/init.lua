@@ -48,7 +48,7 @@ local function enable_autocmds()
 
    local function utf8_or_latin1()
       local encoding = vim.o.fileencoding
-      return encoding == "utf-8" or encoding == "latin1"
+      return encoding == "" or encoding == "utf-8" or encoding == "latin1"
    end
 
    completer.allowed_encoding = utf8_or_latin1()
