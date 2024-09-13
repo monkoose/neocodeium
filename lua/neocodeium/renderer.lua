@@ -3,6 +3,8 @@
 local utils = require("neocodeium.utils")
 local types = require("neocodeium._types")
 local options = require("neocodeium.options").options
+local events = require("neocodeium.events")
+local event = events.event
 
 local fn = vim.fn
 local uv = vim.uv
@@ -13,12 +15,9 @@ local nvim_get_hl_id_by_name = vim.api.nvim_get_hl_id_by_name
 local nvim_create_namespace = vim.api.nvim_create_namespace
 local nvim_buf_del_extmark = vim.api.nvim_buf_del_extmark
 local nvim_buf_clear_namespace = vim.api.nvim_buf_clear_namespace
-local nvim_create_autocmd = vim.api.nvim_create_autocmd
-local nvim_create_augroup = vim.api.nvim_create_augroup
 
 local hlgroup = nvim_get_hl_id_by_name("NeoCodeiumSuggestion")
 local ns = nvim_create_namespace("neocodeium_compl")
-local augroup = nvim_create_augroup("neocodeium_renderer", {})
 
 -- Renderer ------------------------------------------------- {{{1
 
@@ -232,7 +231,7 @@ function Renderer:display(items, index)
    -- When only block part is present and text was changed compared to when
    -- request was sent, return false, so it will dispatch new request
    if not self.fulltext:match("^%s*$") and item.completion.text:match("^\n") then
-      utils.event("_NeoCodeiumCompleterRequest", nil, true)
+      events.emit(event.request)
       return
    end
 
@@ -258,7 +257,7 @@ function Renderer:display(items, index)
                -- When actual text doesn't match prefix return false, so it will
                -- dispatch new request for the completion
                if match_prefix_idx ~= col then
-                  utils.event("_NeoCodeiumCompleterRequest", nil, true)
+                  events.emit(event.request)
                   return
                end
 
@@ -286,7 +285,7 @@ function Renderer:display(items, index)
    if block_text or #inline_contents > 0 then
       self:display_label(items, index)
    end
-   utils.event("NeoCodeiumCompletionDisplayed", nil, true)
+   events.emit("NeoCodeiumCompletionDisplayed", nil, true)
 end
 
 ---@private
@@ -450,7 +449,7 @@ function Renderer:clear(with_reset)
       self.block.id = nil
       self.block.text = nil
       self.fulltext = ""
-      utils.event("NeoCodeiumCompletionCleared", nil, true)
+      events.emit("NeoCodeiumCompletionCleared", nil, true)
    else
       -- self:clear_label()
       self:clear_inline()
@@ -460,41 +459,24 @@ end
 
 -- Subscribed events --------------------------------------- {{{1
 
-nvim_create_autocmd("User", {
-   pattern = "_NeoCodeiumCompleterDisplay",
-   group = augroup,
-   callback = function(ev)
-      local data = ev.data
-      Renderer:display(data.items, data.index)
-   end,
-})
+events.subscribe(event.display, function(data)
+   Renderer:display(data.items, data.index)
+end)
 
-nvim_create_autocmd("User", {
-   pattern = "_NeoCodeiumCompleterClear",
-   group = augroup,
-   callback = function(ev)
-      Renderer:clear(ev.data)
-   end,
-})
+events.subscribe(event.clear, function(data)
+   Renderer:clear(data)
+end)
 
-nvim_create_autocmd("User", {
-   pattern = "_NeoCodeiumCompleterUpdate",
-   group = augroup,
-   callback = function(_)
-      Renderer:update()
-   end,
-})
+events.subscribe(event.update, function(_)
+   Renderer:update()
+end)
 
-nvim_create_autocmd("User", {
-   pattern = "_NeoCodeiumCompleterStatus",
-   group = augroup,
-   callback = function(ev)
-      if utils.is_insert() and utils.is_empty(Renderer.inline) and not Renderer.block.text then
-         local pending = ev.data == 1
-         Renderer:display_label({}, 1, pending)
-      end
-   end,
-})
+events.subscribe(event.status, function(data)
+   if utils.is_insert() and utils.is_empty(Renderer.inline) and not Renderer.block.text then
+      local pending = data == 1
+      Renderer:display_label({}, 1, pending)
+   end
+end)
 -- }}}1
 
 return Renderer

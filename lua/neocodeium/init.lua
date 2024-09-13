@@ -45,6 +45,8 @@ local function enable_autocmds()
    local completer = require("neocodeium.completer")
    local renderer = require("neocodeium.renderer")
    local doc = require("neocodeium.doc")
+   local events = require("neocodeium.events")
+   local event = events.event
 
    local function utf8_or_latin1()
       local encoding = vim.o.fileencoding
@@ -122,7 +124,7 @@ local function enable_autocmds()
    create_autocmd("InsertEnter", {
       callback = function()
          if completer:enabled() then
-            completer:emit_status()
+            events.emit(event.status, completer.status, true)
          end
          completer:initiate()
       end,

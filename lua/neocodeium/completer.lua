@@ -7,6 +7,8 @@ local options = require("neocodeium.options").options
 local types = require("neocodeium._types")
 local server = require("neocodeium.server")
 local renderer = require("neocodeium.renderer")
+local events = require("neocodeium.events")
+local event = events.event
 
 local fn = vim.fn
 local uv = vim.uv
@@ -15,10 +17,6 @@ local json = vim.json
 local nvim_feedkeys = vim.api.nvim_feedkeys
 local nvim_get_current_buf = vim.api.nvim_get_current_buf
 local nvim_replace_termcodes = vim.api.nvim_replace_termcodes
-local nvim_create_autocmd = vim.api.nvim_create_autocmd
-local nvim_create_augroup = vim.api.nvim_create_augroup
-
-local augroup = nvim_create_augroup("neocodeium_completer", {})
 
 -- Completer ----------------------------------------------- {{{1
 
@@ -80,22 +78,6 @@ function Completer:enabled()
    return self.allowed_encoding and options.status() == 0
 end
 
-function Completer:emit_display(items, index)
-   utils.event("_NeoCodeiumCompleterDisplay", { items = items, index = index }, true)
-end
-
-function Completer:emit_clear(with_reset)
-   utils.event("_NeoCodeiumCompleterClear", with_reset)
-end
-
-function Completer:emit_update()
-   utils.event("_NeoCodeiumCompleterUpdate")
-end
-
-function Completer:emit_status()
-   utils.event("_NeoCodeiumCompleterStatus", self.status, true)
-end
-
 ---Cycles completions by amount `n`, wraps around if necessary.
 ---Use negative value to cycle backwards.
 ---@param n integer amount to cycle
@@ -114,7 +96,7 @@ function Completer:cycle(n)
       self.data.index = items_len
    end
 
-   self:emit_display(self.data.items, self.data.index)
+   events.emit(event.display, { items = self.data.items, index = self.data.index }, true)
 end
 
 ---Cycles completions or request to complete if there isn't one.
@@ -151,7 +133,7 @@ function Completer:handle_response(r)
    self.data.items = response.completionItems
    self.data.index = 1
 
-   self:emit_display(self.data.items or {}, 1)
+   events.emit(event.display, { items = self.data.items or {}, index = 1 }, true)
 end
 
 ---Accepts a suggestion till regex match end.
@@ -231,7 +213,8 @@ function Completer:request()
    end
 
    self.status = status.pending
-   self:emit_status()
+   events.emit(event.status, self.status, true)
+
    self.request_id = self.request_id + 1
    local curr_bufnr = nvim_get_current_buf()
    local pos = renderer.pos
@@ -246,7 +229,7 @@ function Completer:request()
 
    server:request("GetCompletions", data, function(r)
       self.status = status.completed
-      self:emit_status()
+      events.emit(event.status, self.status, true)
       self:handle_response(r)
    end)
 
@@ -274,18 +257,18 @@ function Completer:clear(force)
    end
 
    if force then
-      self:emit_clear(true)
+      events.emit(event.clear, true)
    end
 end
 
 ---Initiates a completion.
 ---@param omit_manual? boolean
 function Completer:initiate(omit_manual)
-   self:emit_update()
+   events.emit(event.update)
    self:clear()
 
    if options.manual and not omit_manual then
-      self:emit_clear()
+      events.emit(event.clear)
       return
    end
 
@@ -358,7 +341,7 @@ function Completer:accept()
    end
    -- defer to prevent pasting block before accept_line()
    vim.defer_fn(function()
-      self:emit_clear(true)
+      events.emit(event.clear, true)
       if block then
          utils.set_lines(lnum, lnum, block)
          utils.set_cursor(pos)
@@ -370,13 +353,9 @@ end
 
 -- Subscribed events --------------------------------------- {{{1
 
-nvim_create_autocmd("User", {
-   pattern = "_NeoCodeiumRendererRequest",
-   group = augroup,
-   callback = function()
-      Completer:request()
-   end,
-})
+events.subscribe(event.request, function()
+   Completer:request()
+end)
 -- }}}1
 
 return Completer

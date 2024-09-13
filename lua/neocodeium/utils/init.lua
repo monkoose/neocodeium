@@ -4,7 +4,6 @@ local nvim_exec2 = vim.api.nvim_exec2
 local nvim_buf_set_lines = vim.api.nvim_buf_set_lines
 local nvim_win_get_cursor = vim.api.nvim_win_get_cursor
 local nvim_win_set_cursor = vim.api.nvim_win_set_cursor
-local nvim_exec_autocmds = vim.api.nvim_exec_autocmds
 
 local M = {}
 
@@ -18,21 +17,6 @@ function M.exec(cmd)
    end
 
    return result.output
-end
-
---- Trigger a NeoCodeium event
----@param event string The event pattern
----@param data? any The event data
----@param scheduled? boolean Whether or not to schedule the event
-function M.event(event, data, scheduled)
-   local event_opts = { pattern = event, data = data, modeline = false }
-   if scheduled then
-      vim.schedule(function()
-         nvim_exec_autocmds("User", event_opts)
-      end)
-   else
-      nvim_exec_autocmds("User", event_opts)
-   end
 end
 
 ---Returns cursor position in the current window

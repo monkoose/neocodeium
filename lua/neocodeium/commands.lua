@@ -8,6 +8,7 @@ local options = require("neocodeium.options").options
 local api_key = require("neocodeium.api_key")
 local stdio = require("neocodeium.utils.stdio")
 local server = require("neocodeium.server")
+local events = require("neocodeium.events")
 
 local fn = vim.fn
 local json = vim.json
@@ -147,12 +148,12 @@ function M.disable(bang)
       server:stop()
       echo.info("the server has been halted")
    end
-   utils.event("NeoCodeiumDisabled")
+   events.emit("NeoCodeiumDisabled")
 end
 
 function M.enable()
    options.enabled = true
-   utils.event("NeoCodeiumEnabled")
+   events.emit("NeoCodeiumEnabled")
    if not server.pid then
       server:run()
    end
@@ -168,12 +169,12 @@ end
 
 function M.disable_buffer()
    vim.b.neocodeium_enabled = false
-   utils.event("NeoCodeiumBufDisabled")
+   events.emit("NeoCodeiumBufDisabled")
 end
 
 function M.enable_buffer()
    vim.b.neocodeium_enabled = true
-   utils.event("NeoCodeiumBufEnabled")
+   events.emit("NeoCodeiumBufEnabled")
 end
 
 function M.toggle_buffer()
