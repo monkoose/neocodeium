@@ -66,9 +66,6 @@ end
 ---@param callback fun()
 function Bin:download(callback)
    local base_url = "https://github.com/Exafunction/codeium/releases/download"
-   if options.server.portal_url then
-      base_url = options.server.portal_url:gsub("/$", "")
-   end
    ---@type url
    local url = string.format(
       "%s/language-server-v%s/language_server_%s.gz",
