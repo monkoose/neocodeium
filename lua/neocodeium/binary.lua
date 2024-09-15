@@ -93,7 +93,7 @@ function Bin:download(callback)
    )
 end
 
----Expands langauge server binary from compressed file.
+---Expands language server binary from compressed file.
 ---Returns `true` on success and `false` on failure.
 ---@return boolean
 function Bin:expand()
