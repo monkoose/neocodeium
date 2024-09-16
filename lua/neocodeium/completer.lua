@@ -156,7 +156,8 @@ function Completer:accept_regex(regex)
          local combined_text = renderer.inline[1].text
          if text_len > #combined_text then
             local combined_prefix = ""
-            for _, item in ipairs({ unpack(renderer.inline, 2) }) do
+            for i = 2, #renderer.inline do
+               local item = renderer.inline[i]
                combined_text = combined_text .. item.prefix
                local combined_len = #combined_text
                if text_len >= combined_len then
@@ -336,8 +337,9 @@ function Completer:accept()
    if inline then
       self:accept_line()
    end
-   -- defer to prevent pasting block before accept_line()
-   vim.defer_fn(function()
+   -- scheduling prevents pasting block before accept_line(),
+   -- because accept_line() using some type of scheduling too with nvim_feedkeys()
+   vim.schedule(function()
       events.emit(event.clear, true)
       if block then
          utils.set_lines(lnum, lnum, block)
@@ -345,7 +347,7 @@ function Completer:accept()
          -- required to update label position
          renderer.pos = pos
       end
-   end, 0)
+   end)
 end
 
 -- Subscribed events --------------------------------------- {{{1
