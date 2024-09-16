@@ -6,7 +6,6 @@ local options = require("neocodeium.options").options
 local stdio = require("neocodeium.utils.stdio")
 local echo = require("neocodeium.utils.echo")
 local events = require("neocodeium.events")
-local event = events.event
 local Bin = require("neocodeium.binary")
 
 local fn = vim.fn
@@ -271,15 +270,6 @@ function Server:init(timer, manager_dir)
       end)
    end
 end
-
--- Subscribed events --------------------------------------- {{{1
-events.subscribe(event.accept, function(data)
-   Server:request("AcceptCompletion", {
-      metadata = Server.metadata,
-      completion_id = data,
-   })
-end)
-
 -- }}}1
 
 return Server

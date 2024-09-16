@@ -453,21 +453,6 @@ your code base. When you switch buffers, this context should be updated
 automatically (it takes some time). You can see current chat context in the
 left bottom corner.
 
-### 🚗 Roadmap
-
-- [x] Add vimdoc help
-- [x] Add the command to open buffer with the log output
-- [x] Add :checkhealth
-- [x] Add support for Codeium Chat (in browser only)
-- [ ] Completely decouple renderer from completer.
-Add an custom renderer setup option.
-Renderer is already pretty much decoupled, but still transforms data it receives and
-so completer receives from it more data than required. Its API should
-consist of: display(), update() and clear() methods and do not pass any data to
-the completer. Not sure if someone will use it, but there are always some enthusiasts and hackers.
-With this feature implementing some custom renderer (like for any extendable completion engine) would be easy.
-Provide an example of custom renderer with built-in completion (omnifunc).
-
 ### 💐 Credits
 
 - [codeium.vim] - The main source for understanding how to use Codeium.

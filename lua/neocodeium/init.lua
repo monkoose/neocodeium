@@ -43,10 +43,7 @@ end
 
 local function enable_autocmds()
    local completer = require("neocodeium.completer")
-   local renderer = require("neocodeium.renderer")
    local doc = require("neocodeium.doc")
-   local events = require("neocodeium.events")
-   local event = events.event
 
    local function utf8_or_latin1()
       local encoding = vim.o.fileencoding
@@ -85,20 +82,20 @@ local function enable_autocmds()
       pattern = "*:i*",
       once = true,
       callback = function()
-         renderer.label.enabled = nu_or_rnu()
+         completer.label.enabled = nu_or_rnu()
       end,
    })
 
    create_autocmd("WinEnter", {
       callback = function()
-         renderer.label.enabled = nu_or_rnu()
+         completer.label.enabled = nu_or_rnu()
       end,
    })
 
    create_autocmd("OptionSet", {
       pattern = "number,relativenumber",
       callback = function()
-         renderer.label.enabled = nu_or_rnu()
+         completer.label.enabled = nu_or_rnu()
       end,
    })
 
@@ -123,9 +120,7 @@ local function enable_autocmds()
 
    create_autocmd("InsertEnter", {
       callback = function()
-         if completer:enabled() then
-            events.emit(event.status, completer.status, true)
-         end
+         completer:update_label()
          completer:initiate()
       end,
    })

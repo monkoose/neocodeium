@@ -6,16 +6,6 @@ local nvim_create_augroup = vim.api.nvim_create_augroup
 
 local augroup = nvim_create_augroup("neocodeium_events", {})
 
----@enum event
-events.event = {
-   display = "_NeoCodeiumDisplay",
-   clear = "_NeoCodeiumClear",
-   update = "_NeoCodeiumUpdate",
-   status = "_NeoCodeiumStatus",
-   request = "_NeoCodeiumRequest",
-   accept = "_NeoCodeiumAccept",
-}
-
 ---Trigger an event
 ---@param event string The event pattern
 ---@param data? any The event data
