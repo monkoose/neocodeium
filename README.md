@@ -62,6 +62,21 @@ a different plugin manager, please refer to its documentation for installation i
 
 Now you can use `Alt-f` in insert mode to accept codeium suggestions.
 
+Enterprise users: you should receive portal and API URLs for Codeium from your company.
+Once you get them, add them to your config. This way `:NeoCodeium auth` will authenticate you on the right portal. For example,
+
+````lua
+{
+  "monkoose/neocodeium",
+  event = "VeryLazy",
+  opts = {
+    server = {
+      api_url = 'https://codeium.company.net/_route/api_server',
+      portal_url = 'https://codeium.company.net',
+    },
+  }
+}
+
 **Note:** To obtain an API token, you’ll need to run `:NeoCodeium auth`.
 On Windows WSL `wslview` `(sudo apt install wslu)` should be installed to properly open the browser.
 
