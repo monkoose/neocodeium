@@ -363,7 +363,7 @@ local NeoCodeium = {
   },
   provider = function(self)
     local symbols = self.symbols
-    local status, server_status = require("neocodium").get_status()
+    local status, server_status = require("neocodeium").get_status()
     return symbols.status[status] .. symbols.server_status[server_status]
   end,
   hl = { fg = "yellow" },
@@ -415,7 +415,7 @@ require("neocodeium").setup({
     -- Portal URL to use (for registering a user and downloading the binary)
     portal_url = nil,
   },
-  -- Set to `false` to disable showing the number of suggestions label in the line column
+  -- Set to `false` to disable showing the number of suggestions label in the line number column
   show_label = true,
   -- Set to `true` to enable suggestions debounce
   debounce = false,
