@@ -82,7 +82,7 @@ local Completer = {
 ---@return editor_options
 local function get_editor_opts()
    return {
-      tab_size = vim.bo.shiftwidth,
+      tab_size = fn.shiftwidth(),
       insert_spaces = vim.bo.expandtab,
    }
 end
