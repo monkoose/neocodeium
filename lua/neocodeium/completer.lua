@@ -380,11 +380,9 @@ function Completer:update_forward_line()
          self.inline[1].text = self.block.text:sub(col + 1)
          self:clear_block()
          -- required to update label position
-         nvim_buf_set_extmark(0, ns, self.pos[1], 0, {
-            id = self.label.id,
-            virt_text = { { " 0 ", "NeoCodeiumLabel" } },
-            virt_text_win_col = -4,
-         })
+         if options.show_label and self.label.enabled then
+            show_label(self.label.id, " 0 ", self.pos[1])
+         end
       end
       self.inline[1].id = show_inline(nil, self.inline[1].text, lnum, col)
    end
