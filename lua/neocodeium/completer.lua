@@ -426,7 +426,6 @@ function Completer:update_horz_move(prev_pos, new_fulltext)
       end
    else -- deleted some text
       if self.fulltext:match("^%s*$") then
-         self:clear_inline()
          self:start_clear_timer()
       else
          local prefix = self.fulltext:sub(col + 1, col - horz_move)
