@@ -2,9 +2,7 @@ local options = require("neocodeium.options").options
 local server = require("neocodeium.server")
 local doc = require("neocodeium.doc")
 local echo = require("neocodeium.utils.echo")
-
-local fs = vim.fs
-local uv = vim.uv
+local stdio = require("neocodeium.utils.stdio")
 
 local nvim_create_autocmd = vim.api.nvim_create_autocmd
 local nvim_create_augroup = vim.api.nvim_create_augroup
@@ -22,11 +20,6 @@ nvim_create_autocmd("BufEnter", {
       end
    end,
 })
-
----@return string|nil
-local function get_project_root()
-   return fs.root(uv.cwd() or 0, options.root_dir)
-end
 
 ---Opens chat in browser
 ---@param response table
@@ -81,7 +74,7 @@ end
 
 ---Sends a request to the server to add a tracked workspace
 function chat.add_tracked_workspace()
-   local root = get_project_root()
+   local root = stdio.get_project_root()
    if root then
       server:request("AddTrackedWorkspace", { workspace = root })
    end

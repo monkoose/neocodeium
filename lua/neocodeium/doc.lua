@@ -2,8 +2,8 @@
 
 local filetype = require("neocodeium.filetype")
 local options = require("neocodeium.options").options
+local stdio = require("neocodeium.utils.stdio")
 
-local fn = vim.fn
 local nvim_buf_get_lines = vim.api.nvim_buf_get_lines
 local nvim_buf_get_name = vim.api.nvim_buf_get_name
 local nvim_list_bufs = vim.api.nvim_list_bufs
@@ -19,6 +19,8 @@ local nvim_create_autocmd = vim.api.nvim_create_autocmd
 ---@type table<bufnr, { data: document, tick: integer }>
 local cached_data = {}
 
+local project_root = stdio.to_uri(stdio.get_project_root())
+
 local augroup = nvim_create_augroup("neocodeium_docs", {})
 
 ---Autocmd to clear docs cache
@@ -27,6 +29,15 @@ nvim_create_autocmd("BufUnload", {
    desc = "Clear documents cache on buffer unload",
    callback = function(args)
       cached_data[args.buf] = nil
+   end,
+})
+
+---Autocmd to update project's root directory
+nvim_create_autocmd("DirChanged", {
+   group = augroup,
+   desc = "Update project's root directory",
+   callback = function()
+      project_root = stdio.to_uri(stdio.get_project_root())
    end,
 })
 
@@ -76,8 +87,8 @@ function M.get(buf, ft, max_lines, pos)
       editor_language = ft == "" and "unspecified" or ft,
       language = filetype.language[lang] or filetype.language.unspecified,
       cursor_position = { row = pos[1], col = pos[2] },
-      absolute_path = name,
-      relative_path = fn.fnamemodify(name, ":."),
+      absolute_uri = stdio.to_uri(name),
+      workspace_uri = project_root,
       line_ending = "\n",
    }
 end

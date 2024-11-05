@@ -1,4 +1,9 @@
+local options = require("neocodeium.options").options
+local utils = require("neocodeium.utils")
+
 local fn = vim.fn
+local fs = vim.fs
+local uv = vim.uv
 
 local M = {}
 
@@ -38,6 +43,27 @@ end
 ---@return filepath
 function M.root_dir()
    return fn.fnamemodify(script_path(), ":h:h:h:h")
+end
+
+---@return string|nil
+function M.get_project_root()
+   return fs.root(0, options.root_dir) or uv.cwd()
+end
+
+local is_windows = utils.get_system_info().is_win
+---@param path? string
+---@return string|nil
+function M.to_uri(path)
+   if not path then
+      return
+   end
+
+   if is_windows then
+      path = path:gsub("\\", "/")
+      return "file:///" .. path
+   else
+      return "file://" .. path
+   end
 end
 
 return M

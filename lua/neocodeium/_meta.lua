@@ -34,8 +34,8 @@
 ---@field editor_language string
 ---@field cursor_position { row: integer, col: integer }
 ---@field language integer
----@field absolute_path string
----@field relative_path string
+---@field absolute_uri string
+---@field workspace_uri string|nil
 ---@field line_ending string
 
 ---@class request_metadata
