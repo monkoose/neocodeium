@@ -78,17 +78,22 @@ local function enable_autocmds()
       return vim.wo.number or vim.wo.relativenumber
    end
 
-   create_autocmd("ModeChanged", {
-      pattern = "*:i*",
-      once = true,
-      callback = function()
-         completer.label.enabled = nu_or_rnu()
-      end,
-   })
+   local function insert_enter_once()
+      create_autocmd("ModeChanged", {
+         pattern = "*:i*",
+         once = true,
+         callback = function()
+            vim.print(nu_or_rnu())
+            completer.label.enabled = nu_or_rnu()
+         end,
+      })
+   end
+
+   insert_enter_once()
 
    create_autocmd("WinEnter", {
       callback = function()
-         completer.label.enabled = nu_or_rnu()
+         insert_enter_once()
       end,
    })
 
