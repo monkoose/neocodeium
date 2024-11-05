@@ -83,7 +83,6 @@ local function enable_autocmds()
          pattern = "*:i*",
          once = true,
          callback = function()
-            vim.print(nu_or_rnu())
             completer.label.enabled = nu_or_rnu()
          end,
       })
