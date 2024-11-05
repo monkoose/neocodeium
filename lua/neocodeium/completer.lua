@@ -210,11 +210,11 @@ function Completer:enabled()
 end
 
 function Completer:update_label()
-   if utils.is_insert() and utils.is_empty(self.inline) and not self.block.text then
-      vim.schedule(function()
+   vim.schedule(function()
+      if utils.is_insert() and utils.is_empty(self.inline) and not self.block.text then
          self:display_label()
-      end)
-   end
+      end
+   end)
 end
 
 ---@private
@@ -352,13 +352,9 @@ end
 ---@private
 function Completer:start_clear_timer()
    if not self.clear_timer:is_active() then
-      self.clear_timer:start(
-         350,
-         0,
-         vim.schedule_wrap(function()
-            self:clear_all()
-         end)
-      )
+      self.clear_timer:start(350, 0, function()
+         self:clear_all(false, true)
+      end)
    end
 end
 
@@ -498,20 +494,33 @@ end
 
 ---Clears plugin's namespace and resets cache
 ---@param with_reset? boolean
-function Completer:clear_all(with_reset)
+---@param scheduled? boolean
+function Completer:clear_all(with_reset, scheduled)
    if with_reset then
       self.clear_timer:stop()
-      nvim_buf_clear_namespace(0, ns, 0, -1)
       self.label.id = nil
       self.inline = {}
       self.block.id = nil
       self.block.text = nil
       self.fulltext = ""
+      if scheduled then
+         vim.schedule(function()
+            nvim_buf_clear_namespace(0, ns, 0, -1)
+         end)
+      else
+         nvim_buf_clear_namespace(0, ns, 0, -1)
+      end
       events.emit("NeoCodeiumCompletionCleared", nil, true)
    else
-      -- self:clear_label()
-      self:clear_inline()
-      self:clear_block()
+      if scheduled then
+         vim.schedule(function()
+            self:clear_inline()
+            self:clear_block()
+         end)
+      else
+         self:clear_inline()
+         self:clear_block()
+      end
    end
 end
 

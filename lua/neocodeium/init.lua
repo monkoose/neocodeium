@@ -125,7 +125,6 @@ local function enable_autocmds()
 
    create_autocmd("InsertEnter", {
       callback = function()
-         completer:update_label()
          completer:initiate()
       end,
    })
