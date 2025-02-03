@@ -170,6 +170,42 @@ vim.keymap.set("i", "<A-f>", function() neocodeium.accept() end)
 </details>
 
 <details>
+<summary><b>Using alongside blink.cmp</b></summary>
+
+If you are using NeoCodeium with `manual = false` (the default), you can configure blink.cmp to act in a similar fashion as the tip above for nvim-cmp. In the plugin configuration, set `auto-show` to be disabled in default mode (it will stay on in `cmdline` mode for convenience):
+
+```lua
+completion = {
+    menu = {
+        auto_show = function(ctx)
+            return ctx.mode ~= 'default'
+        end,
+    }
+}
+```
+
+Then adjust blink.cmp to clear suggestions when the menu is opened and ensure to get suggestions only when the menu is not visible:
+
+```lua
+local neocodeium = require('neocodeium')
+local blink = require('blink.cmp')
+
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'BlinkCmpMenuOpen',
+  callback = function()
+    neocodeium.clear()
+  end,
+})
+
+neocodeium.setup({
+  filter = function()
+    return not blink.is_visible()
+  end,
+})
+```
+</details>
+
+<details>
 <summary><b>Disable in Telescope prompt and DAP REPL</b></summary>
 
 ```lua
