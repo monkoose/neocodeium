@@ -360,7 +360,7 @@ end
 
 ---@private
 function Completer:update_forward_line()
-   if self.block.text and self.block.text ~= "" then
+   if not utils.is_empty(self.block.text) then
       -- find if block.text has multiple lines
       local index = self.block.text:find("\n")
       self.inline = { { prefix = "" } }

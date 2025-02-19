@@ -1,5 +1,6 @@
 -- Imports ------------------------------------------------- {{{1
 
+local utils = require("neocodeium.utils")
 local log = require("neocodeium.log")
 local api_key = require("neocodeium.api_key")
 local options = require("neocodeium.options").options
@@ -73,11 +74,11 @@ function Server:start()
       manager_dir,
    }
 
-   if options.server.api_url and options.server.api_url ~= "" then
+   if not utils.is_empty(options.server.api_url) then
       table.insert(args, "--enterprise_mode")
    end
 
-   if options.server.portal_url and options.server.portal_url ~= "" then
+   if not utils.is_empty(options.server.portal_url) then
       table.insert(args, "--portal_url")
       table.insert(args, options.server.portal_url)
    end

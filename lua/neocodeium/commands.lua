@@ -91,7 +91,7 @@ local function request_api_key()
       local ok, decoded_response = pcall(json.decode, response)
       if ok then
          local key = decoded_response.api_key
-         if key and key ~= "" then
+         if not utils.is_empty(key) then
             return key
          end
       end

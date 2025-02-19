@@ -3,6 +3,7 @@ local server = require("neocodeium.server")
 local doc = require("neocodeium.doc")
 local echo = require("neocodeium.utils.echo")
 local stdio = require("neocodeium.utils.stdio")
+local utils = require("neocodeium.utils")
 
 local nvim_create_autocmd = vim.api.nvim_create_autocmd
 local nvim_create_augroup = vim.api.nvim_create_augroup
@@ -42,7 +43,7 @@ function chat.launch(response)
       extension_name = metadata.extension_name,
       extension_version = metadata.extension_version,
       web_server_url = "ws://127.0.0.1:" .. ws_port,
-      has_enterprise_extension = options.server.api_url and options.server.api_url ~= "",
+      has_enterprise_extension = not utils.is_empty(options.server.api_url),
       locale = "en",
       ide_telemetry_enabled = true,
       has_index_service = true,
