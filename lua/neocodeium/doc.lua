@@ -15,7 +15,7 @@ local nvim_create_autocmd = vim.api.nvim_create_autocmd
 
 -- Cache --------------------------------------------------- {{{1
 
----Persistent cache of the buffers data
+---Persistent cache of the buffers data.
 ---@type table<bufnr, { data: document, tick: integer }>
 local cached_data = {}
 
@@ -23,7 +23,7 @@ local project_root = stdio.to_uri(stdio.get_project_root())
 
 local augroup = nvim_create_augroup("neocodeium_docs", {})
 
----Autocmd to clear docs cache
+---Autocmd to clear docs cache.
 nvim_create_autocmd("BufUnload", {
    group = augroup,
    desc = "Clear documents cache on buffer unload",
@@ -32,7 +32,7 @@ nvim_create_autocmd("BufUnload", {
    end,
 })
 
----Autocmd to update project's root directory
+---Autocmd to update project's root directory.
 nvim_create_autocmd("DirChanged", {
    group = augroup,
    desc = "Update project's root directory",
@@ -43,18 +43,13 @@ nvim_create_autocmd("DirChanged", {
 
 -- Auxiliary functions ------------------------------------- {{{1
 
----Returns iterator over numbers of all loaded buffers
+---Returns iterator over numbers of all loaded buffers.
 ---@return Iter
 local function loaded_bufs()
-   local bufs = vim.iter(nvim_list_bufs())
-   bufs:filter(function(b)
-      return nvim_buf_is_loaded(b) and true or false
-   end)
-
-   return bufs
+   return vim.iter(nvim_list_bufs()):filter(nvim_buf_is_loaded)
 end
 
----Returns true if buffer with `bufnr` is not a special buffer
+---Returns true if buffer with `bufnr` is not a special buffer.
 ---@param bufnr bufnr
 ---@return boolean
 local function is_normal_buf(bufnr)
@@ -65,7 +60,7 @@ end
 
 local M = {}
 
----Returns document data
+---Returns document data.
 ---@param buf bufnr
 ---@param ft string buffer filetype
 ---@param max_lines integer maximum lines to process, -1 for all lines
@@ -77,7 +72,7 @@ function M.get(buf, ft, max_lines, pos)
    local name = nvim_buf_get_name(buf)
    local lang ---@type string
    if first_ft == "" then
-      lang = filetype.aliases["text"]
+      lang = "plaintext"
    else
       lang = filetype.aliases[first_ft] or first_ft
    end
@@ -93,7 +88,7 @@ function M.get(buf, ft, max_lines, pos)
    }
 end
 
----Returns docs for all loaded buffers
+---Returns docs for all loaded buffers.
 ---@param cur_bufnr integer current buffer number
 ---@return document[]
 function M.get_all_loaded(cur_bufnr)
@@ -109,8 +104,7 @@ function M.get_all_loaded(cur_bufnr)
       if b ~= cur_bufnr and buf_ft ~= "" and is_normal_buf(b) and options.status(b) == 0 then
          local buf_cache = cached_data[b]
          local buf_tick = nvim_buf_get_var(b, "changedtick") ---@type integer
-         -- use new data only when buffer's content has changed
-         -- otherwise use cached data
+         -- use new data only when buffer's content has changed, otherwise use cached data
          if not buf_cache or buf_tick ~= buf_cache.tick then
             doc_data = M.get(b, buf_ft, options.max_lines, pos)
             table.insert(docs, doc_data)
