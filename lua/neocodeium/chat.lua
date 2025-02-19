@@ -11,7 +11,7 @@ local nvim_get_option_value = vim.api.nvim_get_option_value
 
 local chat = {}
 
--- Refresh chat content on buffer change
+-- Refresh chat content on buffer change.
 nvim_create_autocmd("BufEnter", {
    group = nvim_create_augroup("neocodeium_chat", {}),
    callback = function()
@@ -21,7 +21,7 @@ nvim_create_autocmd("BufEnter", {
    end,
 })
 
----Opens chat in browser
+---Opens chat in browser.
 ---@param response table
 function chat.launch(response)
    local metadata = server.metadata
@@ -31,12 +31,8 @@ function chat.launch(response)
 
    -- possible, server is not ready
    if not (chat_port and ws_port) then
+      echo.error("Server not ready. Chat client port or web server port is missing.")
       return
-   end
-
-   local has_enterprise_extension = false
-   if options.server.api_url and options.server.api_url ~= "" then
-      has_enterprise_extension = true
    end
 
    local url = vim.iter({
@@ -46,7 +42,7 @@ function chat.launch(response)
       extension_name = metadata.extension_name,
       extension_version = metadata.extension_version,
       web_server_url = "ws://127.0.0.1:" .. ws_port,
-      has_enterprise_extension = has_enterprise_extension,
+      has_enterprise_extension = options.server.api_url and options.server.api_url ~= "",
       locale = "en",
       ide_telemetry_enabled = true,
       has_index_service = true,
@@ -59,11 +55,11 @@ function chat.launch(response)
 
    vim.ui.open(url)
    vim.schedule(function()
-      echo.info("chat has been opened in the browser")
+      echo.info("Chat has been opened in the browser")
    end)
 end
 
----Sends a request to the server to refresh context
+---Sends a request to the server to refresh context.
 function chat.refresh_context()
    if options.status(0) == 0 then
       local cursor = nvim_win_get_cursor(0)
@@ -72,11 +68,13 @@ function chat.refresh_context()
    end
 end
 
----Sends a request to the server to add a tracked workspace
+---Sends a request to the server to add a tracked workspace.
 function chat.add_tracked_workspace()
    local root = stdio.get_project_root()
    if root then
       server:request("AddTrackedWorkspace", { workspace = root })
+   else
+      echo.error("Project root not found. Unable to add tracked workspace.")
    end
 end
 
