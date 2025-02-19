@@ -18,7 +18,7 @@ local Bin = { version = "1.36.1" }
 
 -- Auxiliary functions ------------------------------------- {{{1
 
----Expands langauge server binary from compressed file on Windows.
+---Expands language server binary from compressed file on Windows.
 ---@param bin_gz filepath
 local function powershell_expand(bin_gz)
    utils.with_shell(function()
@@ -60,7 +60,7 @@ function Bin.new()
    return self
 end
 
----Downloads language server binary. Should be used only after `Bin:set()`,
+---Downloads language server binary. Should be used only after `Bin.new()`,
 ---so that `Bin.path` and `Bin.suffix` are properly set.
 ---@async
 ---@param callback fun()
