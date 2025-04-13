@@ -236,6 +236,18 @@ neocodeium.setup({
 ```
 </details>
 
+<details>
+<summary><b>Disable NeoCodeium in .env files</b></summary>
+
+```lua
+filter = function(bufnr)
+    if vim.endswith(vim.api.nvim_buf_get_name(bufnr), ".env") then
+        return false
+    end
+    return true
+end
+```
+</details>
 #### ⌨️ Keymaps
 
 NeoCodeium doesn’t provide any keymaps, which means you’ll need to add them
