@@ -3,6 +3,7 @@
 local filetype = require("neocodeium.filetype")
 local options = require("neocodeium.options").options
 local stdio = require("neocodeium.utils.stdio")
+local utils = require("neocodeium.utils")
 
 local nvim_buf_get_lines = vim.api.nvim_buf_get_lines
 local nvim_buf_get_name = vim.api.nvim_buf_get_name
@@ -47,13 +48,6 @@ nvim_create_autocmd("DirChanged", {
 ---@return Iter
 local function loaded_bufs()
    return vim.iter(nvim_list_bufs()):filter(nvim_buf_is_loaded)
-end
-
----Returns true if buffer with `bufnr` is not a special buffer.
----@param bufnr bufnr
----@return boolean
-local function is_normal_buf(bufnr)
-   return nvim_get_option_value("buftype", { buf = bufnr }) == ""
 end
 
 -- Public API ---------------------------------------------- {{{1
@@ -101,7 +95,7 @@ function M.get_all_loaded(cur_bufnr)
    local pos = { 0, 0 }
    for b in loaded_bufs() do
       local buf_ft = nvim_get_option_value("filetype", { buf = b })
-      if b ~= cur_bufnr and buf_ft ~= "" and is_normal_buf(b) and options.status(b) == 0 then
+      if b ~= cur_bufnr and buf_ft ~= "" and utils.is_normal_buf(b) and options.status(b) == 0 then
          local buf_cache = cached_data[b]
          local buf_tick = nvim_buf_get_var(b, "changedtick") ---@type integer
          -- use new data only when buffer's content has changed, otherwise use cached data

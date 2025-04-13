@@ -240,6 +240,10 @@ CONFIGURATION                                       *neocodeium-configuration*
         Boolean.
         When `true`, then some information messages like "Neocodeium: server
         started..." would be disabled.
+    disable_in_special_buftypes~
+        Boolean.
+        When `false`, then neocodeium will show suggestions in special
+        buftypes, like `nofile` etc.
     filter~
         Function.
 
@@ -329,6 +333,7 @@ This function returns two numbers:
             it returns `false`
         5 - Buffer has wrong encoding (codeium can accept only UTF-8 and
             LATIN-1 encodings)
+        6 - Buffer is of special type `:help 'buftype'`
     2. Server status
         0 - Server is on (running)
         1 - Server is connection (not working status)

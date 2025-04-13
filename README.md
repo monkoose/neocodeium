@@ -325,6 +325,7 @@ This function returns two numbers:
         3 - Buffer is disableld when it's filetype is matching `setup.filetypes = { some_filetyps = false }`
         4 - Buffer is disabled when `setup.filter` returns `false` for the current buffer
         5 - Buffer has wrong encoding (codeium can accept only UTF-8 and LATIN-1 encodings)
+        6 - Buffer is of special type `:help 'buftype'`
 
 2. Server status
 
@@ -461,6 +462,8 @@ require("neocodeium").setup({
   max_lines = 10000,
   -- Set to `true` to disable some non-important messages, like "NeoCodeium: server started..."
   silent = false,
+  -- Set to `false` to enable suggestions in special buftypes, like `nofile` etc.
+  disable_in_special_buftypes = true,
   -- Set to a function that returns `true` if a buffer should be enabled
   -- and `false` if the buffer should be disabled
   -- You can still enable disabled by this option buffer with `:NeoCodeium enable_buffer`

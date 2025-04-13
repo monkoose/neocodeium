@@ -4,6 +4,7 @@ local nvim_exec2 = vim.api.nvim_exec2
 local nvim_buf_set_lines = vim.api.nvim_buf_set_lines
 local nvim_win_get_cursor = vim.api.nvim_win_get_cursor
 local nvim_win_set_cursor = vim.api.nvim_win_set_cursor
+local nvim_get_option_value = vim.api.nvim_get_option_value
 
 local M = {}
 
@@ -139,6 +140,13 @@ end
 function M.trim_leading(str)
    local substituted = str:gsub("^%s+", "")
    return substituted
+end
+
+---Returns true if buffer with `bufnr` is not a special buffer.
+---@param bufnr bufnr
+---@return boolean
+function M.is_normal_buf(bufnr)
+   return nvim_get_option_value("buftype", { buf = bufnr }) == ""
 end
 
 return M

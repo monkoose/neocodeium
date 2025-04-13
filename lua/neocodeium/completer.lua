@@ -49,6 +49,7 @@ local status = {
 
 ---@class Completer
 ---@field pos pos
+---@field disabled boolean
 ---@field tick integer
 ---@field clear_timer uv.uv_timer_t
 ---@field fulltext string
@@ -63,6 +64,7 @@ local status = {
 ---@field other_docs document[]
 local Completer = {
    data = {},
+   disabled = true,
    status = status.none,
    debounce_timer = assert(uv.new_timer()),
    request_id = 0,
@@ -655,11 +657,7 @@ end
 ---@private
 ---Constructs and sends a request to the server only when in an appropriate state.
 function Completer:request()
-   if
-      not server.port
-      or self.status == status.pending
-      or not (self:enabled() and utils.is_insert())
-   then
+   if not server.port or self.disabled or self.status == status.pending then
       return
    end
 

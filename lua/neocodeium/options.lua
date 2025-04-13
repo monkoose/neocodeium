@@ -1,4 +1,5 @@
 local echo = require("neocodeium.utils.echo")
+local utils = require("neocodeium.utils")
 
 local nvim_get_option_value = vim.api.nvim_get_option_value
 
@@ -24,6 +25,7 @@ local defaults = {
    debounce = false,
    max_lines = 10000,
    silent = false,
+   disable_in_special_buftypes = true,
    filetypes = {
       help = false,
       gitcommit = false,
@@ -56,11 +58,13 @@ function M.setup(opts)
       if not M.options.enabled then
          return 1 -- globally disabled
       -- Buffer variable should enable neocodeium even if it is disabled
-      -- by 'options.filetypes' or 'options.filter()'
+      -- by 'options.filetypes' or 'options.filter()' or in special buftypes
       elseif vim.b[bufnr].neocodeium_enabled then
          return 0 -- enabled
       elseif vim.b[bufnr].neocodeium_enabled == false then
          return 2 -- locally disabled
+      elseif M.options.disable_in_special_buftypes and not utils.is_normal_buf(bufnr) then
+         return 6 -- disabled in special buftypes
       -- The same as vim.b[bunfr].neocodeium_enabled == nil and ...
       elseif M.options.filetypes[nvim_get_option_value("filetype", { buf = bufnr })] == false then
          return 3 -- disabled by 'options.filetypes'

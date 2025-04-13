@@ -107,6 +107,7 @@ local function enable_autocmds()
       pattern = "i*:[^i]*",
       callback = function()
          completer:clear(true)
+         completer.disabled = true
       end,
    })
 
@@ -124,6 +125,11 @@ local function enable_autocmds()
 
    create_autocmd("InsertEnter", {
       callback = function()
+         if completer:enabled() then
+            completer.disabled = false
+         else
+            completer.disabled = true
+         end
          completer:initiate()
       end,
    })
