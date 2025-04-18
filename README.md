@@ -397,6 +397,7 @@ local NeoCodeium = {
         [3] = "󱙺 ", -- Disabled for Buffer filetype
         [4] = "󱙺 ", -- Disabled for Buffer with enabled function
         [5] = "󱚠 ", -- Disabled for Buffer encoding
+        [6] = "󱚠 ", -- Buffer is special type
       },
       server_status = {
         [0] = "󰣺 ", -- Connected
