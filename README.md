@@ -248,6 +248,7 @@ filter = function(bufnr)
 end
 ```
 </details>
+
 #### ⌨️ Keymaps
 
 NeoCodeium doesn’t provide any keymaps, which means you’ll need to add them
