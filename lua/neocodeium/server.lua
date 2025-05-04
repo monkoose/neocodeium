@@ -163,12 +163,6 @@ function Server:run()
    if stdio.executable(self.bin.path) then
       self:start()
    else
-      local bin_dir = fs.dirname(self.bin.path)
-      if bin_dir then
-         fn.delete(bin_dir, "rf")
-         fn.mkdir(bin_dir, "p")
-      end
-
       self.bin:download(function()
          if self.bin:expand() then
             self:start()

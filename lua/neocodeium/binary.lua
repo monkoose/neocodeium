@@ -7,6 +7,7 @@ local options = require("neocodeium.options").options
 local stdio = require("neocodeium.utils.stdio")
 
 local fn = vim.fn
+local fs = vim.fs
 
 -- Binary -------------------------------------------------- {{{1
 
@@ -73,6 +74,12 @@ function Bin:download(callback)
       self.version,
       self.suffix
    )
+
+   local bin_dir = fs.dirname(self.path)
+   if bin_dir then
+      fn.delete(bin_dir, "rf")
+      fn.mkdir(bin_dir, "p")
+   end
 
    echo.info("Downloading binary v" .. self.version)
    vim.system(
