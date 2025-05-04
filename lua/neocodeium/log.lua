@@ -6,6 +6,8 @@ local uv = vim.uv
 ---Log file
 local logfile = fn.tempname() .. "-neocodeium.log"
 local min_log_level = vim.env.NEOCODEIUM_LOG_LEVEL or "warn"
+---@type integer
+local o644 = tonumber(644, 8) ---@diagnostic disable-line: assign-type-mismatch
 
 ---Appends newline to `msg` if it doesn't end with it
 ---@param msg string
@@ -22,7 +24,6 @@ end
 ---@return fun(msg: string)
 local function log(lvl)
    if lvl >= types.level[min_log_level] then
-      local o644 = tonumber(644, 8) ---@diagnostic disable-line: param-type-mismatch
       return function(msg)
          uv.fs_open(logfile, "a", o644, function(_, fd)
             if fd then

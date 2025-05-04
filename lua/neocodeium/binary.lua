@@ -78,6 +78,7 @@ function Bin:download(callback)
    local bin_dir = fs.dirname(self.path)
    if bin_dir then
       fn.delete(bin_dir, "rf")
+      -- TODO: handle error
       fn.mkdir(bin_dir, "p")
    end
 
