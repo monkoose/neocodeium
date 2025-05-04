@@ -1,4 +1,3 @@
-local echo = require("neocodeium.utils.echo")
 local utils = require("neocodeium.utils")
 
 local nvim_get_option_value = vim.api.nvim_get_option_value
