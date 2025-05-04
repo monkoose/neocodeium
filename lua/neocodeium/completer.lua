@@ -121,15 +121,10 @@ end
 ---@param str string
 ---@return string
 local function leading_tabs_to_spaces(str)
-   ---@diagnostic disable-next-line: redundant-return-value
-   return str:gsub("^\t*", function(m)
-      -- faster than string.rep
-      return string.sub(
-         [[                                                         ]],
-         1,
-         #m * fn.shiftwidth()
-      )
+   str = str:gsub("^\t*", function(m)
+      return string.rep(" ", #m * fn.shiftwidth())
    end)
+   return str
 end
 
 ---Adds virtual text below the line with `lnum` number.
