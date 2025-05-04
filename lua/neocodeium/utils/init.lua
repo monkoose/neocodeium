@@ -134,14 +134,6 @@ function M.is_empty(val)
    return val == nil or #val == 0
 end
 
----Trims leading whitespaces
----@param str string
----@return string
-function M.trim_leading(str)
-   local substituted = str:gsub("^%s+", "")
-   return substituted
-end
-
 ---Returns true if buffer with `bufnr` is not a special buffer.
 ---@param bufnr bufnr
 ---@return boolean
