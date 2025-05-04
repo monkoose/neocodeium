@@ -41,16 +41,6 @@ function M.setup(opts)
    ---@type Options
    M.options = vim.tbl_deep_extend("force", defaults, opts or {})
 
-   -- TODO: remove after some time
-   if type(M.options.enabled) == "function" then
-      ---@diagnostic disable-next-line: assign-type-mismatch
-      M.options.filter = M.options.enabled
-      M.options.enabled = true
-      echo.warn(
-         "using a function for `enabled` is deprecated, please use the `filter` option instead"
-      )
-   end
-
    ---@param bufnr? bufnr
    ---@return integer
    M.options.status = function(bufnr)

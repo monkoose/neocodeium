@@ -135,7 +135,6 @@ end
 ---@return extmark_id
 local function show_block(id, text, lnum)
    local block_lines = {}
-   -- XXX: should it have {trimempty = true}?
    for line in vim.gsplit(text, "\n") do
       table.insert(block_lines, { { leading_tabs_to_spaces(line), hlgroup } })
    end
