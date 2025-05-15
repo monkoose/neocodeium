@@ -142,7 +142,7 @@ end
 
 ---@param text string
 ---@return extmark_id
-function Renderer:show_label(text)
+function Renderer:set_virt_label(text)
    self.label_virt_text[1][1] = text
    return nvim_buf_set_extmark(0, ns, state.pos[1], 0, {
       id = self.label.id,
@@ -158,7 +158,7 @@ end
 ---@param col col
 ---@param lnum? lnum
 ---@return extmark_id
-function Renderer:show_inline(id, str, col, lnum)
+function Renderer:set_virt_inline(id, str, col, lnum)
    self.inline_virt_text[1][1] = str
    return nvim_buf_set_extmark(0, ns, lnum or state.pos[1], col, {
       id = id,
@@ -174,7 +174,7 @@ end
 ---@param text string # text to display, will be split into lines at "\n"
 ---@param lnum? lnum
 ---@return extmark_id
-function Renderer:show_block(text, lnum)
+function Renderer:set_virt_block(text, lnum)
    local block_lines = {}
    for line in vim.gsplit(text, "\n") do
       table.insert(block_lines, { { leading_tabs_to_spaces(line), hlgroup } })
@@ -223,7 +223,7 @@ function Renderer:display_inline(contents)
       end
       state.inline[i].text = c.text
       state.inline[i].prefix = c.prefix
-      state.inline[i].id = self:show_inline(state.inline[i].id, c.text, c.col, c.lnum)
+      state.inline[i].id = self:set_virt_inline(state.inline[i].id, c.text, c.col, c.lnum)
    end
 end
 
@@ -233,7 +233,7 @@ function Renderer:display_block(text)
    if text then
       if not state.block.id or state.block.text ~= text then
          state.block.text = text
-         state.block.id = self:show_block(text)
+         state.block.id = self:set_virt_block(text)
       end
    else
       self:remove_block()
@@ -247,11 +247,11 @@ function Renderer:display_label()
    end
 
    if state.request_status == REQUEST_STATUS.pending then
-      self.label.id = self:show_label(" * ")
+      self.label.id = self:set_virt_label(" * ")
    elseif utils.is_empty(state.data.items) then
-      self.label.id = self:show_label(" 0 ")
+      self.label.id = self:set_virt_label(" 0 ")
    else
-      self.label.id = self:show_label(state.data.index .. "/" .. #state.data.items)
+      self.label.id = self:set_virt_label(state.data.index .. "/" .. #state.data.items)
    end
 end
 
@@ -364,16 +364,16 @@ function Renderer:update_forward_line()
          state.inline[1].text = state.block.text:sub(col + 1, index - 1)
          state.block.text = state.block.text:sub(index + 1)
          -- state.block.id already exists, no need to set it
-         self:show_block(state.block.text, lnum)
+         self:set_virt_block(state.block.text, lnum)
       else
          state.inline[1].text = state.block.text:sub(col + 1)
          self:remove_block()
          -- required to update label position
          if options.show_label and self.label.enabled then
-            self:show_label(" 0 ")
+            self:set_virt_label(" 0 ")
          end
       end
-      state.inline[1].id = self:show_inline(nil, state.inline[1].text, col, lnum)
+      state.inline[1].id = self:set_virt_inline(nil, state.inline[1].text, col, lnum)
    end
    self:start_clear_timer()
 end
@@ -388,7 +388,7 @@ function Renderer:update_backward_line()
       end
       self:remove_inline()
       -- state.block.id could be nil, so we need to set it
-      state.block.id = self:show_block(state.block.text)
+      state.block.id = self:set_virt_block(state.block.text)
    end
    self:start_clear_timer()
 end
@@ -408,7 +408,7 @@ function Renderer:update_horz_move(prev_pos, new_fulltext)
       else
          local prefix = first_inline.text:sub(1, horz_move)
          state.inline[1].text = first_inline.text:sub(horz_move + 1)
-         self:show_inline(first_inline.id, first_inline.text, col)
+         self:set_virt_inline(first_inline.id, first_inline.text, col)
          if new_fulltext:sub(prev_col) ~= prefix then
             self:start_clear_timer()
          end
@@ -419,7 +419,7 @@ function Renderer:update_horz_move(prev_pos, new_fulltext)
       else
          local prefix = self.fulltext:sub(col + 1, col - horz_move)
          state.inline[1].text = prefix .. first_inline.text
-         self:show_inline(first_inline.id, first_inline.text, col)
+         self:set_virt_inline(first_inline.id, first_inline.text, col)
          self.clear_timer:stop()
          self:start_clear_timer()
       end
