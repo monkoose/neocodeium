@@ -42,6 +42,8 @@ local Renderer = {
    cancel_requrest_data = {
       request_id = -1,
    },
+   label_virt_text = { { "", "NeoCodeiumLabel" } },
+   inline_virt_text = { { "", hlgroup } },
 }
 
 -- Auxiliary functions ------------------------------------- {{{1
@@ -53,34 +55,6 @@ local function delete_virttext(id)
    return nvim_buf_del_extmark(0, ns, id)
 end
 
----@param id extmark_id
----@param text string
----@param lnum lnum
-local function show_label(id, text, lnum)
-   return nvim_buf_set_extmark(0, ns, lnum, 0, {
-      id = id,
-      virt_text = { { text, "NeoCodeiumLabel" } },
-      virt_text_win_col = -1 - #text,
-   })
-end
-
----Adds virtual text into the `lnum` line number and `col` column.
----If `id` is nil then a new id will be generated.
----@param id? extmark_id
----@param str string text to display
----@param lnum lnum
----@param col col
----@return extmark_id
-local function show_inline(id, str, lnum, col)
-   return nvim_buf_set_extmark(0, ns, lnum, col, {
-      id = id,
-      virt_text_pos = "inline",
-      virt_text = { { str, hlgroup } },
-      undo_restore = false,
-      strict = false,
-   })
-end
-
 ---Returns `str` with leading tabs converted to spaces.
 ---@param str string
 ---@return string
@@ -89,26 +63,6 @@ local function leading_tabs_to_spaces(str)
       return string.rep(" ", #m * fn.shiftwidth())
    end)
    return str
-end
-
----Adds virtual text below the line with `lnum` number.
----If `id` is nil then a new id will be generated.
----@param id? extmark_id
----@param text string text to display, will be split into lines at "\n"
----@param lnum lnum
----@return extmark_id
-local function show_block(id, text, lnum)
-   local block_lines = {}
-   for line in vim.gsplit(text, "\n") do
-      table.insert(block_lines, { { leading_tabs_to_spaces(line), hlgroup } })
-   end
-
-   return nvim_buf_set_extmark(0, ns, lnum, 0, {
-      id = id,
-      virt_lines = block_lines,
-      undo_restore = false,
-      strict = false,
-   })
 end
 
 ---Returns length of the common prefix of two strings
@@ -184,6 +138,8 @@ local function get_completion_content(parts, compare_text)
          elseif part.type == PART.block then
             block_text = text
          end
+      else
+         return inline_contents, block_text, true
       end
    end
 
@@ -191,6 +147,54 @@ local function get_completion_content(parts, compare_text)
 end
 
 -- Renderer methods ---------------------------------------- {{{1
+
+---@param text string
+---@return extmark_id
+function Renderer:show_label(text)
+   self.label_virt_text[1][1] = text
+   return nvim_buf_set_extmark(0, ns, state.pos[1], 0, {
+      id = self.label.id,
+      virt_text = self.label_virt_text,
+      virt_text_win_col = -1 - #text,
+   })
+end
+
+---Adds virtual text into the `lnum` line number and `col` column.
+---If `id` is nil then a new id will be generated.
+---@param id? extmark_id
+---@param str string text to display
+---@param col col
+---@param lnum? lnum
+---@return extmark_id
+function Renderer:show_inline(id, str, col, lnum)
+   self.inline_virt_text[1][1] = str
+   return nvim_buf_set_extmark(0, ns, lnum or state.pos[1], col, {
+      id = id,
+      virt_text_pos = "inline",
+      virt_text = self.inline_virt_text,
+      undo_restore = false,
+      strict = false,
+   })
+end
+
+---Adds virtual text below the line with `lnum` number.
+---If `id` is nil then a new id will be generated.
+---@param text string # text to display, will be split into lines at "\n"
+---@param lnum? lnum
+---@return extmark_id
+function Renderer:show_block(text, lnum)
+   local block_lines = {}
+   for line in vim.gsplit(text, "\n") do
+      table.insert(block_lines, { { leading_tabs_to_spaces(line), hlgroup } })
+   end
+
+   return nvim_buf_set_extmark(0, ns, lnum or state.pos[1], 0, {
+      id = state.block.id,
+      virt_lines = block_lines,
+      undo_restore = false,
+      strict = false,
+   })
+end
 
 function Renderer:update_label()
    vim.schedule(function()
@@ -212,9 +216,8 @@ end
 ---@private
 ---@param contents inline_content[]
 function Renderer:display_inline(contents)
-   -- clear extra inline items
-   local contents_len = #contents
-   local leftover_ids = #state.inline - contents_len
+   -- removes extra inline items
+   local leftover_ids = #state.inline - #contents
    if leftover_ids > 0 then
       for _ = 1, leftover_ids do
          local item = table.remove(state.inline)
@@ -222,29 +225,26 @@ function Renderer:display_inline(contents)
       end
    end
    -- change inline virtual text
-   if contents_len > 0 then
-      for i, c in ipairs(contents) do
-         if not state.inline[i] then
-            state.inline[i] = {}
-         end
-         state.inline[i].text = c.text
-         state.inline[i].prefix = c.prefix
-         state.inline[i].id = show_inline(state.inline[i].id, c.text, c.lnum, c.col)
+   for i, c in ipairs(contents) do
+      if not state.inline[i] then
+         state.inline[i] = {}
       end
+      state.inline[i].text = c.text
+      state.inline[i].prefix = c.prefix
+      state.inline[i].id = self:show_inline(state.inline[i].id, c.text, c.col, c.lnum)
    end
 end
 
 ---@private
----@param lnum lnum
 ---@param text? string
-function Renderer:display_block(text, lnum)
+function Renderer:display_block(text)
    if text then
       if not state.block.id or state.block.text ~= text then
          state.block.text = text
-         state.block.id = show_block(state.block.id, text, lnum)
+         state.block.id = self:show_block(text)
       end
    else
-      self:clear_block()
+      self:remove_block()
    end
 end
 
@@ -254,13 +254,12 @@ function Renderer:display_label()
       return
    end
 
-   local lnum = state.pos[1]
    if state.request_status == REQUEST_STATUS.pending then
-      self.label.id = show_label(self.label.id, " * ", lnum)
+      self.label.id = self:show_label(" * ")
    elseif utils.is_empty(state.data.items) then
-      self.label.id = show_label(self.label.id, " 0 ", lnum)
+      self.label.id = self:show_label(" 0 ")
    else
-      self.label.id = show_label(self.label.id, state.data.index .. "/" .. #state.data.items, lnum)
+      self.label.id = self:show_label(state.data.index .. "/" .. #state.data.items)
    end
 end
 
@@ -294,7 +293,7 @@ function Renderer:display()
 
    self.clear_timer:stop()
    self:display_inline(inline_contents)
-   self:display_block(block_text, state.pos[1])
+   self:display_block(block_text)
    if block_text or #inline_contents > 0 then
       self:display_label()
    end
@@ -302,33 +301,29 @@ function Renderer:display()
    return false
 end
 
----Clears the block virtual text and removes block.id cache
-function Renderer:clear_block()
-   if state.block.id == nil then
-      return
+---Removes block virtual text and block cache
+function Renderer:remove_block()
+   if state.block.id then
+      delete_virttext(state.block.id)
+      state.block.text = nil
+      state.block.id = nil
    end
-
-   delete_virttext(state.block.id)
-   state.block.text = nil
-   state.block.id = nil
 end
 
----Clears the inline virtual text and resets `state.inline` to empty table
-function Renderer:clear_inline()
-   for _, item in ipairs(state.inline) do
-      delete_virttext(item.id)
+---Removes inline virtual text and resets `state.inline`
+function Renderer:remove_inline()
+   for i = #state.inline, 1, -1 do
+      delete_virttext(state.inline[i].id)
+      state.inline[i] = nil
    end
-   state.inline = {}
 end
 
----Clears the label virtual text and removes label.id cache
-function Renderer:clear_label()
-   if self.label.id == nil then
-      return
+---Removes label virtual text and label.id cache
+function Renderer:remove_label()
+   if self.label.id then
+      delete_virttext(self.label.id)
+      self.label.id = nil
    end
-
-   delete_virttext(self.label.id)
-   self.label.id = nil
 end
 
 ---Clears completion state. When `force` is true, the inline and block
@@ -377,12 +372,12 @@ function Renderer:clear_all(with_reset, scheduled)
    else
       if scheduled then
          vim.schedule(function()
-            self:clear_inline()
-            self:clear_block()
+            self:remove_inline()
+            self:remove_block()
          end)
       else
-         self:clear_inline()
-         self:clear_block()
+         self:remove_inline()
+         self:remove_block()
       end
    end
 end
@@ -392,6 +387,7 @@ function Renderer:update_forward_line()
    if not utils.is_empty(state.block.text) then
       -- find if block.text has multiple lines
       local index = state.block.text:find("\n")
+      self:remove_inline()
       state.inline = { { prefix = "" } }
       local lnum, col = unpack(state.pos)
       if index then
@@ -400,16 +396,16 @@ function Renderer:update_forward_line()
          state.inline[1].text = state.block.text:sub(col + 1, index - 1)
          state.block.text = state.block.text:sub(index + 1)
          -- state.block.id already exists, no need to set it
-         show_block(state.block.id, state.block.text, lnum)
+         self:show_block(state.block.text, lnum)
       else
          state.inline[1].text = state.block.text:sub(col + 1)
-         self:clear_block()
+         self:remove_block()
          -- required to update label position
          if options.show_label and self.label.enabled then
-            show_label(self.label.id, " 0 ", state.pos[1])
+            self:show_label(" 0 ")
          end
       end
-      state.inline[1].id = show_inline(nil, state.inline[1].text, lnum, col)
+      state.inline[1].id = self:show_inline(nil, state.inline[1].text, col, lnum)
    end
    self:start_clear_timer()
 end
@@ -422,9 +418,9 @@ function Renderer:update_backward_line()
       else
          state.block.text = state.inline[1].text
       end
-      self:clear_inline()
+      self:remove_inline()
       -- state.block.id could be nil, so we need to set it
-      state.block.id = show_block(state.block.id, state.block.text, state.pos[1])
+      state.block.id = self:show_block(state.block.text)
    end
    self:start_clear_timer()
 end
@@ -432,19 +428,19 @@ end
 ---@param prev_pos pos
 ---@param new_fulltext string
 function Renderer:update_horz_move(prev_pos, new_fulltext)
-   local lnum, col = unpack(state.pos)
+   local col = state.pos[2]
    local prev_col = prev_pos[2]
    local horz_move = col - prev_col
    local first_inline = state.inline[1]
 
    if horz_move >= 0 then -- added some text
       if horz_move > #first_inline.text then
-         self:clear_inline()
+         self:remove_inline()
          self:start_clear_timer()
       else
          local prefix = first_inline.text:sub(1, horz_move)
          state.inline[1].text = first_inline.text:sub(horz_move + 1)
-         show_inline(first_inline.id, first_inline.text, lnum, col)
+         self:show_inline(first_inline.id, first_inline.text, col)
          if new_fulltext:sub(prev_col) ~= prefix then
             self:start_clear_timer()
          end
@@ -455,7 +451,7 @@ function Renderer:update_horz_move(prev_pos, new_fulltext)
       else
          local prefix = self.fulltext:sub(col + 1, col - horz_move)
          state.inline[1].text = prefix .. first_inline.text
-         show_inline(first_inline.id, first_inline.text, lnum, col)
+         self:show_inline(first_inline.id, first_inline.text, col)
          self.clear_timer:stop()
          self:start_clear_timer()
       end
@@ -481,7 +477,7 @@ function Renderer:update()
          self:update_backward_line()
       else -- cursor movement happened on the same line
          if not state.inline[1] then
-            self:clear_inline()
+            self:remove_inline()
          else
             self:update_horz_move(prev_pos, fulltext)
          end
