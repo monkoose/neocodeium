@@ -45,18 +45,14 @@ local function enable_autocmds()
    local completer = require("neocodeium.completer")
    local doc = require("neocodeium.doc")
    local state = require("neocodeium.state")
+   local utils = require("neocodeium.utils")
 
-   local function utf8_or_latin1()
-      local encoding = vim.o.fileencoding
-      return encoding == "" or encoding == "utf-8" or encoding == "latin1"
-   end
-
-   completer.allowed_encoding = utf8_or_latin1()
+   state.allowed_encoding = utils.is_utf8_or_latin1()
    local other_docs_timer = assert(uv.new_timer())
 
    create_autocmd("BufEnter", {
       callback = function()
-         completer.allowed_encoding = utf8_or_latin1()
+         state.allowed_encoding = utils.is_utf8_or_latin1()
          other_docs_timer:stop()
          other_docs_timer:start(
             1,
@@ -71,7 +67,7 @@ local function enable_autocmds()
    create_autocmd("OptionSet", {
       pattern = "fileencoding",
       callback = function()
-         completer.allowed_encoding = utf8_or_latin1()
+         state.allowed_encoding = utils.is_utf8_or_latin1()
       end,
    })
 
@@ -155,7 +151,7 @@ function M.setup(opts)
    local options = require("neocodeium.options").options
    local commands = require("neocodeium.commands")
    local server = require("neocodeium.server")
-   local completer = require("neocodeium.completer")
+   local state = require("neocodeium.state")
 
    if options.enabled then
       if vim.v.vim_did_enter == 1 then
@@ -220,7 +216,7 @@ function M.setup(opts)
          server_status = 2 -- OFF
       end
 
-      if not completer.allowed_encoding then
+      if not state.allowed_encoding then
          return 5, server_status -- disabled by wrong encoding
       end
 

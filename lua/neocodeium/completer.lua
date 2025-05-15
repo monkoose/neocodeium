@@ -53,13 +53,11 @@ local ns = nvim_create_namespace("neocodeium_compl")
 ---@field data compl.data
 ---@field debounce_timer uv.uv_timer_t
 ---@field request_id integer
----@field allowed_encoding boolean
 ---@field other_docs document[]
 local Completer = {
    data = {},
    debounce_timer = assert(uv.new_timer()),
    request_id = 0,
-   allowed_encoding = false,
    other_docs = {},
    pos = { 0, 0 },
    clear_timer = assert(uv.new_timer()),
@@ -193,7 +191,7 @@ end
 ---Returns `true` if completion for current buffer is enabled.
 ---@return boolean
 function Completer:enabled()
-   return self.allowed_encoding and options.status() == 0
+   return state.allowed_encoding and options.status() == 0
 end
 
 function Completer:update_label()

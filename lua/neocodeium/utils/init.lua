@@ -130,4 +130,11 @@ function M.is_normal_buf(bufnr)
    return nvim_get_option_value("buftype", { buf = bufnr }) == ""
 end
 
+---Returns true if file encoding in the current buffer is utf-8 or latin1
+---@return boolean
+function M.is_utf8_or_latin1()
+   local encoding = vim.o.fileencoding
+   return encoding == "" or encoding == "utf-8" or encoding == "latin1"
+end
+
 return M

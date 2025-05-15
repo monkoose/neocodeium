@@ -8,6 +8,7 @@ local State = {
    active = false,
    chat_enabled = false,
    status = STATUS.none,
+   allowed_encoding = false,
 }
 
 return State
