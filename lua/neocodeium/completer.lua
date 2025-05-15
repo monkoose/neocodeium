@@ -182,6 +182,7 @@ function Completer:accept_regex(regex)
    nvim_feedkeys(text, "nt", true)
 end
 
+-- TODO: better word boundaries
 ---Accepts a suggestion till the end of the word.
 function Completer:accept_word()
    self:accept_regex([[.\{-}\%(\>\|$\)]])
