@@ -4,9 +4,11 @@ local log = require("neocodeium.log")
 local doc = require("neocodeium.doc")
 local utils = require("neocodeium.utils")
 local options = require("neocodeium.options").options
-local types = require("neocodeium._types")
 local server = require("neocodeium.server")
 local events = require("neocodeium.events")
+local state = require("neocodeium.state")
+local PART = require("neocodeium.enums").PART
+local STATUS = require("neocodeium.enums").STATUS
 
 local fn = vim.fn
 local uv = vim.uv
@@ -27,13 +29,6 @@ local ns = nvim_create_namespace("neocodeium_compl")
 
 -- Completer ----------------------------------------------- {{{1
 
----@enum compl.status
-local status = {
-   none = 0,
-   pending = 1,
-   completed = 2,
-}
-
 ---@class inline
 ---@field id? integer
 ---@field text? string
@@ -49,7 +44,6 @@ local status = {
 
 ---@class Completer
 ---@field pos pos
----@field disabled boolean
 ---@field tick integer
 ---@field clear_timer uv.uv_timer_t
 ---@field fulltext string
@@ -57,15 +51,12 @@ local status = {
 ---@field inline inline[]
 ---@field block block
 ---@field data compl.data
----@field status compl.status
 ---@field debounce_timer uv.uv_timer_t
 ---@field request_id integer
 ---@field allowed_encoding boolean
 ---@field other_docs document[]
 local Completer = {
    data = {},
-   disabled = true,
-   status = status.none,
    debounce_timer = assert(uv.new_timer()),
    request_id = 0,
    allowed_encoding = false,
@@ -207,7 +198,7 @@ end
 
 function Completer:update_label()
    vim.schedule(function()
-      if utils.is_insert() and utils.is_empty(self.inline) and not self.block.text then
+      if state.active and utils.is_empty(self.inline) and not self.block.text then
          self:display_label()
       end
    end)
@@ -259,7 +250,7 @@ function Completer:display_label()
    end
 
    local lnum = self.pos[1]
-   if self.status == status.pending then
+   if state.status == STATUS.pending then
       self.label.id = show_label(self.label.id, " * ", lnum)
    elseif utils.is_empty(self.data.items) then
       self.label.id = show_label(self.label.id, " 0 ", lnum)
@@ -270,7 +261,7 @@ end
 
 ---Displays completion item
 function Completer:display()
-   if not utils.is_insert() then
+   if not state.active then
       self:clear_all(true)
       return
    end
@@ -302,7 +293,7 @@ function Completer:display()
       if lnum == (tonumber(part.line) or 0) then
          local text = part.text
 
-         if part.type == types.part.inline then
+         if part.type == PART.inline then
             local prefix = part.prefix or ""
             local prefix_len = #prefix
             local column = prefix_len + cummulative_cols
@@ -330,7 +321,7 @@ function Completer:display()
                inline_contents,
                { lnum = lnum, col = column + delta, text = text, prefix = prefix }
             )
-         elseif part.type == types.part.block then
+         elseif part.type == PART.block then
             block_text = text
          end
       end
@@ -586,7 +577,7 @@ end
 ---@private
 ---@param regex string
 function Completer:accept_regex(regex)
-   if not utils.is_insert() then
+   if not state.active then
       return
    end
 
@@ -651,11 +642,11 @@ end
 ---@private
 ---Constructs and sends a request to the server only when in an appropriate state.
 function Completer:request()
-   if not server.port or self.disabled or self.status == status.pending then
+   if not (server.port and state.active) or state.status == STATUS.pending then
       return
    end
 
-   self.status = status.pending
+   state.status = STATUS.pending
    self:update_label()
 
    self.request_id = self.request_id + 1
@@ -671,7 +662,7 @@ function Completer:request()
    }
 
    server:request("GetCompletions", data, function(r)
-      self.status = status.completed
+      state.status = STATUS.completed
       self:update_label()
       self:handle_response(r)
    end)
@@ -685,8 +676,8 @@ end
 ---virtual text is cleared too.
 ---@param force? boolean
 function Completer:clear(force)
-   if force or options.debounce or self.status ~= status.pending then
-      self.status = status.none
+   if force or options.debounce or state.status ~= STATUS.pending then
+      state.status = STATUS.none
       if options.debounce and self.debounce_timer:is_active() then
          self.debounce_timer:stop()
       end
@@ -735,7 +726,7 @@ end
 
 ---Completes the current suggestion.
 function Completer:accept()
-   if not utils.is_insert() then
+   if not state.active then
       return
    end
 
@@ -749,9 +740,9 @@ function Completer:accept()
    local inline = false
 
    for _, part in ipairs(parts) do
-      if part.type == types.part.inline then
+      if part.type == PART.inline then
          inline = true
-      elseif part.type == types.part.block then
+      elseif part.type == PART.block then
          block = vim.split(part.text, "\n")
       end
    end

@@ -104,7 +104,7 @@
 ---Text of the part.
 ---@field text string
 ---Type of the part.
----@field type compl.type
+---@field type compl.part_type
 
 ---@class compl.range
 ---@field startOffset compl.offset?

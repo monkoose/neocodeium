@@ -1,4 +1,4 @@
-local types = require("neocodeium._types")
+local LEVEL = require("neocodeium.enums").LEVEL
 
 local fn = vim.fn
 local uv = vim.uv
@@ -23,7 +23,7 @@ end
 ---@param lvl level
 ---@return fun(msg: string)
 local function log(lvl)
-   if lvl >= types.level[min_log_level] then
+   if lvl >= LEVEL[min_log_level] then
       return function(msg)
          uv.fs_open(logfile, "a", o644, function(_, fd)
             if fd then
@@ -46,10 +46,10 @@ function M.get_log_file()
    return logfile
 end
 
-M.trace = log(types.level.trace) ---@type fun(msg: string)
-M.debug = log(types.level.debug) ---@type fun(msg: string)
-M.info = log(types.level.info) ---@type fun(msg: string)
-M.warn = log(types.level.warn) ---@type fun(msg: string)
-M.error = log(types.level.error) ---@type fun(msg: string)
+M.trace = log(LEVEL.trace) ---@type fun(msg: string)
+M.debug = log(LEVEL.debug) ---@type fun(msg: string)
+M.info = log(LEVEL.info) ---@type fun(msg: string)
+M.warn = log(LEVEL.warn) ---@type fun(msg: string)
+M.error = log(LEVEL.error) ---@type fun(msg: string)
 
 return M

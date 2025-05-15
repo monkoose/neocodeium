@@ -1,4 +1,4 @@
-local types = require("neocodeium._types")
+local LEVEL = require("neocodeium.enums").LEVEL
 
 ---@param lvl level one of vim.log.levels
 ---@return fun(msg: string, silent?: boolean)
@@ -12,7 +12,7 @@ local function echo(lvl)
 end
 
 return {
-   info = echo(types.level.info),
-   warn = echo(types.level.warn),
-   error = echo(types.level.error),
+   info = echo(LEVEL.info),
+   warn = echo(LEVEL.warn),
+   error = echo(LEVEL.error),
 }
