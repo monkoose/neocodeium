@@ -23,7 +23,7 @@ local json = vim.json
 ---@field pid? integer
 ---@field is_restart boolean
 ---@field chat_enabled boolean
----@field callback? fun()
+---@field startup_callback? fun()
 local Server = {
    bin = Bin.new(),
    is_restart = false,
@@ -251,9 +251,9 @@ function Server:init(timer, manager_dir)
       log.info("Found port: " .. port)
       echo.info("server started on port " .. port, options.silent)
       self.port = port
-      if self.callback then
-         self.callback()
-         self.callback = nil
+      if self.startup_callback then
+         self.startup_callback()
+         self.startup_callback = nil
       end
       events.emit("NeoCodeiumServerConnected")
 
