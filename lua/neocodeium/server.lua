@@ -8,6 +8,7 @@ local stdio = require("neocodeium.utils.stdio")
 local echo = require("neocodeium.utils.echo")
 local events = require("neocodeium.events")
 local Bin = require("neocodeium.binary")
+local state = require("neocodeium.state")
 
 local fn = vim.fn
 local uv = vim.uv
@@ -22,12 +23,10 @@ local json = vim.json
 ---@field handle? uv.uv_process_t
 ---@field pid? integer
 ---@field is_restart boolean
----@field chat_enabled boolean
 ---@field startup_callback? fun()
 local Server = {
    bin = Bin.new(),
    is_restart = false,
-   chat_enabled = false,
    metadata = {
       api_key = api_key.get(),
       ide_name = "neovim",
@@ -83,7 +82,7 @@ function Server:start()
       table.insert(args, options.server.portal_url)
    end
 
-   if self.chat_enabled then
+   if state.chat_enabled then
       table.insert(args, "--enable_local_search")
       table.insert(args, "--enable_index_service")
       table.insert(args, "--search_max_workspace_file_count=5000")

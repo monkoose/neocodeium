@@ -9,6 +9,7 @@ local api_key = require("neocodeium.api_key")
 local stdio = require("neocodeium.utils.stdio")
 local server = require("neocodeium.server")
 local events = require("neocodeium.events")
+local state = require("neocodeium.state")
 
 local fn = vim.fn
 local json = vim.json
@@ -212,11 +213,11 @@ function M.chat()
       chat.add_tracked_workspace()
    end
 
-   if server.chat_enabled and server.port then
+   if state.chat_enabled and server.port then
       launch_chat()
    else
-      server.callback = launch_chat
-      server.chat_enabled = true
+      server.startup_callback = launch_chat
+      state.chat_enabled = true
       server:restart()
    end
 end
