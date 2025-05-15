@@ -11,6 +11,7 @@ local nvim_win_get_cursor = vim.api.nvim_win_get_cursor
 local nvim_get_option_value = vim.api.nvim_get_option_value
 
 local chat = {}
+local request_data = {}
 
 -- Refresh chat content on buffer change.
 nvim_create_autocmd("BufEnter", {
@@ -65,7 +66,8 @@ function chat.refresh_context()
    if options.status(0) == 0 then
       local cursor = nvim_win_get_cursor(0)
       local ft = nvim_get_option_value("filetype", { buf = 0 })
-      server:request("RefreshContextForIdeAction", { active_document = doc.get(0, ft, -1, cursor) })
+      request_data.active_document = doc.get(0, ft, -1, cursor)
+      server:request("RefreshContextForIdeAction", request_data)
    end
 end
 
