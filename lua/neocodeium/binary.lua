@@ -16,7 +16,7 @@ local fs = vim.fs
 ---@field version string
 ---@field path filepath
 ---@field suffix? string
-local Bin = { version = "1.42.8" }
+local Bin = { version = "1.46.3" }
 
 -- Auxiliary functions ------------------------------------- {{{1
 
