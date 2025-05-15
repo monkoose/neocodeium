@@ -139,6 +139,57 @@ local function calc_inline_delta(len, idx, col)
    return result
 end
 
+---@param parts any
+---@param compare_text string
+---@return inline_content[], string|nil, boolean
+local function get_completion_content(parts, compare_text)
+   local lnum, col = unpack(state.pos)
+   local block_text ---@type string?
+   local inline_contents = {} ---@type inline_content[]
+   local cummulative_cols = 0
+   local delta = 0
+
+   for i, part in ipairs(parts) do
+      -- process only correct parts
+      if lnum == (tonumber(part.line) or 0) then
+         local text = part.text
+
+         if part.type == PART.inline then
+            local prefix = part.prefix or ""
+            local prefix_len = #prefix
+            local column = prefix_len + cummulative_cols
+            cummulative_cols = column
+
+            if i == 1 then
+               local compl_line = prefix .. text
+               local match_prefix_idx = same_prefix_index(compl_line, compare_text)
+               -- When actual text doesn't match prefix return false, so it will
+               -- dispatch new request for the completion
+               if match_prefix_idx ~= col then
+                  return inline_contents, block_text, true
+               end
+
+               delta = calc_inline_delta(prefix_len, match_prefix_idx, col)
+               if delta < 0 then
+                  text = prefix:sub(delta) .. text
+               elseif delta > 0 then
+                  text = text:sub(delta + 1)
+               end
+               prefix = ""
+            end
+            table.insert(
+               inline_contents,
+               { lnum = lnum, col = column + delta, text = text, prefix = prefix }
+            )
+         elseif part.type == PART.block then
+            block_text = text
+         end
+      end
+   end
+
+   return inline_contents, block_text, false
+end
+
 -- Renderer methods ---------------------------------------- {{{1
 
 function Renderer:update_label()
@@ -221,7 +272,6 @@ function Renderer:display()
       return false
    end
 
-   local lnum, col = unpack(state.pos)
    local items = state.data.items or {}
    local index = state.data.index or 1
    local item = items[index] or {}
@@ -237,52 +287,14 @@ function Renderer:display()
       return true
    end
 
-   local block_text ---@type string?
-   local inline_contents = {} ---@type inline_content[]
-   local cummulative_cols = 0
-   local delta = 0
-
-   for i, part in ipairs(parts) do
-      -- process only correct parts
-      if lnum == (tonumber(part.line) or 0) then
-         local text = part.text
-
-         if part.type == PART.inline then
-            local prefix = part.prefix or ""
-            local prefix_len = #prefix
-            local column = prefix_len + cummulative_cols
-            cummulative_cols = column
-
-            if i == 1 then
-               local compl_line = prefix .. text
-               local match_prefix_idx = same_prefix_index(compl_line, self.fulltext)
-               -- When actual text doesn't match prefix return false, so it will
-               -- dispatch new request for the completion
-               if match_prefix_idx ~= col then
-                  return true
-               end
-
-               delta = calc_inline_delta(prefix_len, match_prefix_idx, col)
-               if delta < 0 then
-                  text = prefix:sub(delta) .. text
-               elseif delta > 0 then
-                  text = text:sub(delta + 1)
-               end
-               prefix = ""
-            end
-            table.insert(
-               inline_contents,
-               { lnum = lnum, col = column + delta, text = text, prefix = prefix }
-            )
-         elseif part.type == PART.block then
-            block_text = text
-         end
-      end
+   local inline_contents, block_text, new_request = get_completion_content(parts, self.fulltext)
+   if new_request then
+      return true
    end
 
    self.clear_timer:stop()
    self:display_inline(inline_contents)
-   self:display_block(block_text, lnum)
+   self:display_block(block_text, state.pos[1])
    if block_text or #inline_contents > 0 then
       self:display_label()
    end
