@@ -4,11 +4,10 @@ local filetype = require("neocodeium.filetype")
 local options = require("neocodeium.options").options
 local stdio = require("neocodeium.utils.stdio")
 local utils = require("neocodeium.utils")
+local state = require("neocodeium.state")
 
 local nvim_buf_get_lines = vim.api.nvim_buf_get_lines
 local nvim_buf_get_name = vim.api.nvim_buf_get_name
-local nvim_list_bufs = vim.api.nvim_list_bufs
-local nvim_buf_is_loaded = vim.api.nvim_buf_is_loaded
 local nvim_get_option_value = vim.api.nvim_get_option_value
 local nvim_buf_get_var = vim.api.nvim_buf_get_var
 local nvim_create_augroup = vim.api.nvim_create_augroup
@@ -41,14 +40,6 @@ nvim_create_autocmd("DirChanged", {
       project_root = stdio.to_uri(stdio.get_project_root())
    end,
 })
-
--- Auxiliary functions ------------------------------------- {{{1
-
----Returns iterator over numbers of all loaded buffers.
----@return Iter
-local function loaded_bufs()
-   return vim.iter(nvim_list_bufs()):filter(nvim_buf_is_loaded)
-end
 
 -- Public API ---------------------------------------------- {{{1
 
@@ -93,9 +84,14 @@ function M.get_all_loaded(cur_bufnr)
    local doc_data
    local docs = {}
    local pos = { 0, 0 }
-   for b in loaded_bufs() do
+   for b in utils.loaded_bufs() do
       local buf_ft = nvim_get_option_value("filetype", { buf = b })
-      if b ~= cur_bufnr and buf_ft ~= "" and utils.is_normal_buf(b) and options.status(b) == 0 then
+      if
+         b ~= cur_bufnr
+         and buf_ft ~= ""
+         and utils.is_normal_buf(b)
+         and state:get_status(b) == 0
+      then
          local buf_cache = cached_data[b]
          local buf_tick = nvim_buf_get_var(b, "changedtick") ---@type integer
          -- use new data only when buffer's content has changed, otherwise use cached data

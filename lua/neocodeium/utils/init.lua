@@ -3,6 +3,8 @@ local nvim_buf_set_lines = vim.api.nvim_buf_set_lines
 local nvim_win_get_cursor = vim.api.nvim_win_get_cursor
 local nvim_win_set_cursor = vim.api.nvim_win_set_cursor
 local nvim_get_option_value = vim.api.nvim_get_option_value
+local nvim_list_bufs = vim.api.nvim_list_bufs
+local nvim_buf_is_loaded = vim.api.nvim_buf_is_loaded
 
 local M = {}
 
@@ -131,10 +133,17 @@ function M.is_normal_buf(bufnr)
 end
 
 ---Returns true if file encoding in the current buffer is utf-8 or latin1
+---@param bufnr bufnr
 ---@return boolean
-function M.is_utf8_or_latin1()
-   local encoding = vim.o.fileencoding
+function M.is_utf8_or_latin1(bufnr)
+   local encoding = vim.bo[bufnr].fileencoding
    return encoding == "" or encoding == "utf-8" or encoding == "latin1"
+end
+
+---Returns iterator over numbers of all loaded buffers.
+---@return Iter
+function M.loaded_bufs()
+   return vim.iter(nvim_list_bufs()):filter(nvim_buf_is_loaded)
 end
 
 return M

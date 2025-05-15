@@ -65,12 +65,6 @@ function Completer:scheduled_display()
    end)
 end
 
----Returns `true` if completion for current buffer is enabled.
----@return boolean
-function Completer:enabled()
-   return state.allowed_encoding and options.status() == 0
-end
-
 ---Cycles completions by amount `n`, wraps around if necessary.
 ---Use negative value to cycle backwards.
 ---@param n integer amount to cycle
