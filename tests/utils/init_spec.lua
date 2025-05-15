@@ -73,46 +73,39 @@ describe("get_system_info()", function()
       assert.is.Table(info)
       assert.is.String(info.os)
       assert.is.String(info.arch)
-      assert.is.Boolean(info.is_arm)
-      assert.is.Boolean(info.is_unix)
-      assert.is.Boolean(info.is_win)
    end)
 
    it("should return correct data", function()
-      local uname = stub(vim.uv, "os_uname")
+      local jit_os = jit.os
+      local jit_arch = jit.arch
 
-      uname.returns({ sysname = "Linux", machine = "x86_64" })
+      jit.os = "Linux"
+      jit.arch = "x64"
+      package.loaded["neocodeium.utils"] = nil
       local info = utils.get_system_info()
       assert.is.Equal(info.os, "linux")
       assert.is.Equal(info.arch, "x64")
-      assert.is.False(info.is_arm)
-      assert.is.False(info.is_win)
-      assert.is.True(info.is_unix)
 
-      uname.returns({ sysname = "Windows_NT", machine = "x86_64" })
+      jit.os = "Windows"
       package.loaded["neocodeium.utils"] = nil
       info = require("neocodeium.utils").get_system_info()
       assert.is.Equal(info.os, "windows")
       assert.is.Equal(info.arch, "x64")
-      assert.is.True(info.is_win)
-      assert.is.False(info.is_unix)
 
-      uname.returns({ sysname = "Darwin", machine = "arm" })
+      jit.os = "OSX"
+      package.loaded["neocodeium.utils"] = nil
+      info = require("neocodeium.utils").get_system_info()
+      assert.is.Equal(info.os, "macos")
+      assert.is.Equal(info.arch, "x64")
+
+      jit.arch = "arm"
       package.loaded["neocodeium.utils"] = nil
       info = require("neocodeium.utils").get_system_info()
       assert.is.Equal(info.os, "macos")
       assert.is.Equal(info.arch, "arm")
-      assert.is.True(info.is_arm)
-      assert.is.False(info.is_win)
-      assert.is.True(info.is_unix)
 
-      uname.returns({ sysname = "Darwin", machine = "aarch64" })
-      package.loaded["neocodeium.utils"] = nil
-      info = require("neocodeium.utils").get_system_info()
-      assert.is.Equal(info.arch, "arm")
-      assert.is.True(info.is_arm)
-
-      uname:revert()
+      jit.os = jit_os
+      jit.arch = jit_arch
    end)
 end)
 

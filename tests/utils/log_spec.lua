@@ -4,6 +4,7 @@ local fn = vim.fn
 describe("get_log_file()", function()
    it("should return correct path", function()
       local path = log.get_log_file()
+      vim.cmd.sleep("10m")
       assert.is.True(vim.endswith(path, "-neocodeium.log"))
       vim.uv.fs_open(path, "a", tonumber("644", 8), function(_, fd)
          if fd then

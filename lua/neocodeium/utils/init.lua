@@ -1,5 +1,3 @@
-local uv = vim.uv
-
 local nvim_exec2 = vim.api.nvim_exec2
 local nvim_buf_set_lines = vim.api.nvim_buf_set_lines
 local nvim_win_get_cursor = vim.api.nvim_win_get_cursor
@@ -51,60 +49,51 @@ function M.is_insert()
 end
 
 ---Returns OS name
----@param uname uv.os_uname.info
 ---@return os_name
-local function get_os(uname)
-   local os = uname.sysname
+local function get_os()
+   local os = jit.os
    if os == "Linux" then
-      os = "linux"
-   elseif os == "Darwin" then
-      os = "macos"
-   elseif os == "Windows_NT" or os:match("MINGW32_NT") then
-      os = "windows"
-   else
-      os = "unknown"
+      return "linux"
+   elseif os == "OSX" then
+      return "macos"
+   elseif os == "Windows" then
+      return "windows"
    end
-
-   return os
+   return "unsupported"
 end
 
 ---Returns system architecture
----@param os os_name
----@param machine string
 ---@return arch
-local function get_arch(os, machine)
-   local function is_arm()
-      if machine:match("^arm") or machine:match("^aarch64") then
-         return true
+local function get_arch()
+   local arch = jit.arch
+   if arch == "x64" then
+      return "x64"
+   elseif arch:match("^arm") then
+      local os = jit.os
+      if os == "OSX" or os == "Linux" then
+         return "arm"
+      else
+         return "unsupported"
       end
    end
-
-   if (os == "linux" or os == "macos") and is_arm() then
-      return "arm"
-   end
-
-   return "x64"
+   return "unsupported"
 end
 
-local system_info_cache = nil
+local system_info = nil
 ---Returns system information
 ---@return system_info
 function M.get_system_info()
-   if not system_info_cache then
-      local uname = uv.os_uname()
-      local os = get_os(uname)
-      local arch = get_arch(os, uname.machine)
+   if not system_info then
+      local os = get_os()
+      local arch = get_arch()
 
-      system_info_cache = {
+      system_info = {
          os = os,
          arch = arch,
-         is_arm = arch == "arm",
-         is_unix = os == "linux" or os == "macos",
-         is_win = os == "windows",
       }
    end
 
-   return system_info_cache
+   return system_info
 end
 
 ---Executes a function and restores original shell options afterwards

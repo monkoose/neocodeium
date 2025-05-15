@@ -50,7 +50,7 @@ function M.get_project_root()
    return fs.root(0, options.root_dir) or uv.cwd()
 end
 
-local is_windows = utils.get_system_info().is_win
+local on_windows = utils.get_system_info().os == "windows"
 ---@param path? string
 ---@return string|nil
 function M.to_uri(path)
@@ -58,7 +58,7 @@ function M.to_uri(path)
       return
    end
 
-   if is_windows then
+   if on_windows then
       path = path:gsub("\\", "/")
       return "file:///" .. path
    else

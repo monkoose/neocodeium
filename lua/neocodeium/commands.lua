@@ -59,7 +59,7 @@ local function request_api_key()
       return fn.system(str_cmd)
    end
 
-   local on_windows = utils.get_system_info().is_win
+   local on_windows = utils.get_system_info().os == "windows"
    local ssl_error = "The revocation function was unable to check revocation for the certificate."
    local auth_token = secret_input("Paste your token here (it would be hidden): ")
    for _ = 1, 3 do

@@ -5,6 +5,7 @@ local echo = require("neocodeium.utils.echo")
 local conf = require("neocodeium.utils.conf")
 local options = require("neocodeium.options").options
 local stdio = require("neocodeium.utils.stdio")
+local log = require("neocodeium.log")
 
 local fn = vim.fn
 local fs = vim.fs
@@ -49,13 +50,18 @@ function Bin.new()
       self.path = options.bin
    else
       local system_info = utils.get_system_info()
-      self.suffix = system_info.os .. "_" .. system_info.arch
-      if system_info.is_win then
-         self.suffix = self.suffix .. ".exe"
-      end
+      if system_info.os == "unsupported" or system_info.arch == "unsupported" then
+         log.error("Unsupported OS or architecture")
+         echo.error("Unsupported OS or architecture")
+      else
+         self.suffix = system_info.os .. "_" .. system_info.arch
+         if system_info.os == "windows" then
+            self.suffix = self.suffix .. ".exe"
+         end
 
-      local bin_dir = conf.dir .. "/bin/" .. self.version
-      self.path = bin_dir .. "/language_server_" .. self.suffix
+         local bin_dir = conf.dir .. "/bin/" .. self.version
+         self.path = bin_dir .. "/language_server_" .. self.suffix
+      end
    end
 
    return self
@@ -66,6 +72,12 @@ end
 ---@async
 ---@param callback fun()
 function Bin:download(callback)
+   if not self.path then
+      log.error("Binary path not set")
+      echo.error("Binary path not set")
+      return
+   end
+
    local base_url = "https://github.com/Exafunction/codeium/releases/download"
    ---@type url
    local url = string.format(
@@ -102,9 +114,14 @@ end
 ---Returns `true` on success and `false` on failure.
 ---@return boolean
 function Bin:expand()
+   if not self.path then
+      log.error("Binary path not set")
+      echo.error("Binary path not set")
+      return false
+   end
    local bin_gz = self.path .. ".gz"
    echo.info("Extracting binary...")
-   if utils.get_system_info().is_win then
+   if utils.get_system_info().os == "windows" then
       powershell_expand(bin_gz)
    else
       -- Uncompress binary

@@ -19,15 +19,12 @@
 ---@alias extmark_id integer
 ---@alias filepath string
 
----@alias os_name "linux" | "macos" | "windows" | "unknown"
----@alias arch "x64" | "arm"
+---@alias os_name "linux" | "macos" | "windows" | "unsupported"
+---@alias arch "x64" | "arm" | "unsupported"
 
 ---@class system_info
 ---@field os os_name
 ---@field arch arch
----@field is_arm boolean
----@field is_unix boolean
----@field is_win boolean
 
 ---@class document
 ---@field text string
