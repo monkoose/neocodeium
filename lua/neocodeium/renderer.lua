@@ -325,8 +325,8 @@ end
 function Renderer:clear(force)
    if force or options.debounce or state.request_status ~= REQUEST_STATUS.pending then
       state.request_status = REQUEST_STATUS.none
-      if options.debounce and state.debounce_timer:is_active() then
-         state.debounce_timer:stop()
+      if options.debounce then
+         state:stop_debounce_timer()
       end
       -- Cancel request if there is one
       if not vim.tbl_isempty(state.data) then

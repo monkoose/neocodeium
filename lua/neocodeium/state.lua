@@ -45,4 +45,10 @@ function State:valid()
    return self.data.items ~= nil and self.data.index ~= nil
 end
 
+function State:stop_debounce_timer()
+   if self.debounce_timer:is_active() then
+      self.debounce_timer:stop()
+   end
+end
+
 return State

@@ -49,6 +49,15 @@ function Completer:curr_item()
    end
 end
 
+function Completer:scheduled_display()
+   vim.schedule(function()
+      local resend_request = renderer:display()
+      if resend_request then
+         self:request()
+      end
+   end)
+end
+
 ---Returns `true` if completion for current buffer is enabled.
 ---@return boolean
 function Completer:enabled()
@@ -73,9 +82,7 @@ function Completer:cycle(n)
       state.data.index = items_len
    end
 
-   vim.schedule(function()
-      renderer:display()
-   end)
+   self:scheduled_display()
 end
 
 ---Cycles completions or request to complete if there isn't one.
@@ -115,12 +122,7 @@ function Completer:handle_response(r)
    state.data.items = response.completionItems
    state.data.index = 1
 
-   vim.schedule(function()
-      local resend_request = renderer:display()
-      if resend_request then
-         self:request()
-      end
-   end)
+   self:scheduled_display()
 end
 
 ---Accepts a suggestion till regex match end.
@@ -215,6 +217,12 @@ function Completer:request()
    state.data.id = self.request_id
 end
 
+function Completer:scheduled_request()
+   vim.schedule(function()
+      self:request()
+   end)
+end
+
 ---Initiates a completion.
 ---@param omit_manual? boolean
 function Completer:initiate(omit_manual)
@@ -227,20 +235,12 @@ function Completer:initiate(omit_manual)
    end
 
    if options.debounce then
-      if state.debounce_timer:is_active() then
-         state.debounce_timer:stop()
-      end
-      state.debounce_timer:start(
-         120,
-         0,
-         vim.schedule_wrap(function()
-            self:request()
-         end)
-      )
-   else
-      vim.schedule(function()
-         self:request()
+      state:stop_debounce_timer()
+      state.debounce_timer:start(120, 0, function()
+         self:scheduled_request()
       end)
+   else
+      self:scheduled_request()
    end
 end
 
