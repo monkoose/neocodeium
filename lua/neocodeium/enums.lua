@@ -23,4 +23,15 @@ M.REQUEST_STATUS = {
    completed = 2,
 }
 
+---@enum state.status
+M.STATUS = {
+   enabled = 0,
+   disabled = 1,
+   buf_disabled = 2,
+   filetype_disabled = 3,
+   filter_disabled = 4,
+   encoding_disabled = 5,
+   special_buf_disabled = 6,
+}
+
 return M

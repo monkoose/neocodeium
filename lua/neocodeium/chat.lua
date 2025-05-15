@@ -5,6 +5,7 @@ local echo = require("neocodeium.utils.echo")
 local stdio = require("neocodeium.utils.stdio")
 local utils = require("neocodeium.utils")
 local state = require("neocodeium.state")
+local STATUS = require("neocodeium.enums").STATUS
 
 local nvim_create_autocmd = vim.api.nvim_create_autocmd
 local nvim_create_augroup = vim.api.nvim_create_augroup
@@ -64,7 +65,7 @@ end
 
 ---Sends a request to the server to refresh context.
 function chat.refresh_context()
-   if state:get_status() == 0 then
+   if state:get_status() == STATUS.enabled then
       local cursor = nvim_win_get_cursor(0)
       local ft = nvim_get_option_value("filetype", { buf = 0 })
       request_data.active_document = doc.get(0, ft, -1, cursor)

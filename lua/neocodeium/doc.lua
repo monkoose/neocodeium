@@ -5,6 +5,7 @@ local options = require("neocodeium.options").options
 local stdio = require("neocodeium.utils.stdio")
 local utils = require("neocodeium.utils")
 local state = require("neocodeium.state")
+local STATUS = require("neocodeium.enums").STATUS
 
 local nvim_buf_get_lines = vim.api.nvim_buf_get_lines
 local nvim_buf_get_name = vim.api.nvim_buf_get_name
@@ -90,7 +91,7 @@ function M.get_all_loaded(cur_bufnr)
          b ~= cur_bufnr
          and buf_ft ~= ""
          and utils.is_normal_buf(b)
-         and state:get_status(b) == 0
+         and state:get_status(b) == STATUS.enabled
       then
          local buf_cache = cached_data[b]
          local buf_tick = nvim_buf_get_var(b, "changedtick") ---@type integer

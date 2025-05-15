@@ -1,6 +1,7 @@
 local options = require("neocodeium.options").options
 local utils = require("neocodeium.utils")
 local REQUEST_STATUS = require("neocodeium.enums").REQUEST_STATUS
+local STATUS = require("neocodeium.enums").STATUS
 
 local uv = vim.uv
 
@@ -58,24 +59,24 @@ end
 function State:get_status(bufnr)
    bufnr = bufnr or 0
    if not options.enabled then
-      return 1 -- globally disabled
+      return STATUS.disabled
       -- Buffer variable should enable neocodeium even if it is disabled
       -- by 'options.filetypes' or 'options.filter()' or in special buftypes
    elseif vim.b[bufnr].neocodeium_enabled then
-      return 0 -- enabled
+      return STATUS.enabled
    elseif vim.b[bufnr].neocodeium_enabled == false then
-      return 2 -- locally disabled
+      return STATUS.buf_disabled
    elseif not vim.b[bufnr].neocodeium_allowed_encoding then
-      return 5 -- disabled by wrong encoding
+      return STATUS.encoding_disabled
    elseif options.disable_in_special_buftypes and not utils.is_normal_buf(bufnr) then
-      return 6 -- disabled in special buftypes
+      return STATUS.special_buf_disabled
       -- The same as vim.b[bunfr].neocodeium_enabled == nil and ...
    elseif options.filetypes[nvim_get_option_value("filetype", { buf = bufnr })] == false then
-      return 3 -- disabled by 'options.filetypes'
+      return STATUS.filetype_disabled
    elseif options.filter and options.filter(bufnr) == false then
-      return 4 -- disabled by 'options.filter()'
+      return STATUS.filter_disabled
    else
-      return 0 -- enabled
+      return STATUS.enabled
    end
 end
 

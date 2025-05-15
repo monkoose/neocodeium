@@ -47,6 +47,7 @@ local function enable_autocmds()
    local doc = require("neocodeium.doc")
    local state = require("neocodeium.state")
    local utils = require("neocodeium.utils")
+   local STATUS = require("neocodeium.enums").STATUS
 
    local other_docs_timer = assert(uv.new_timer())
 
@@ -131,7 +132,7 @@ local function enable_autocmds()
 
    create_autocmd("InsertEnter", {
       callback = function()
-         if state:get_status() == 0 then
+         if state:get_status() == STATUS.enabled then
             state.active = true
          else
             state.active = false
