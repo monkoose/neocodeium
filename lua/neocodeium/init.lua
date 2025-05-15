@@ -43,6 +43,7 @@ end
 
 local function enable_autocmds()
    local completer = require("neocodeium.completer")
+   local renderer = require("neocodeium.renderer")
    local doc = require("neocodeium.doc")
    local state = require("neocodeium.state")
    local utils = require("neocodeium.utils")
@@ -80,7 +81,7 @@ local function enable_autocmds()
          pattern = "*:i*",
          once = true,
          callback = function()
-            completer.label.enabled = nu_or_rnu()
+            renderer.label.enabled = nu_or_rnu()
          end,
       })
    end
@@ -96,21 +97,21 @@ local function enable_autocmds()
    create_autocmd("OptionSet", {
       pattern = "number,relativenumber",
       callback = function()
-         completer.label.enabled = nu_or_rnu()
+         renderer.label.enabled = nu_or_rnu()
       end,
    })
 
    create_autocmd("ModeChanged", {
       pattern = "i*:[^i]*",
       callback = function()
-         completer:clear(true)
+         renderer:clear(true)
          state.active = false
       end,
    })
 
    create_autocmd("BufLeave", {
       callback = function()
-         completer:clear(true)
+         renderer:clear(true)
       end,
    })
 
@@ -229,7 +230,7 @@ function M.accept()
 end
 
 function M.clear()
-   require("neocodeium.completer"):clear(true)
+   require("neocodeium.renderer"):clear(true)
 end
 
 function M.cycle(n)

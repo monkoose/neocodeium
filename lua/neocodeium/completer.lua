@@ -5,66 +5,26 @@ local doc = require("neocodeium.doc")
 local utils = require("neocodeium.utils")
 local options = require("neocodeium.options").options
 local server = require("neocodeium.server")
-local events = require("neocodeium.events")
+local renderer = require("neocodeium.renderer")
 local state = require("neocodeium.state")
 local PART = require("neocodeium.enums").PART
-local STATUS = require("neocodeium.enums").STATUS
+local REQUEST_STATUS = require("neocodeium.enums").REQUEST_STATUS
 
 local fn = vim.fn
-local uv = vim.uv
 local json = vim.json
 
 local nvim_feedkeys = vim.api.nvim_feedkeys
 local nvim_get_current_buf = vim.api.nvim_get_current_buf
 local nvim_replace_termcodes = vim.api.nvim_replace_termcodes
-local nvim_get_current_line = vim.api.nvim_get_current_line
-local nvim_buf_set_extmark = vim.api.nvim_buf_set_extmark
-local nvim_get_hl_id_by_name = vim.api.nvim_get_hl_id_by_name
-local nvim_create_namespace = vim.api.nvim_create_namespace
-local nvim_buf_del_extmark = vim.api.nvim_buf_del_extmark
-local nvim_buf_clear_namespace = vim.api.nvim_buf_clear_namespace
-
-local hlgroup = nvim_get_hl_id_by_name("NeoCodeiumSuggestion")
-local ns = nvim_create_namespace("neocodeium_compl")
 
 -- Completer ----------------------------------------------- {{{1
 
----@class inline
----@field id? integer
----@field text? string
----@field prefix? string
-
----@class block
----@field text? string
----@field id? integer
-
----@class label
----@field enabled boolean
----@field id? integer
-
 ---@class Completer
----@field pos pos
----@field tick integer
----@field clear_timer uv.uv_timer_t
----@field fulltext string
----@field label label
----@field inline inline[]
----@field block block
----@field data compl.data
----@field debounce_timer uv.uv_timer_t
 ---@field request_id integer
 ---@field other_docs document[]
 local Completer = {
-   data = {},
-   debounce_timer = assert(uv.new_timer()),
    request_id = 0,
    other_docs = {},
-   pos = { 0, 0 },
-   clear_timer = assert(uv.new_timer()),
-   fulltext = "",
-   label = { enabled = false },
-   inline = {},
-   block = {},
 }
 
 -- Auxiliary functions ------------------------------------- {{{1
@@ -78,113 +38,14 @@ local function get_editor_opts()
    }
 end
 
----@param id extmark_id
----@param text string
----@param lnum lnum
-local function show_label(id, text, lnum)
-   return nvim_buf_set_extmark(0, ns, lnum, 0, {
-      id = id,
-      virt_text = { { text, "NeoCodeiumLabel" } },
-      virt_text_win_col = -1 - #text,
-   })
-end
-
----Adds virtual text into the `lnum` line number and `col` column.
----If `id` is nil then a new id will be generated.
----@param id? extmark_id
----@param str string text to display
----@param lnum lnum
----@param col col
----@return extmark_id
-local function show_inline(id, str, lnum, col)
-   return nvim_buf_set_extmark(0, ns, lnum, col, {
-      id = id,
-      virt_text_pos = "inline",
-      virt_text = { { str, hlgroup } },
-      undo_restore = false,
-      strict = false,
-   })
-end
-
----Returns `str` with leading tabs converted to spaces.
----@param str string
----@return string
-local function leading_tabs_to_spaces(str)
-   str = str:gsub("^\t*", function(m)
-      return string.rep(" ", #m * fn.shiftwidth())
-   end)
-   return str
-end
-
----Adds virtual text below the line with `lnum` number.
----If `id` is nil then a new id will be generated.
----@param id? extmark_id
----@param text string text to display, will be split into lines at "\n"
----@param lnum lnum
----@return extmark_id
-local function show_block(id, text, lnum)
-   local block_lines = {}
-   for line in vim.gsplit(text, "\n") do
-      table.insert(block_lines, { { leading_tabs_to_spaces(line), hlgroup } })
-   end
-
-   return nvim_buf_set_extmark(0, ns, lnum, 0, {
-      id = id,
-      virt_lines = block_lines,
-      undo_restore = false,
-      strict = false,
-   })
-end
-
----Deletes virtual text by it's extmark `id`
----@param id extmark_id
----@return boolean true if deleted
-local function delete_virttext(id)
-   return nvim_buf_del_extmark(0, ns, id)
-end
-
----Returns length of the common prefix of two strings
----@param s1 string
----@param s2 string
----@return integer
-local function same_prefix_index(s1, s2)
-   local len = math.min(#s1, #s2)
-   for i = 1, len do
-      if s1:sub(i, i) ~= s2:sub(i, i) then
-         return i - 1
-      end
-   end
-   return len
-end
-
----@param len integer
----@param idx integer
----@param col col
----@return integer
-local function calc_inline_delta(len, idx, col)
-   local result = 0
-   if col > len then
-      result = col - len
-   elseif col < len then
-      result = idx >= len and idx - len or col - len
-   end
-   return result
-end
-
 -- Completer methods --------------------------------------- {{{1
-
----Returns `true` if completion data is present and valid.
----@return boolean
-function Completer:valid()
-   return self.data.items ~= nil and self.data.index ~= nil
-end
 
 ---Returns current completion item or nil if there isn't one.
 ---@private
 ---@return compl.item|nil
 function Completer:curr_item()
-   if self:valid() and self.data.index <= #self.data.items then
-      return self.data.items[self.data.index]
+   if state:valid() and state.data.index <= #state.data.items then
+      return state.data.items[state.data.index]
    end
 end
 
@@ -192,321 +53,6 @@ end
 ---@return boolean
 function Completer:enabled()
    return state.allowed_encoding and options.status() == 0
-end
-
-function Completer:update_label()
-   vim.schedule(function()
-      if state.active and utils.is_empty(self.inline) and not self.block.text then
-         self:display_label()
-      end
-   end)
-end
-
----@private
----@param contents inline_content[]
-function Completer:display_inline(contents)
-   -- clear extra inline items
-   local contents_len = #contents
-   local leftover_ids = #self.inline - contents_len
-   if leftover_ids > 0 then
-      for _ = 1, leftover_ids do
-         local item = table.remove(self.inline)
-         delete_virttext(item.id)
-      end
-   end
-   -- change inline virtual text
-   if contents_len > 0 then
-      for i, c in ipairs(contents) do
-         if not self.inline[i] then
-            self.inline[i] = {}
-         end
-         self.inline[i].text = c.text
-         self.inline[i].prefix = c.prefix
-         self.inline[i].id = show_inline(self.inline[i].id, c.text, c.lnum, c.col)
-      end
-   end
-end
-
----@private
----@param lnum lnum
----@param text? string
-function Completer:display_block(text, lnum)
-   if text then
-      if not self.block.id or self.block.text ~= text then
-         self.block.text = text
-         self.block.id = show_block(self.block.id, text, lnum)
-      end
-   else
-      self:clear_block()
-   end
-end
-
----@private
-function Completer:display_label()
-   if not (options.show_label and self.label.enabled) then
-      return
-   end
-
-   local lnum = self.pos[1]
-   if state.status == STATUS.pending then
-      self.label.id = show_label(self.label.id, " * ", lnum)
-   elseif utils.is_empty(self.data.items) then
-      self.label.id = show_label(self.label.id, " 0 ", lnum)
-   else
-      self.label.id = show_label(self.label.id, self.data.index .. "/" .. #self.data.items, lnum)
-   end
-end
-
----Displays completion item
-function Completer:display()
-   if not state.active then
-      self:clear_all(true)
-      return
-   end
-
-   local lnum, col = unpack(self.pos)
-   local items = self.data.items or {}
-   local index = self.data.index or 1
-   local item = items[index] or {}
-   local parts = item.completionParts or {}
-
-   if utils.is_empty(parts) then
-      return
-   end
-
-   -- When only block part is present and text was changed compared to when
-   -- request was sent, return false, so it will dispatch new request
-   if not self.fulltext:match("^%s*$") and item.completion.text:match("^\n") then
-      self:request()
-      return
-   end
-
-   local block_text ---@type string?
-   local inline_contents = {} ---@type inline_content[]
-   local cummulative_cols = 0
-   local delta = 0
-
-   for i, part in ipairs(parts) do
-      -- process only correct parts
-      if lnum == (tonumber(part.line) or 0) then
-         local text = part.text
-
-         if part.type == PART.inline then
-            local prefix = part.prefix or ""
-            local prefix_len = #prefix
-            local column = prefix_len + cummulative_cols
-            cummulative_cols = column
-
-            if i == 1 then
-               local compl_line = prefix .. text
-               local match_prefix_idx = same_prefix_index(compl_line, self.fulltext)
-               -- When actual text doesn't match prefix return false, so it will
-               -- dispatch new request for the completion
-               if match_prefix_idx ~= col then
-                  self:request()
-                  return
-               end
-
-               delta = calc_inline_delta(prefix_len, match_prefix_idx, col)
-               if delta < 0 then
-                  text = prefix:sub(delta) .. text
-               elseif delta > 0 then
-                  text = text:sub(delta + 1)
-               end
-               prefix = ""
-            end
-            table.insert(
-               inline_contents,
-               { lnum = lnum, col = column + delta, text = text, prefix = prefix }
-            )
-         elseif part.type == PART.block then
-            block_text = text
-         end
-      end
-   end
-
-   self.clear_timer:stop()
-   self:display_inline(inline_contents)
-   self:display_block(block_text, lnum)
-   if block_text or #inline_contents > 0 then
-      self:display_label()
-   end
-   events.emit("NeoCodeiumCompletionDisplayed", nil, true)
-end
-
----@private
-function Completer:start_clear_timer()
-   if not self.clear_timer:is_active() then
-      self.clear_timer:start(350, 0, function()
-         self:clear_all(false, true)
-      end)
-   end
-end
-
----@private
-function Completer:update_forward_line()
-   if not utils.is_empty(self.block.text) then
-      -- find if block.text has multiple lines
-      local index = self.block.text:find("\n")
-      self.inline = { { prefix = "" } }
-      local lnum, col = unpack(self.pos)
-      if index then
-         -- starting index `self.pos[2] + 1` is start of the line with indentation
-         -- prevents shifting of the inline text
-         self.inline[1].text = self.block.text:sub(col + 1, index - 1)
-         self.block.text = self.block.text:sub(index + 1)
-         -- self.block.id already exists, no need to set it
-         show_block(self.block.id, self.block.text, lnum)
-      else
-         self.inline[1].text = self.block.text:sub(col + 1)
-         self:clear_block()
-         -- required to update label position
-         if options.show_label and self.label.enabled then
-            show_label(self.label.id, " 0 ", self.pos[1])
-         end
-      end
-      self.inline[1].id = show_inline(nil, self.inline[1].text, lnum, col)
-   end
-   self:start_clear_timer()
-end
-
----@private
-function Completer:update_backward_line()
-   if #self.inline == 1 then
-      if self.block.text then
-         self.block.text = self.inline[1].text .. "\n" .. self.block.text
-      else
-         self.block.text = self.inline[1].text
-      end
-      self:clear_inline()
-      -- self.block.id could be nil, so we need to set it
-      self.block.id = show_block(self.block.id, self.block.text, self.pos[1])
-   end
-   self:start_clear_timer()
-end
-
----@param prev_pos pos
----@param new_fulltext string
-function Completer:update_horz_move(prev_pos, new_fulltext)
-   local lnum, col = unpack(self.pos)
-   local prev_col = prev_pos[2]
-   local horz_move = col - prev_col
-   local first_inline = self.inline[1]
-
-   if horz_move >= 0 then -- added some text
-      if horz_move > #first_inline.text then
-         self:clear_inline()
-         self:start_clear_timer()
-      else
-         local prefix = first_inline.text:sub(1, horz_move)
-         self.inline[1].text = first_inline.text:sub(horz_move + 1)
-         show_inline(first_inline.id, first_inline.text, lnum, col)
-         if new_fulltext:sub(prev_col) ~= prefix then
-            self:start_clear_timer()
-         end
-      end
-   else -- deleted some text
-      if self.fulltext:match("^%s*$") then
-         self:start_clear_timer()
-      else
-         local prefix = self.fulltext:sub(col + 1, col - horz_move)
-         self.inline[1].text = prefix .. first_inline.text
-         show_inline(first_inline.id, first_inline.text, lnum, col)
-         self.clear_timer:stop()
-         self:start_clear_timer()
-      end
-   end
-end
-
-function Completer:update()
-   local prev_pos = self.pos
-   self.pos = utils.get_cursor()
-   local vert_move = self.pos[1] - prev_pos[1]
-
-   if self.tick == vim.b.changedtick or math.abs(vert_move) > 1 then
-      self.clear_timer:stop()
-      self:clear_all()
-      self.fulltext = nvim_get_current_line()
-   else
-      local fulltext = nvim_get_current_line()
-      if vert_move == 1 then
-         self.clear_timer:stop()
-         self:update_forward_line()
-      elseif vert_move == -1 then
-         self.clear_timer:stop()
-         self:update_backward_line()
-      else -- cursor movement happened on the same line
-         if not self.inline[1] then
-            self:clear_inline()
-         else
-            self:update_horz_move(prev_pos, fulltext)
-         end
-      end
-      self.fulltext = fulltext
-   end
-
-   self.tick = vim.b.changedtick
-end
-
----Clears the block virtual text and removes block.id cache
-function Completer:clear_block()
-   if self.block.id == nil then
-      return
-   end
-
-   delete_virttext(self.block.id)
-   self.block.text = nil
-   self.block.id = nil
-end
-
----Clears the inline virtual text and resets `self.inline` to empty table
-function Completer:clear_inline()
-   for _, item in ipairs(self.inline) do
-      delete_virttext(item.id)
-   end
-   self.inline = {}
-end
-
----Clears the label virtual text and removes label.id cache
-function Completer:clear_label()
-   if self.label.id == nil then
-      return
-   end
-
-   delete_virttext(self.label.id)
-   self.label.id = nil
-end
-
----Clears plugin's namespace and resets cache
----@param with_reset? boolean
----@param scheduled? boolean
-function Completer:clear_all(with_reset, scheduled)
-   if with_reset then
-      self.clear_timer:stop()
-      self.label.id = nil
-      self.inline = {}
-      self.block.id = nil
-      self.block.text = nil
-      self.fulltext = ""
-      if scheduled then
-         vim.schedule(function()
-            nvim_buf_clear_namespace(0, ns, 0, -1)
-         end)
-      else
-         nvim_buf_clear_namespace(0, ns, 0, -1)
-      end
-      events.emit("NeoCodeiumCompletionCleared", nil, true)
-   else
-      if scheduled then
-         vim.schedule(function()
-            self:clear_inline()
-            self:clear_block()
-         end)
-      else
-         self:clear_inline()
-         self:clear_block()
-      end
-   end
 end
 
 ---Cycles completions by amount `n`, wraps around if necessary.
@@ -518,17 +64,17 @@ function Completer:cycle(n)
       return
    end
 
-   self.data.index = self.data.index + (n or 1)
-   local items_len = #self.data.items
+   state.data.index = state.data.index + (n or 1)
+   local items_len = #state.data.items
    -- wrap on boundaries
-   if self.data.index > items_len then
-      self.data.index = 1
-   elseif self.data.index < 1 then
-      self.data.index = items_len
+   if state.data.index > items_len then
+      state.data.index = 1
+   elseif state.data.index < 1 then
+      state.data.index = items_len
    end
 
    vim.schedule(function()
-      self:display()
+      renderer:display()
    end)
 end
 
@@ -548,8 +94,11 @@ end
 ---@private
 ---@param r response
 function Completer:handle_response(r)
+   state.request_status = REQUEST_STATUS.completed
+   renderer:update_label()
+
    -- finish if the context has changed
-   if vim.tbl_isempty(self.data) then
+   if vim.tbl_isempty(state.data) then
       return
    end
 
@@ -563,11 +112,14 @@ function Completer:handle_response(r)
       return
    end
 
-   self.data.items = response.completionItems
-   self.data.index = 1
+   state.data.items = response.completionItems
+   state.data.index = 1
 
    vim.schedule(function()
-      self:display()
+      local resend_request = renderer:display()
+      if resend_request then
+         self:request()
+      end
    end)
 end
 
@@ -580,19 +132,19 @@ function Completer:accept_regex(regex)
    end
 
    local text = ""
-   for _, item in ipairs(self.inline) do
+   for _, item in ipairs(state.inline) do
       text = text .. item.prefix .. item.text
    end
 
    if text ~= "" then
       text = fn.matchstr(text, regex)
-      if #self.inline > 1 then
+      if #state.inline > 1 then
          local text_len = #text
-         local combined_text = self.inline[1].text
+         local combined_text = state.inline[1].text
          if text_len > #combined_text then
             local combined_prefix = ""
-            for i = 2, #self.inline do
-               local item = self.inline[i]
+            for i = 2, #state.inline do
+               local item = state.inline[i]
                combined_text = combined_text .. item.prefix
                local combined_len = #combined_text
                if text_len >= combined_len then
@@ -613,14 +165,14 @@ function Completer:accept_regex(regex)
          end
       end
    else
-      text = self.block.text or ""
+      text = state.block.text or ""
       if text == "" then
          return
       end
 
       text = vim.split(text, "\n")[1]
       text = fn.matchstr(text, regex)
-      local lnum1 = self.pos[1] + 1
+      local lnum1 = state.pos[1] + 1
       utils.set_lines(lnum1, lnum1, { "" })
       utils.set_cursor({ lnum1, 0 })
    end
@@ -640,16 +192,16 @@ end
 ---@private
 ---Constructs and sends a request to the server only when in an appropriate state.
 function Completer:request()
-   if not (server.port and state.active) or state.status == STATUS.pending then
+   if not (server.port and state.active) or state.request_status == REQUEST_STATUS.pending then
       return
    end
 
-   state.status = STATUS.pending
-   self:update_label()
+   state.request_status = REQUEST_STATUS.pending
+   renderer:update_label()
 
    self.request_id = self.request_id + 1
    local curr_bufnr = nvim_get_current_buf()
-   local pos = self.pos
+   local pos = state.pos
    local metadata = server.metadata
    metadata.request_id = self.request_id
    local data = {
@@ -660,55 +212,30 @@ function Completer:request()
    }
 
    server:request("GetCompletions", data, function(r)
-      state.status = STATUS.completed
-      self:update_label()
       self:handle_response(r)
    end)
 
    -- setting 'duplicate' id so it can be processed correctly by
    -- handle_response() and clear() methods
-   self.data.id = self.request_id
-end
-
----Clears completion state. When `force` is true, the inline and block
----virtual text is cleared too.
----@param force? boolean
-function Completer:clear(force)
-   if force or options.debounce or state.status ~= STATUS.pending then
-      state.status = STATUS.none
-      if options.debounce and self.debounce_timer:is_active() then
-         self.debounce_timer:stop()
-      end
-      -- Cancel request if there is one
-      if not vim.tbl_isempty(self.data) then
-         if self.data.id and self.data.id > 0 then
-            server:request("CancelRequest", { request_id = self.data.id })
-         end
-         self.data = {}
-      end
-   end
-
-   if force then
-      self:clear_all(true)
-   end
+   state.data.id = self.request_id
 end
 
 ---Initiates a completion.
 ---@param omit_manual? boolean
 function Completer:initiate(omit_manual)
-   self:update()
-   self:clear()
+   renderer:update()
+   renderer:clear()
 
    if options.manual and not omit_manual then
-      self:clear_all()
+      renderer:clear_all()
       return
    end
 
    if options.debounce then
-      if self.debounce_timer:is_active() then
-         self.debounce_timer:stop()
+      if state.debounce_timer:is_active() then
+         state.debounce_timer:stop()
       end
-      self.debounce_timer:start(
+      state.debounce_timer:start(
          120,
          0,
          vim.schedule_wrap(function()
@@ -755,7 +282,7 @@ function Completer:accept()
    })
 
    local pos ---@type pos
-   local lnum = self.pos[1] + 1
+   local lnum = state.pos[1] + 1
    if block then
       local block_len = #block
       local delta = curr_item.suffix and curr_item.suffix.deltaCursorOffset or 0
@@ -774,12 +301,12 @@ function Completer:accept()
    -- scheduling prevents pasting block before accept_line(),
    -- because accept_line() using some type of scheduling too with nvim_feedkeys()
    vim.schedule(function()
-      self:clear_all(true)
+      renderer:clear_all(true)
       if block then
          utils.set_lines(lnum, lnum, block)
          utils.set_cursor(pos)
          -- required to update label position
-         self.pos = pos
+         state.pos = pos
       end
    end)
 end
