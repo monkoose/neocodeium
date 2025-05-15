@@ -19,12 +19,19 @@ local nvim_replace_termcodes = vim.api.nvim_replace_termcodes
 
 -- Completer ----------------------------------------------- {{{1
 
+---@class cancel_requrest_data
+---@field request_id integer
+
 ---@class Completer
 ---@field request_id integer
 ---@field other_docs document[]
+---@field cancel_requrest_data cancel_requrest_data
 local Completer = {
    request_id = 0,
    other_docs = {},
+   cancel_requrest_data = {
+      request_id = -1,
+   },
 }
 
 -- Auxiliary functions ------------------------------------- {{{1
@@ -227,10 +234,10 @@ end
 ---@param omit_manual? boolean
 function Completer:initiate(omit_manual)
    renderer:update()
-   renderer:clear()
+   self:clear()
 
    if options.manual and not omit_manual then
-      renderer:clear_all()
+      renderer:clear()
       return
    end
 
@@ -294,7 +301,7 @@ function Completer:accept()
    -- scheduling prevents pasting block before accept_line(),
    -- because accept_line() using some type of scheduling too with nvim_feedkeys()
    vim.schedule(function()
-      renderer:clear_all(true)
+      renderer:clear(true)
       if block then
          utils.set_lines(lnum, lnum, block)
          utils.set_cursor(pos)
@@ -303,6 +310,31 @@ function Completer:accept()
       end
    end)
 end
+
+---Clears completion state. When `force` is true, the inline and block
+---virtual text is cleared too.
+---@param force? boolean
+function Completer:clear(force)
+   if force or options.debounce or state.request_status ~= REQUEST_STATUS.pending then
+      state.request_status = REQUEST_STATUS.none
+      if options.debounce then
+         state:stop_debounce_timer()
+      end
+      -- Cancel request if there is one
+      if not vim.tbl_isempty(state.data) then
+         if state.data.id and state.data.id > 0 then
+            self.cancel_requrest_data.request_id = state.data.id
+            server:request("CancelRequest", self.cancel_requrest_data)
+         end
+         state.data = {}
+      end
+   end
+
+   if force then
+      renderer:clear(true)
+   end
+end
+
 -- }}}1
 
 return Completer

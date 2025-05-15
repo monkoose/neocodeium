@@ -104,14 +104,14 @@ local function enable_autocmds()
    create_autocmd("ModeChanged", {
       pattern = "i*:[^i]*",
       callback = function()
-         renderer:clear(true)
+         completer:clear(true)
          state.active = false
       end,
    })
 
    create_autocmd("BufLeave", {
       callback = function()
-         renderer:clear(true)
+         completer:clear(true)
       end,
    })
 
@@ -230,7 +230,7 @@ function M.accept()
 end
 
 function M.clear()
-   require("neocodeium.renderer"):clear(true)
+   require("neocodeium.completer"):clear(true)
 end
 
 function M.cycle(n)

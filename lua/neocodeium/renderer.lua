@@ -2,7 +2,6 @@
 
 local options = require("neocodeium.options").options
 local events = require("neocodeium.events")
-local server = require("neocodeium.server")
 local state = require("neocodeium.state")
 local utils = require("neocodeium.utils")
 local PART = require("neocodeium.enums").PART
@@ -25,23 +24,16 @@ local ns = vim.api.nvim_create_namespace("neocodeium_compl")
 ---@field enabled boolean
 ---@field id? integer
 
----@class cancel_requrest_data
----@field request_id integer
-
 ---@class Renderer
 ---@field clear_timer uv.uv_timer_t
 ---@field label label
 ---@field fulltext string
 ---@field changedtick integer
----@field cancel_requrest_data cancel_requrest_data
 local Renderer = {
    clear_timer = assert(uv.new_timer()),
    label = { enabled = false },
    fulltext = "",
    changedtick = -1,
-   cancel_requrest_data = {
-      request_id = -1,
-   },
    label_virt_text = { { "", "NeoCodeiumLabel" } },
    inline_virt_text = { { "", hlgroup } },
 }
@@ -208,7 +200,7 @@ end
 function Renderer:start_clear_timer()
    if not self.clear_timer:is_active() then
       self.clear_timer:start(350, 0, function()
-         self:clear_all(false, true)
+         self:clear(false, true)
       end)
    end
 end
@@ -267,7 +259,7 @@ end
 ---@return boolean
 function Renderer:display()
    if not state.active then
-      self:clear_all(true)
+      self:clear(true)
       return false
    end
 
@@ -326,34 +318,10 @@ function Renderer:remove_label()
    end
 end
 
----Clears completion state. When `force` is true, the inline and block
----virtual text is cleared too.
----@param force? boolean
-function Renderer:clear(force)
-   if force or options.debounce or state.request_status ~= REQUEST_STATUS.pending then
-      state.request_status = REQUEST_STATUS.none
-      if options.debounce then
-         state:stop_debounce_timer()
-      end
-      -- Cancel request if there is one
-      if not vim.tbl_isempty(state.data) then
-         if state.data.id and state.data.id > 0 then
-            self.cancel_requrest_data.request_id = state.data.id
-            server:request("CancelRequest", self.cancel_requrest_data)
-         end
-         state.data = {}
-      end
-   end
-
-   if force then
-      self:clear_all(true)
-   end
-end
-
 ---Clears plugin's namespace and resets cache
 ---@param with_reset? boolean
 ---@param scheduled? boolean
-function Renderer:clear_all(with_reset, scheduled)
+function Renderer:clear(with_reset, scheduled)
    if with_reset then
       self.clear_timer:stop()
       self.label.id = nil
@@ -465,7 +433,7 @@ function Renderer:update()
 
    if self.changedtick == vim.b.changedtick or math.abs(vert_move) > 1 then
       self.clear_timer:stop()
-      self:clear_all()
+      self:clear()
       self.fulltext = nvim_get_current_line()
    else
       local fulltext = nvim_get_current_line()
