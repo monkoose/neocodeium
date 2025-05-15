@@ -52,13 +52,13 @@ local function enable_autocmds()
    end
 
    completer.allowed_encoding = utf8_or_latin1()
-   local other_timer = assert(uv.new_timer())
+   local other_docs_timer = assert(uv.new_timer())
 
    create_autocmd("BufEnter", {
       callback = function()
          completer.allowed_encoding = utf8_or_latin1()
-         other_timer:stop()
-         other_timer:start(
+         other_docs_timer:stop()
+         other_docs_timer:start(
             1,
             0,
             vim.schedule_wrap(function()
