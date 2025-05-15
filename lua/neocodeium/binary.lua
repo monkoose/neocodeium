@@ -90,8 +90,10 @@ function Bin:download(callback)
    local bin_dir = fs.dirname(self.path)
    if bin_dir then
       fn.delete(bin_dir, "rf")
-      -- TODO: handle error
-      fn.mkdir(bin_dir, "p")
+      if fn.mkdir(bin_dir, "p") == 0 then
+         echo.error("failed to create directory " .. bin_dir)
+         log.error("Failed to create directory " .. bin_dir)
+      end
    end
 
    echo.info("Downloading binary v" .. self.version)
