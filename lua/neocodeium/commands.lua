@@ -209,7 +209,7 @@ function M.chat()
    local chat = require("neocodeium.chat")
    local function launch_chat()
       chat.refresh_context()
-      server:request("GetProcesses", { metadata = server.metadata }, chat.launch)
+      server:request("GetProcesses", state.request_data, chat.launch)
       chat.add_tracked_workspace()
    end
 

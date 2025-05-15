@@ -25,16 +25,23 @@ local ns = vim.api.nvim_create_namespace("neocodeium_compl")
 ---@field enabled boolean
 ---@field id? integer
 
+---@class cancel_requrest_data
+---@field request_id integer
+
 ---@class Renderer
 ---@field clear_timer uv.uv_timer_t
 ---@field label label
 ---@field fulltext string
 ---@field changedtick integer
+---@field cancel_requrest_data cancel_requrest_data
 local Renderer = {
    clear_timer = assert(uv.new_timer()),
    label = { enabled = false },
    fulltext = "",
    changedtick = -1,
+   cancel_requrest_data = {
+      request_id = -1,
+   },
 }
 
 -- Auxiliary functions ------------------------------------- {{{1
@@ -324,7 +331,8 @@ function Renderer:clear(force)
       -- Cancel request if there is one
       if not vim.tbl_isempty(state.data) then
          if state.data.id and state.data.id > 0 then
-            server:request("CancelRequest", { request_id = state.data.id })
+            self.cancel_requrest_data.request_id = state.data.id
+            server:request("CancelRequest", self.cancel_requrest_data)
          end
          state.data = {}
       end

@@ -53,11 +53,17 @@
 ---| "AddTrackedWorkspace"
 
 ---@class request_data
----@field metadata request_metadata?
----@field editor_options editor_options?
----@field document document?
----@field other_documents document[]?
----@field request_id integer?
+---@field metadata request_metadata
+
+---@class accept_request_data
+---@field metadata request_metadata
+---@field completion_id string
+
+---@class completion_request_data
+---@field metadata request_metadata
+---@field editor_options? editor_options
+---@field document? document
+---@field other_documents? document[]
 
 ---@class response
 ---@field out string[]

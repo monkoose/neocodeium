@@ -200,23 +200,18 @@ function Completer:request()
    renderer:update_label()
 
    self.request_id = self.request_id + 1
-   local curr_bufnr = nvim_get_current_buf()
-   local pos = state.pos
-   local metadata = server.metadata
-   metadata.request_id = self.request_id
-   local data = {
-      metadata = metadata,
-      editor_options = get_editor_opts(),
-      document = doc.get(curr_bufnr, vim.bo.filetype, -1, pos),
-      other_documents = self.other_docs,
-   }
+   state.completion_request_data.metadata.request_id = self.request_id
+   state.completion_request_data.document =
+      doc.get(nvim_get_current_buf(), vim.bo.filetype, -1, state.pos)
+   state.completion_request_data.other_documents = self.other_docs
+   state.completion_request_data.editor_options = get_editor_opts()
 
-   server:request("GetCompletions", data, function(r)
+   server:request("GetCompletions", state.completion_request_data, function(r)
       self:handle_response(r)
    end)
 
    -- setting 'duplicate' id so it can be processed correctly by
-   -- handle_response() and clear() methods
+   -- self:handle_response() and renderer:clear() methods
    state.data.id = self.request_id
 end
 
@@ -276,10 +271,8 @@ function Completer:accept()
       return
    end
 
-   server:request("AcceptCompletion", {
-      metadata = server.metadata,
-      completion_id = curr_item.completion.completionId,
-   })
+   state.accept_request_data.completion_id = curr_item.completion.completionId
+   server:request("AcceptCompletion", state.accept_request_data)
 
    local pos ---@type pos
    local lnum = state.pos[1] + 1

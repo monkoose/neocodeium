@@ -252,7 +252,7 @@ end
 ---Returns true if a suggestion's virtual text is visible
 ---@return boolean
 function M.visible()
-   return require("neocodeium.completer"):valid()
+   return require("neocodeium.state"):valid()
 end
 
 function M.chat()

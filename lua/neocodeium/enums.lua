@@ -16,7 +16,7 @@ M.PART = {
    block = "COMPLETION_PART_TYPE_BLOCK",
 }
 
----@enum state.request_status
+---@enum request_status
 M.REQUEST_STATUS = {
    none = 0,
    pending = 1,

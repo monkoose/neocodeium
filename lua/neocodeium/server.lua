@@ -24,6 +24,7 @@ local json = vim.json
 ---@field pid? integer
 ---@field is_restart boolean
 ---@field startup_callback? fun()
+---@field metadata request_metadata
 local Server = {
    bin = Bin.new(),
    is_restart = false,
@@ -191,7 +192,7 @@ end
 
 ---Sends request to the server
 ---@param type request_type
----@param data request_data
+---@param data table
 ---@param on_exit? fun(response: response)
 function Server:request(type, data, on_exit)
    ---@type url
@@ -249,6 +250,11 @@ function Server:init(timer, manager_dir)
       local port = fs.basename(port_file)
       log.info("Found port: " .. port)
       echo.info("server started on port " .. port, options.silent)
+
+      state.request_data.metadata = self.metadata
+      state.accept_request_data.metadata = self.metadata
+      state.completion_request_data.metadata = self.metadata
+
       self.port = port
       if self.startup_callback then
          self.startup_callback()
@@ -260,7 +266,7 @@ function Server:init(timer, manager_dir)
       local interval = 10000 -- 10 seconds
       -- constantly send heartbeats
       timer:start(interval, interval, function()
-         self:request("Heartbeat", { metadata = self.metadata })
+         self:request("Heartbeat", state.request_data)
       end)
    end
 end

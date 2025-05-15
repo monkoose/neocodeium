@@ -14,7 +14,10 @@ local uv = vim.uv
 ---@class State
 ---@field active boolean
 ---@field chat_enabled boolean
----@field request_status state.request_status
+---@field request_status request_status
+---@field request_data request_data
+---@field accept_request_data accept_request_data
+---@field completion_request_data completion_request_data
 ---@field allowed_encoding boolean
 ---@field pos pos
 ---@field data compl.data
@@ -25,6 +28,9 @@ local State = {
    active = false,
    chat_enabled = false,
    request_status = REQUEST_STATUS.none,
+   request_data = {}, ---@diagnostic disable-line: missing-fields
+   accept_request_data = {}, ---@diagnostic disable-line: missing-fields
+   completion_request_data = {}, ---@diagnostic disable-line: missing-fields
    allowed_encoding = false,
    pos = { 0, 0 },
    data = {},
