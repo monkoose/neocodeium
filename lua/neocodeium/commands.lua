@@ -48,7 +48,7 @@ local function request_api_key()
 
    local curl_with_args = {
       "curl",
-      "-sS",
+      "-sSL",
       register_user_url,
       "--header",
       "Content-Type:application/json",

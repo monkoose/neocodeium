@@ -199,7 +199,7 @@ function Server:request(type, data, on_exit)
       .. self.port
       .. "/exa.language_server_pb.LanguageServerService/"
       .. type
-   local cmd_args = { uri, "-H", "Content-Type: application/json", "-d@-" }
+   local cmd_args = { "-L", uri, "-H", "Content-Type: application/json", "-d@-" }
    -- Because response from the server can be splitted into multiple chunks
    -- we collecting them in this table
    local response = { out = {}, err = {} }
