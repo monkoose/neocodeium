@@ -248,6 +248,18 @@ CONFIGURATION                                       *neocodeium-configuration*
         String.
         Sets default log level.
         One of "trace", "debug", "info", "warn", "error".
+    single_line~
+        Dictionary.
+        enabled~
+            Boolean.
+            When `true`, then single line mode is enabled. In this mode,
+            multi-line suggestions would collapse into a single line and only
+            shows full lines when on the end of the suggested (accepted) line.
+            So it is less distracting and works better with other completion
+            plugins.
+        label~
+            String.
+            Label indicating that there is multi-line suggestion.
     filter~
         Function.
         Function that if returns `false` then disables completions for the
@@ -274,6 +286,10 @@ Defaults: >lua
         silent = false,
         disable_in_special_buftypes = true,
         log_level = "warn",
+        single_line = {
+            enabled = false,
+            label = "...",
+        }
         filter = nil,
         filetypes = {
             help = false,

@@ -1,9 +1,9 @@
 local options = require("neocodeium.options").options
 local utils = require("neocodeium.utils")
-local REQUEST_STATUS = require("neocodeium.enums").REQUEST_STATUS
 local STATUS = require("neocodeium.enums").STATUS
 
 local uv = vim.uv
+local fn = vim.fn
 
 local nvim_get_option_value = vim.api.nvim_get_option_value
 
@@ -14,32 +14,43 @@ local nvim_get_option_value = vim.api.nvim_get_option_value
 
 ---@class block
 ---@field text? string
+---@field visible? boolean
 ---@field id? integer
 
 ---@class State
 ---@field active boolean
 ---@field chat_enabled boolean
----@field request_status request_status
 ---@field request_data request_data
 ---@field accept_request_data accept_request_data
----@field completion_request_data completion_request_data
+---@field completion_request_data state.completion_request_data
+---@field pending boolean
+---@field matching boolean
 ---@field pos pos
 ---@field data compl.data
 ---@field inline inline[]
 ---@field block block
 ---@field debounce_timer uv.uv_timer_t
+---@field curline_text string
 local State = {
    active = false,
    chat_enabled = false,
-   request_status = REQUEST_STATUS.none,
    request_data = {}, ---@diagnostic disable-line: missing-fields
    accept_request_data = {}, ---@diagnostic disable-line: missing-fields
-   completion_request_data = {}, ---@diagnostic disable-line: missing-fields
+   ---@diagnostic disable-next-line: missing-fields
+   completion_request_data = {
+      editor_options = {
+         tab_size = fn.shiftwidth(),
+         insert_spaces = vim.bo.expandtab,
+      },
+   },
+   pending = false,
+   matching = false,
    pos = { 0, 0 },
    data = {},
    inline = {},
    block = {},
    debounce_timer = assert(uv.new_timer()),
+   curline_text = "",
 }
 
 ---Returns `true` if completion data is present and valid.
@@ -78,6 +89,11 @@ function State:get_status(bufnr)
    else
       return STATUS.enabled
    end
+end
+
+function State:update_editor_options()
+   self.completion_request_data.editor_options.tab_size = fn.shiftwidth()
+   self.completion_request_data.editor_options.insert_spaces = vim.bo.expandtab
 end
 
 return State

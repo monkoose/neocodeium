@@ -1,5 +1,4 @@
 local options = require("neocodeium.options").options
-local LEVEL = require("neocodeium.enums").LEVEL
 
 local fn = vim.fn
 local uv = vim.uv
@@ -9,6 +8,15 @@ local logfile = fn.tempname() .. "-neocodeium.log"
 local min_log_level = vim.env.NEOCODEIUM_LOG_LEVEL or options.log_level
 ---@type integer
 local o644 = tonumber(644, 8) ---@diagnostic disable-line: assign-type-mismatch
+
+---@enum level
+local LEVEL = {
+   trace = 0,
+   debug = 1,
+   info = 2,
+   warn = 3,
+   error = 4,
+}
 
 local M = {
    BOTH = 0,

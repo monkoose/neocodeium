@@ -59,17 +59,17 @@
 ---@field metadata request_metadata
 ---@field completion_id string
 
----@class completion_request_data
+---@class state.completion_request_data
 ---@field metadata request_metadata
----@field editor_options? editor_options
----@field document? document
----@field other_documents? document[]
+---@field editor_options state.editor_options
+---@field document document
+---@field other_documents document[]
 
 ---@class response
 ---@field out string[]
 ---@field err string[]
 
----@class editor_options
+---@class state.editor_options
 ---@field tab_size integer
 ---@field insert_spaces boolean
 
@@ -92,7 +92,6 @@
 ---@class compl.data
 ---@field items compl.item[]?
 ---@field index integer?
----@field id integer?
 
 ---@alias completionId string
 ---@class compl.item

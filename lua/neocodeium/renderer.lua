@@ -4,8 +4,6 @@ local options = require("neocodeium.options").options
 local events = require("neocodeium.events")
 local state = require("neocodeium.state")
 local utils = require("neocodeium.utils")
-local PART = require("neocodeium.enums").PART
-local REQUEST_STATUS = require("neocodeium.enums").REQUEST_STATUS
 
 local fn = vim.fn
 local uv = vim.uv
@@ -23,18 +21,22 @@ local ns = vim.api.nvim_create_namespace("neocodeium_compl")
 ---@class label
 ---@field enabled boolean
 ---@field id? integer
+---@field virt_text table
 
 ---@class Renderer
 ---@field clear_timer uv.uv_timer_t
 ---@field label label
----@field fulltext string
 ---@field changedtick integer
+---@field single_line_virt_text table
+---@field inline_virt_text table
 local Renderer = {
    clear_timer = assert(uv.new_timer()),
-   label = { enabled = false },
-   fulltext = "",
+   label = {
+      enabled = false,
+      virt_text = { { "", "NeoCodeiumLabel" } },
+   },
    changedtick = -1,
-   label_virt_text = { { "", "NeoCodeiumLabel" } },
+   single_line_virt_text = { { options.single_line.label, "NeoCodeiumSingleLineLabel" } },
    inline_virt_text = { { "", hlgroup } },
 }
 
@@ -57,96 +59,15 @@ local function leading_tabs_to_spaces(str)
    return str
 end
 
----Returns length of the common prefix of two strings
----@param s1 string
----@param s2 string
----@return integer
-local function same_prefix_index(s1, s2)
-   local len = math.min(#s1, #s2)
-   for i = 1, len do
-      if s1:sub(i, i) ~= s2:sub(i, i) then
-         return i - 1
-      end
-   end
-   return len
-end
-
----@param len integer
----@param idx integer
----@param col col
----@return integer
-local function calc_inline_delta(len, idx, col)
-   local result = 0
-   if col > len then
-      result = col - len
-   elseif col < len then
-      result = idx >= len and idx - len or col - len
-   end
-   return result
-end
-
----@param parts any
----@param compare_text string
----@return inline_content[], string|nil, boolean
-local function get_completion_content(parts, compare_text)
-   local lnum, col = unpack(state.pos)
-   local block_text ---@type string?
-   local inline_contents = {} ---@type inline_content[]
-   local cummulative_cols = 0
-   local delta = 0
-
-   for i, part in ipairs(parts) do
-      -- process only correct parts
-      if lnum == (tonumber(part.line) or 0) then
-         local text = part.text
-
-         if part.type == PART.inline then
-            local prefix = part.prefix or ""
-            local prefix_len = #prefix
-            local column = prefix_len + cummulative_cols
-            cummulative_cols = column
-
-            if i == 1 then
-               local compl_line = prefix .. text
-               local match_prefix_idx = same_prefix_index(compl_line, compare_text)
-               -- When actual text doesn't match prefix return false, so it will
-               -- dispatch new request for the completion
-               if match_prefix_idx ~= col then
-                  return inline_contents, block_text, true
-               end
-
-               delta = calc_inline_delta(prefix_len, match_prefix_idx, col)
-               if delta < 0 then
-                  text = prefix:sub(delta) .. text
-               elseif delta > 0 then
-                  text = text:sub(delta + 1)
-               end
-               prefix = ""
-            end
-            table.insert(
-               inline_contents,
-               { lnum = lnum, col = column + delta, text = text, prefix = prefix }
-            )
-         elseif part.type == PART.block then
-            block_text = text
-         end
-      else
-         return inline_contents, block_text, true
-      end
-   end
-
-   return inline_contents, block_text, false
-end
-
 -- Renderer methods ---------------------------------------- {{{1
 
 ---@param text string
 ---@return extmark_id
 function Renderer:set_virt_label(text)
-   self.label_virt_text[1][1] = text
+   self.label.virt_text[1][1] = text
    return nvim_buf_set_extmark(0, ns, state.pos[1], 0, {
       id = self.label.id,
-      virt_text = self.label_virt_text,
+      virt_text = self.label.virt_text,
       virt_text_win_col = -1 - #text,
    })
 end
@@ -175,25 +96,33 @@ end
 ---@param lnum? lnum
 ---@return extmark_id
 function Renderer:set_virt_block(text, lnum)
-   local block_lines = {}
-   for line in vim.gsplit(text, "\n") do
-      table.insert(block_lines, { { leading_tabs_to_spaces(line), hlgroup } })
-   end
-
-   return nvim_buf_set_extmark(0, ns, lnum or state.pos[1], 0, {
-      id = state.block.id,
-      virt_lines = block_lines,
-      undo_restore = false,
-      strict = false,
-   })
-end
-
-function Renderer:update_label()
-   vim.schedule(function()
-      if state.active and utils.is_empty(state.inline) and not state.block.text then
-         self:display_label()
+   lnum = lnum or state.pos[1]
+   if
+      options.single_line.enabled
+      and state.inline[1]
+      and not utils.is_empty(state.inline[1].text)
+   then
+      state.block.visible = false
+      return nvim_buf_set_extmark(0, ns, lnum, 0, {
+         id = state.block.id,
+         virt_text = self.single_line_virt_text,
+         undo_restore = false,
+         strict = false,
+      })
+   else
+      state.block.visible = true
+      local block_lines = {}
+      for line in vim.gsplit(text, "\n") do
+         table.insert(block_lines, { { leading_tabs_to_spaces(line), hlgroup } })
       end
-   end)
+
+      return nvim_buf_set_extmark(0, ns, lnum, 0, {
+         id = state.block.id,
+         virt_lines = block_lines,
+         undo_restore = false,
+         strict = false,
+      })
+   end
 end
 
 ---@private
@@ -231,7 +160,7 @@ end
 ---@param text? string
 function Renderer:display_block(text)
    if text then
-      if not state.block.id or state.block.text ~= text then
+      if not state.block.id or options.single_line.enabled or state.block.text ~= text then
          state.block.text = text
          state.block.id = self:set_virt_block(text)
       end
@@ -240,57 +169,44 @@ function Renderer:display_block(text)
    end
 end
 
+function Renderer:update_label()
+   vim.schedule(function()
+      if state.active and utils.is_empty(state.inline) and not state.block.text then
+         self:display_label()
+      end
+   end)
+end
+
 ---@private
 function Renderer:display_label()
    if not (options.show_label and self.label.enabled) then
       return
    end
 
-   if state.request_status == REQUEST_STATUS.pending then
+   if state.pending then
       self.label.id = self:set_virt_label(" * ")
    elseif utils.is_empty(state.data.items) then
       self.label.id = self:set_virt_label(" 0 ")
    else
-      self.label.id = self:set_virt_label(state.data.index .. "/" .. #state.data.items)
+      if #state.inline == 1 and state.inline[1].text == "" and not state.block.text then
+         self.label.id = self:set_virt_label(" 0 ")
+      else
+         self.label.id = self:set_virt_label(state.data.index .. "/" .. #state.data.items)
+      end
    end
 end
 
 ---Displays completion item, if request to the server should be resend returns true
----@return boolean
-function Renderer:display()
-   if not state.active then
-      self:clear(true)
-      return false
-   end
-
-   local items = state.data.items or {}
-   local index = state.data.index or 1
-   local item = items[index] or {}
-   local parts = item.completionParts or {}
-
-   if utils.is_empty(parts) then
-      return false
-   end
-
-   -- When only block part is present and text was changed compared to when
-   -- request was sent, return false, so it will dispatch new request
-   if not self.fulltext:match("^%s*$") and item.completion.text:match("^\n") then
-      return true
-   end
-
-   local inline_contents, block_text, new_request = get_completion_content(parts, self.fulltext)
-   if new_request then
-      return true
-   end
-
+---@param inline inline_content[]
+---@param block? string
+function Renderer:display(inline, block)
    self.clear_timer:stop()
-   self:display_inline(inline_contents)
-   self:display_block(block_text)
-   if block_text or #inline_contents > 0 then
+   self:display_inline(inline)
+   self:display_block(block)
+   if block or #inline > 0 then
       self:display_label()
    end
    events.emit("NeoCodeiumCompletionDisplayed", nil, true)
-   return false
 end
 
 ---Removes block virtual text and block cache
@@ -299,6 +215,7 @@ function Renderer:remove_block()
       delete_virttext(state.block.id)
       state.block.text = nil
       state.block.id = nil
+      state.block.visible = nil
    end
 end
 
@@ -328,7 +245,8 @@ function Renderer:clear(with_reset, scheduled)
       state.inline = {}
       state.block.id = nil
       state.block.text = nil
-      self.fulltext = ""
+      state.block.visible = nil
+      state.curline_text = ""
       if scheduled then
          vim.schedule(function()
             nvim_buf_clear_namespace(0, ns, 0, -1)
@@ -346,6 +264,9 @@ function Renderer:clear(with_reset, scheduled)
       else
          self:remove_inline()
          self:remove_block()
+         if options.manual then
+            self:remove_label()
+         end
       end
    end
 end
@@ -394,8 +315,8 @@ function Renderer:update_backward_line()
 end
 
 ---@param prev_pos pos
----@param new_fulltext string
-function Renderer:update_horz_move(prev_pos, new_fulltext)
+---@param curline_text string
+function Renderer:update_horz_move(prev_pos, curline_text)
    local col = state.pos[2]
    local prev_col = prev_pos[2]
    local horz_move = col - prev_col
@@ -409,17 +330,24 @@ function Renderer:update_horz_move(prev_pos, new_fulltext)
          local prefix = first_inline.text:sub(1, horz_move)
          state.inline[1].text = first_inline.text:sub(horz_move + 1)
          self:set_virt_inline(first_inline.id, first_inline.text, col)
-         if new_fulltext:sub(prev_col) ~= prefix then
+         if curline_text:sub(prev_col + 1) ~= prefix then
             self:start_clear_timer()
+         else
+            state.matching = true
+            -- refresh virttext block of full inline completion
+            if state.inline[1].text == "" and state.block.text then
+               self:set_virt_block(state.block.text)
+            end
          end
       end
    else -- deleted some text
-      if self.fulltext:match("^%s*$") then
+      if state.curline_text:match("^%s*$") then
          self:start_clear_timer()
       else
-         local prefix = self.fulltext:sub(col + 1, col - horz_move)
+         local prefix = state.curline_text:sub(col + 1, col - horz_move)
          state.inline[1].text = prefix .. first_inline.text
          self:set_virt_inline(first_inline.id, first_inline.text, col)
+         state.matching = true
          self.clear_timer:stop()
          self:start_clear_timer()
       end
@@ -427,6 +355,7 @@ function Renderer:update_horz_move(prev_pos, new_fulltext)
 end
 
 function Renderer:update()
+   state.matching = false
    local prev_pos = state.pos
    state.pos = utils.get_cursor()
    local vert_move = state.pos[1] - prev_pos[1]
@@ -434,9 +363,9 @@ function Renderer:update()
    if self.changedtick == vim.b.changedtick or math.abs(vert_move) > 1 then
       self.clear_timer:stop()
       self:clear()
-      self.fulltext = nvim_get_current_line()
+      state.curline_text = nvim_get_current_line()
    else
-      local fulltext = nvim_get_current_line()
+      local curline_text = nvim_get_current_line()
       if vert_move == 1 then
          self.clear_timer:stop()
          self:update_forward_line()
@@ -447,10 +376,10 @@ function Renderer:update()
          if not state.inline[1] then
             self:remove_inline()
          else
-            self:update_horz_move(prev_pos, fulltext)
+            self:update_horz_move(prev_pos, curline_text)
          end
       end
-      self.fulltext = fulltext
+      state.curline_text = curline_text
    end
 
    self.changedtick = vim.b.changedtick

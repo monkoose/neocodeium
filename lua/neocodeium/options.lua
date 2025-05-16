@@ -5,7 +5,8 @@
 ---@field server { api_url?: string, portal_url?: string }
 ---@field show_label boolean
 ---@field debounce boolean
----@field max_lines integer `-1` for all lines
+---@field max_lines integer # `-1` for all lines
+---@field single_line { enabled: boolean, label: string }
 ---@field silent boolean
 ---@field filetypes table<string, boolean>
 ---@field root_dir string[]
@@ -24,6 +25,10 @@ local defaults = {
    silent = false,
    disable_in_special_buftypes = true,
    log_level = "warn",
+   single_line = {
+      enabled = false,
+      label = "...",
+   },
    filetypes = {
       help = false,
       gitcommit = false,

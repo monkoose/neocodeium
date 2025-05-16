@@ -8,7 +8,6 @@ local server = require("neocodeium.server")
 local renderer = require("neocodeium.renderer")
 local state = require("neocodeium.state")
 local PART = require("neocodeium.enums").PART
-local REQUEST_STATUS = require("neocodeium.enums").REQUEST_STATUS
 
 local fn = vim.fn
 local json = vim.json
@@ -19,15 +18,17 @@ local nvim_replace_termcodes = vim.api.nvim_replace_termcodes
 
 -- Completer ----------------------------------------------- {{{1
 
----@class cancel_requrest_data
+---@class compl.cancel_requrest_data
 ---@field request_id integer
 
 ---@class Completer
 ---@field request_id integer
+---@field request_is_valid boolean
 ---@field other_docs document[]
----@field cancel_requrest_data cancel_requrest_data
+---@field cancel_requrest_data compl.cancel_requrest_data
 local Completer = {
    request_id = 0,
+   request_is_valid = false,
    other_docs = {},
    cancel_requrest_data = {
       request_id = -1,
@@ -36,13 +37,70 @@ local Completer = {
 
 -- Auxiliary functions ------------------------------------- {{{1
 
----Returns values of `'shiftwidth'` and `'expandtab'` in the current buffer.
----@return editor_options
-local function get_editor_opts()
-   return {
-      tab_size = fn.shiftwidth(),
-      insert_spaces = vim.bo.expandtab,
-   }
+---Returns inline and block texts of completion item
+---@param item compl.item
+---@return string, string
+local function get_inline_and_block(item)
+   local inline, block
+   for _, part in ipairs(item.completionParts) do
+      if part.type == PART.inline_mask then
+         inline = (part.prefix or "") .. part.text
+      elseif part.type == PART.block then
+         block = part.text
+      end
+   end
+   return inline, block
+end
+
+---Adds completion items to `state.data.items`
+---@param compl_items compl.item[]
+local function add_state_data_items(compl_items)
+   if not compl_items then
+      return
+   end
+
+   local matching_inline, matching_block = get_inline_and_block(state.data.items[1])
+   for _, item in ipairs(compl_items) do
+      local item_inline, item_block = get_inline_and_block(item)
+      local inline_text = state.inline[1] and state.inline[1].text
+      if options.single_line.enabled and inline_text == "" then
+         if item_block ~= matching_block then
+            table.insert(state.data.items, item)
+         end
+      else
+         if item_inline ~= matching_inline or item_block ~= matching_block then
+            table.insert(state.data.items, item)
+         end
+      end
+   end
+end
+
+---Returns length of the common prefix of two strings
+---@param s1 string
+---@param s2 string
+---@return integer
+local function same_prefix_index(s1, s2)
+   local len = math.min(#s1, #s2)
+   for i = 1, len do
+      if s1:sub(i, i) ~= s2:sub(i, i) then
+         return i - 1
+      end
+   end
+   return len
+end
+
+---@param len integer
+---@param idx integer
+---@param col col
+---@return integer
+local function calc_inline_delta(len, idx, col)
+   local result = 0
+   if col > len then
+      result = col - len
+   elseif col < len then
+      result = idx >= len and idx - len or col - len
+   end
+   return result
 end
 
 -- Completer methods --------------------------------------- {{{1
@@ -56,13 +114,77 @@ function Completer:curr_item()
    end
 end
 
-function Completer:scheduled_display()
-   vim.schedule(function()
-      local resend_request = renderer:display()
-      if resend_request then
+function Completer:update()
+   if not state.active then
+      renderer:clear(true)
+      return
+   end
+
+   local items = state.data.items or {}
+   local index = state.data.index or 1
+   local item = items[index] or {}
+   local parts = item.completionParts or {}
+
+   if utils.is_empty(parts) then
+      return
+   end
+
+   -- When only block part is present and text was changed compared to when
+   -- request was send dispatch a new request
+   if not state.curline_text:match("^%s*$") and item.completion.text:match("^\n") then
+      self:request()
+      return
+   end
+
+   local inline = {} ---@type inline_content[]
+   local block ---@type string?
+   local lnum, col = unpack(state.pos)
+   local cummulative_cols = 0
+   local delta = 0
+
+   -- Get inline content and block text
+   for i, part in ipairs(parts) do
+      -- process only correct parts
+      if lnum == (tonumber(part.line) or 0) then
+         local text = part.text
+
+         if part.type == PART.inline then
+            local prefix = part.prefix or ""
+            local prefix_len = #prefix
+            local column = prefix_len + cummulative_cols
+            cummulative_cols = column
+
+            if i == 1 then
+               local compl_line = prefix .. text
+               local match_prefix_idx = same_prefix_index(compl_line, state.curline_text)
+               -- When actual text doesn't match prefix dispatch a new request
+               if match_prefix_idx ~= col then
+                  self:request()
+                  return
+               end
+
+               delta = calc_inline_delta(prefix_len, match_prefix_idx, col)
+               if delta < 0 then
+                  text = prefix:sub(delta) .. text
+               elseif delta > 0 then
+                  text = text:sub(delta + 1)
+               end
+               prefix = ""
+            end
+            table.insert(
+               inline,
+               { lnum = lnum, col = column + delta, text = text, prefix = prefix }
+            )
+         elseif part.type == PART.block then
+            block = text
+         end
+      else
          self:request()
+         return
       end
-   end)
+   end
+
+   renderer:display(inline, block)
 end
 
 ---Cycles completions by amount `n`, wraps around if necessary.
@@ -83,7 +205,7 @@ function Completer:cycle(n)
       state.data.index = items_len
    end
 
-   self:scheduled_display()
+   self:update()
 end
 
 ---Cycles completions or request to complete if there isn't one.
@@ -102,13 +224,13 @@ end
 ---@private
 ---@param r response
 function Completer:handle_response(r)
-   state.request_status = REQUEST_STATUS.completed
+   state.pending = false
    renderer:update_label()
 
-   -- finish if the context has changed
-   if vim.tbl_isempty(state.data) then
+   if not self.request_is_valid then
       return
    end
+   self.request_is_valid = false
 
    local resp_str = table.concat(r.out)
    local ok, response = pcall(json.decode, resp_str)
@@ -124,10 +246,17 @@ function Completer:handle_response(r)
       return
    end
 
-   state.data.items = response.completionItems
+   if state.matching and (state.data.items and #state.data.items == 1) then
+      add_state_data_items(response.completionItems)
+   else
+      state.data.items = response.completionItems
+   end
    state.data.index = 1
+   state.matching = false
 
-   self:scheduled_display()
+   vim.schedule(function()
+      self:update()
+   end)
 end
 
 ---Accepts a suggestion till regex match end.
@@ -189,22 +318,24 @@ end
 -- TODO: better word boundaries
 ---Accepts a suggestion till the end of the word.
 function Completer:accept_word()
+   state.matching = true
    self:accept_regex([[.\{-}\%(\>\|$\)]])
 end
 
 ---Accepts a suggestion till the end of the line.
 function Completer:accept_line()
+   state.matching = true
    self:accept_regex([[.*]])
 end
 
 ---@private
 ---Constructs and sends a request to the server only when in an appropriate state.
 function Completer:request()
-   if not (server.port and state.active) or state.request_status == REQUEST_STATUS.pending then
+   if not (server.port and state.active) or state.pending then
       return
    end
 
-   state.request_status = REQUEST_STATUS.pending
+   state.pending = true
    renderer:update_label()
 
    self.request_id = self.request_id + 1
@@ -212,15 +343,11 @@ function Completer:request()
    state.completion_request_data.document =
       doc.get(nvim_get_current_buf(), vim.bo.filetype, -1, state.pos)
    state.completion_request_data.other_documents = self.other_docs
-   state.completion_request_data.editor_options = get_editor_opts()
 
+   self.request_is_valid = true
    server:request("GetCompletions", state.completion_request_data, function(r)
       self:handle_response(r)
    end)
-
-   -- setting 'duplicate' id so it can be processed correctly by
-   -- self:handle_response() and renderer:clear() methods
-   state.data.id = self.request_id
 end
 
 function Completer:scheduled_request()
@@ -277,6 +404,11 @@ function Completer:accept()
       return
    end
 
+   if options.single_line.enabled and block and not state.block.visible then
+      self:accept_line()
+      return
+   end
+
    state.accept_request_data.completion_id = curr_item.completion.completionId
    server:request("AcceptCompletion", state.accept_request_data)
 
@@ -284,6 +416,7 @@ function Completer:accept()
    local lnum = state.pos[1] + 1
    if block then
       local block_len = #block
+      -- XXX: is codeium completion item still has suffix?
       local delta = curr_item.suffix and curr_item.suffix.deltaCursorOffset or 0
       local last_line = block[block_len]
       local col = #last_line + delta
@@ -294,7 +427,7 @@ function Completer:accept()
       end
    end
 
-   if inline then
+   if inline and not (options.single_line.enabled and block) then
       self:accept_line()
    end
    -- scheduling prevents pasting block before accept_line(),
@@ -304,8 +437,7 @@ function Completer:accept()
       if block then
          utils.set_lines(lnum, lnum, block)
          utils.set_cursor(pos)
-         -- required to update label position
-         state.pos = pos
+         state.pos = pos -- required to update label position
       end
    end)
 end
@@ -314,18 +446,26 @@ end
 ---virtual text is cleared too.
 ---@param force? boolean
 function Completer:clear(force)
-   if force or options.debounce or state.request_status ~= REQUEST_STATUS.pending then
-      state.request_status = REQUEST_STATUS.none
+   if force or options.debounce or not state.pending then
+      state.pending = false
       if options.debounce then
          state:stop_debounce_timer()
       end
       -- Cancel request if there is one
       if not vim.tbl_isempty(state.data) then
-         if state.data.id and state.data.id > 0 then
-            self.cancel_requrest_data.request_id = state.data.id
+         if self.request_is_valid then
+            self.cancel_requrest_data.request_id = self.request_id
             server:request("CancelRequest", self.cancel_requrest_data)
+            self.request_is_valid = false
          end
-         state.data = {}
+         if state.matching and state.data.items then
+            state.data = {
+               items = { state.data.items[state.data.index] },
+               index = 1,
+            }
+         else
+            state.data = {}
+         end
       end
    end
 

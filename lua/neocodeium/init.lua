@@ -1,6 +1,7 @@
 -- Imports ------------------------------------------------- {{{1
 
 local uv = vim.uv
+
 local nvim_get_hl = vim.api.nvim_get_hl
 local nvim_set_hl = vim.api.nvim_set_hl
 local nvim_create_autocmd = vim.api.nvim_create_autocmd
@@ -26,6 +27,13 @@ local function set_highlights()
    nvim_set_hl(0, "NeoCodeiumSuggestion", {
       fg = "#808080",
       ctermfg = 244,
+      default = true,
+   })
+
+   nvim_set_hl(0, "NeoCodeiumSingleLineLabel", {
+      fg = "#808080",
+      ctermfg = 244,
+      bold = true,
       default = true,
    })
 
@@ -63,6 +71,7 @@ local function enable_autocmds()
 
    create_autocmd("BufEnter", {
       callback = function()
+         state:update_editor_options()
          other_docs_timer:stop()
          other_docs_timer:start(
             1,
@@ -107,6 +116,15 @@ local function enable_autocmds()
       pattern = "number,relativenumber",
       callback = function()
          renderer.label.enabled = nu_or_rnu()
+      end,
+   })
+
+   create_autocmd("OptionSet", {
+      pattern = "shiftwidth,expandtab",
+      callback = function(ev)
+         if ev.buf == nvim_get_current_buf() then
+            state:update_editor_options()
+         end
       end,
    })
 

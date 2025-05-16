@@ -118,6 +118,14 @@ require("neocodeium").setup({
   disable_in_special_buftypes = true,
   -- Sets default log level. One of "trace", "debug", "info", "warn", "error"
   log_level = "warn",
+  -- Set `enabled` to `true` to enable single line mode.
+  -- In this mode, multi-line suggestions would collapse into a single line and only
+  -- shows full lines when on the end of the suggested (accepted) line.
+  -- So it is less distracting and works better with other completion plugins.
+  single_line = {
+    enabled = false,
+    label = "...", -- Label indicating that there is multi-line suggestion.
+  }
   -- Set to a function that returns `true` if a buffer should be enabled
   -- and `false` if the buffer should be disabled
   -- You can still enable disabled by this option buffer with `:NeoCodeium enable_buffer`
