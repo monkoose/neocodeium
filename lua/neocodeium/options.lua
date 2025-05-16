@@ -12,6 +12,7 @@
 ---@field filter? fun(bufnr: integer)
 ---@field status function
 ---@field disable_in_special_buftypes boolean
+---@field log_level string
 local defaults = {
    enabled = true,
    bin = nil,
@@ -22,6 +23,7 @@ local defaults = {
    max_lines = 10000,
    silent = false,
    disable_in_special_buftypes = true,
+   log_level = "warn",
    filetypes = {
       help = false,
       gitcommit = false,

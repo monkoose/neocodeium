@@ -244,9 +244,12 @@ CONFIGURATION                                       *neocodeium-configuration*
         Boolean.
         When `false`, then neocodeium will show suggestions in special
         buftypes, like `nofile` etc.
+    log_level~
+        String.
+        Sets default log level.
+        One of "trace", "debug", "info", "warn", "error".
     filter~
         Function.
-
         Function that if returns `false` then disables completions for the
         current buffer.
     filetypes~
@@ -269,6 +272,8 @@ Defaults: >lua
         debounce = false,
         max_lines = 10000,
         silent = false,
+        disable_in_special_buftypes = true,
+        log_level = "warn",
         filter = nil,
         filetypes = {
             help = false,
@@ -342,12 +347,13 @@ This function returns two numbers:
 ==============================================================================
 LOGGING                                                   *neocodeium-logging*
 
-While running NeoCodeium logs some messages into a temporary file, which can
-be viewed with the `:NeoCodeium open_log` command. By default, only errors and
-warnings are logged.
+While running, NeoCodeium logs some messages into a temporary file. It can be
+viewed with the `:NeoCodeium open_log` command. By default only errors and
+warnings are logged. Can be customized with the `log_level` option in the
+`setup()`.
 
-You can set the logging level to one of `trace`, `debug`, `info`, `warn` or
-`error` by exporting the `NEOCODEIUM_LOG_LEVEL` environment variable.
+Temporary logging level can be set by exporting the `NEOCODEIUM_LOG_LEVEL`
+environment variable to one of `trace`, `debug`, `info`, `warn` or `error`.
 
 Example: >sh
     NEOCODEIUM_LOG_LEVEL=info nvim

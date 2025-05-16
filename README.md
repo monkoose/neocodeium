@@ -81,6 +81,60 @@ Once you get them, add them to your config. This way `:NeoCodeium auth` will aut
 **Note:** To obtain an API token, you’ll need to run `:NeoCodeium auth`.
 On Windows WSL `wslview` `(sudo apt install wslu)` should be installed to properly open the browser.
 
+### ⚒️ Setup
+
+NeoCodeium comes with the following default options:
+
+```lua
+-- NeoCodeium Configuration
+require("neocodeium").setup({
+  -- If `false`, then would not start codeium server (disabled state)
+  -- You can manually enable it at runtime with `:NeoCodeium enable`
+  enabled = true,
+  -- Path to a custom Codeium server binary (you can download one from:
+  -- https://github.com/Exafunction/codeium/releases)
+  bin = nil,
+  -- When set to `true`, autosuggestions are disabled.
+  -- Use `require'neodecodeium'.cycle_or_complete()` to show suggestions manually
+  manual = false,
+  -- Information about the API server to use
+  server = {
+    -- API URL to use (for Enterprise mode)
+    api_url = nil,
+    -- Portal URL to use (for registering a user and downloading the binary)
+    portal_url = nil,
+  },
+  -- Set to `false` to disable showing the number of suggestions label in the line number column
+  show_label = true,
+  -- Set to `true` to enable suggestions debounce
+  debounce = false,
+  -- Maximum number of lines parsed from loaded buffers (current buffer always fully parsed)
+  -- Set to `0` to disable parsing non-current buffers (may lower suggestion quality)
+  -- Set it to `-1` to parse all lines
+  max_lines = 10000,
+  -- Set to `true` to disable some non-important messages, like "NeoCodeium: server started..."
+  silent = false,
+  -- Set to `false` to enable suggestions in special buftypes, like `nofile` etc.
+  disable_in_special_buftypes = true,
+  -- Sets default log level. One of "trace", "debug", "info", "warn", "error"
+  log_level = "warn",
+  -- Set to a function that returns `true` if a buffer should be enabled
+  -- and `false` if the buffer should be disabled
+  -- You can still enable disabled by this option buffer with `:NeoCodeium enable_buffer`
+  filter = function(bufnr) return true end,
+  -- Set to `false` to disable suggestions in buffers with specific filetypes
+  -- You can still enable disabled by this option buffer with `:NeoCodeium enable_buffer`
+  filetypes = {
+    help = false,
+    gitcommit = false,
+    gitrebase = false,
+    ["."] = false,
+  },
+  -- List of directories and files to detect workspace root directory for Codeium chat
+  root_dir = { ".bzr", ".git", ".hg", ".svn", "_FOSSIL_", "package.json" }
+})
+```
+
 ### 🚀 Usage
 
 #### 📒 API
@@ -100,7 +154,8 @@ neocodeium.accept_line()
 -- Clears the current suggestion
 neocodeium.clear()
 
--- Cycles through suggestions by `n` (1 by default) items. Use a negative value to cycle in reverse order
+-- Cycles through suggestions by `n` (1 by default) items.
+-- Use a negative value to cycle in reverse order
 neocodeium.cycle(n)
 
 -- Same as `cycle()`, but also tries to show a suggestion if none is visible.
@@ -433,66 +488,15 @@ your preference and to match your chosen color scheme:
 
 While running, NeoCodeium logs some messages into a temporary file. It can be
 viewed with the `:NeoCodeium open_log` command. By default only errors and
-warnings are logged.
+warnings are logged. Can be customized with the `log_level` option in the
+`setup()`.
 
-You can set the logging level to one of `trace`, `debug`, `info`, `warn` or
-`error` by exporting the `NEOCODEIUM_LOG_LEVEL` environment variable.
+Temporary logging level can be set by exporting the `NEOCODEIUM_LOG_LEVEL`
+environment variable to one of `trace`, `debug`, `info`, `warn` or `error`.
 
 Example:
 ```sh
 NEOCODEIUM_LOG_LEVEL=info nvim
-```
-
-### ⚒️ Setup
-
-NeoCodeium comes with the following default options:
-
-```lua
--- NeoCodeium Configuration
-require("neocodeium").setup({
-  -- If `false`, then would not start codeium server (disabled state)
-  -- You can manually enable it at runtime with `:NeoCodeium enable`
-  enabled = true,
-  -- Path to a custom Codeium server binary (you can download one from:
-  -- https://github.com/Exafunction/codeium/releases)
-  bin = nil,
-  -- When set to `true`, autosuggestions are disabled.
-  -- Use `require'neodecodeium'.cycle_or_complete()` to show suggestions manually
-  manual = false,
-  -- Information about the API server to use
-  server = {
-    -- API URL to use (for Enterprise mode)
-    api_url = nil,
-    -- Portal URL to use (for registering a user and downloading the binary)
-    portal_url = nil,
-  },
-  -- Set to `false` to disable showing the number of suggestions label in the line number column
-  show_label = true,
-  -- Set to `true` to enable suggestions debounce
-  debounce = false,
-  -- Maximum number of lines parsed from loaded buffers (current buffer always fully parsed)
-  -- Set to `0` to disable parsing non-current buffers (may lower suggestion quality)
-  -- Set it to `-1` to parse all lines
-  max_lines = 10000,
-  -- Set to `true` to disable some non-important messages, like "NeoCodeium: server started..."
-  silent = false,
-  -- Set to `false` to enable suggestions in special buftypes, like `nofile` etc.
-  disable_in_special_buftypes = true,
-  -- Set to a function that returns `true` if a buffer should be enabled
-  -- and `false` if the buffer should be disabled
-  -- You can still enable disabled by this option buffer with `:NeoCodeium enable_buffer`
-  filter = function(bufnr) return true end,
-  -- Set to `false` to disable suggestions in buffers with specific filetypes
-  -- You can still enable disabled by this option buffer with `:NeoCodeium enable_buffer`
-  filetypes = {
-    help = false,
-    gitcommit = false,
-    gitrebase = false,
-    ["."] = false,
-  },
-  -- List of directories and files to detect workspace root directory for Codeium chat
-  root_dir = { ".bzr", ".git", ".hg", ".svn", "_FOSSIL_", "package.json" }
-})
 ```
 
 #### 💬 Chat
