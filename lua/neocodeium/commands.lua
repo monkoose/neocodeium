@@ -1,7 +1,6 @@
 -- Imports ------------------------------------------------- {{{1
 
 local utils = require("neocodeium.utils")
-local echo = require("neocodeium.utils.echo")
 local conf = require("neocodeium.utils.conf")
 local log = require("neocodeium.log")
 local options = require("neocodeium.options").options
@@ -20,10 +19,11 @@ local json = vim.json
 ---@param url url
 local function open_browser(url)
    vim.ui.open(url)
-   echo.info(
-      "browser should have been opened with the URL (if it doesn't, then open the URL manually):\n"
+   log.info(
+      "Default browser should have been opened with the URL (if it doesn't, then open the URL manually):\n"
          .. url
-         .. "\nLogin and copy a token on the page.\n\n"
+         .. "\nLogin and copy a token on the page.\n\n",
+      { type = log.ECHO }
    )
 end
 
@@ -97,7 +97,7 @@ local function request_api_key()
          end
       end
 
-      echo.warn("Unexpected response: " .. response)
+      log.warn("Unexpected response: " .. response, { type = log.ECHO })
       auth_token = secret_input("Invalid token, please paste again: ")
    end
 end
@@ -121,7 +121,7 @@ function M.auth()
    open_browser(url)
    local key = request_api_key()
    if not key then
-      echo.error("could not retrieve api key\nAuthentication is canceled")
+      log.error("Could not retrieve api key\nAuthentication is canceled", { type = log.BOTH })
       return
    end
 
@@ -138,10 +138,9 @@ function M.auth()
 
    if ok then
       server:run()
-      echo.info("success. Launching the server...")
+      log.info("Auth was successful. Launching the server...", { type = log.BOTH })
    else
-      echo.error("could not write api key to config.json")
-      log.error("Could not write api key to config.json\n" .. err)
+      log.error("Could not write api key to config.json\n" .. err, { type = log.BOTH })
    end
 end
 
@@ -149,7 +148,7 @@ function M.disable(bang)
    options.enabled = false
    if bang and server.pid then
       server:stop()
-      echo.info("the server has been halted")
+      log.info("Server has been halted", { type = log.ECHO })
    end
    events.emit("NeoCodeiumDisabled")
 end
@@ -197,7 +196,7 @@ function M.open_log()
       vim.bo.modifiable = false
       vim.wo.wrap = true
    else
-      echo.warn("log file is empty")
+      log.warn("Log file is empty", { type = log.ECHO })
    end
 end
 

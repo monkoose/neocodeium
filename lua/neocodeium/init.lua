@@ -203,8 +203,8 @@ function M.setup(opts)
       if func then
          func(bang)
       else
-         local echo = require("neocodeium.utils.echo")
-         echo.warn("command '" .. cmd .. "' not found")
+         local log = require("neocodeium.log")
+         log.warn("Command '" .. cmd .. "' not found", { type = log.ECHO })
       end
    end
 

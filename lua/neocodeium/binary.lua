@@ -1,7 +1,6 @@
 -- Imports ------------------------------------------------- {{{1
 
 local utils = require("neocodeium.utils")
-local echo = require("neocodeium.utils.echo")
 local conf = require("neocodeium.utils.conf")
 local options = require("neocodeium.options").options
 local stdio = require("neocodeium.utils.stdio")
@@ -51,8 +50,7 @@ function Bin.new()
    else
       local system_info = utils.get_system_info()
       if system_info.os == "unsupported" or system_info.arch == "unsupported" then
-         log.error("Unsupported OS or architecture")
-         echo.error("Unsupported OS or architecture")
+         log.error("Unsupported OS or architecture", { type = log.BOTH })
       else
          self.suffix = system_info.os .. "_" .. system_info.arch
          if system_info.os == "windows" then
@@ -73,8 +71,7 @@ end
 ---@param callback fun()
 function Bin:download(callback)
    if not self.path then
-      log.error("Binary path not set")
-      echo.error("Binary path not set")
+      log.error("Binary path not set", { type = log.BOTH })
       return
    end
 
@@ -91,18 +88,17 @@ function Bin:download(callback)
    if bin_dir then
       fn.delete(bin_dir, "rf")
       if fn.mkdir(bin_dir, "p") == 0 then
-         echo.error("failed to create directory " .. bin_dir)
-         log.error("Failed to create directory " .. bin_dir)
+         log.error("Failed to create directory " .. bin_dir, { type = log.BOTH })
       end
    end
 
-   echo.info("Downloading binary v" .. self.version)
+   log.info("Downloading binary v" .. self.version, { type = log.ECHO })
    vim.system(
       { "curl", "-Lo", self.path .. ".gz", url },
       { stdout = false },
       vim.schedule_wrap(function(o)
          if o.code ~= 0 then
-            echo.error("failed to download binary\n" .. o.stderr)
+            log.error("Failed to download binary\n" .. o.stderr, { type = log.BOTH })
             return
          end
          if callback then
@@ -117,28 +113,27 @@ end
 ---@return boolean
 function Bin:expand()
    if not self.path then
-      log.error("Binary path not set")
-      echo.error("Binary path not set")
+      log.error("Binary path not set", { type = log.BOTH })
       return false
    end
    local bin_gz = self.path .. ".gz"
-   echo.info("Extracting binary...")
+   log.info("Extracting binary...", { type = log.ECHO })
    if utils.get_system_info().os == "windows" then
       powershell_expand(bin_gz)
    else
       -- Uncompress binary
       fn.system("gzip -d " .. fn.shellescape(bin_gz))
       if vim.v.shell_error ~= 0 then
-         echo.error("failed to extract binary\n" .. vim.v.shell_error)
+         log.error("Failed to extract binary\n" .. vim.v.shell_error, { type = log.BOTH })
          return false
       end
       -- Make binary executable
       fn.system("chmod +x " .. fn.shellescape(self.path))
       if vim.v.shell_error ~= 0 then
-         echo.error("failed to make binary executable\n" .. vim.v.shell_error)
+         log.error("Failed to make binary executable\n" .. vim.v.shell_error, { type = log.BOTH })
          return false
       else
-         echo.info("Binary extracted successfully")
+         log.info("Binary extracted successfully", { type = log.ECHO })
       end
    end
    return true

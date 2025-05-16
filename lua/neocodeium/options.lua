@@ -33,7 +33,7 @@ local defaults = {
    root_dir = { ".bzr", ".git", ".hg", ".svn", "_FOSSIL_", "package.json" },
 }
 
-local M = { options = {} }
+local M = { options = defaults }
 
 function M.setup(opts)
    ---@type Options

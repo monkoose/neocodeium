@@ -1,5 +1,5 @@
 local conf = require("neocodeium.utils.conf")
-local echo = require("neocodeium.utils.echo")
+local log = require("neocodeium.log")
 
 ---@type string?
 local api_key = conf.load().api_key
@@ -10,7 +10,7 @@ local M = {}
 ---@return string|nil
 function M.check()
    if not api_key then
-      echo.warn("No API key found. Run `:NeoCodeium auth` to set it")
+      log.warn("No API key found. Run `:NeoCodeium auth` to set it", { type = log.BOTH })
       return
    end
 

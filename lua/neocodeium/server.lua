@@ -5,7 +5,6 @@ local log = require("neocodeium.log")
 local api_key = require("neocodeium.api_key")
 local options = require("neocodeium.options").options
 local stdio = require("neocodeium.utils.stdio")
-local echo = require("neocodeium.utils.echo")
 local events = require("neocodeium.events")
 local Bin = require("neocodeium.binary")
 local state = require("neocodeium.state")
@@ -181,11 +180,11 @@ end
 ---Restarts the server
 function Server:restart()
    if self.handle and not uv.is_closing(self.handle) then
-      echo.info("restarting the server...", options.silent)
+      log.info("Restarting the server...", { type = log.ECHO, silent = options.silent })
       self.is_restart = true
       self:stop()
    else
-      echo.info("starting the server...", options.silent)
+      log.info("Starting the server...", { type = log.ECHO, silent = options.silent })
       self:run()
    end
 end
@@ -248,8 +247,7 @@ function Server:init(timer, manager_dir)
    local port_file = find_port_file(manager_dir)
    if port_file then
       local port = fs.basename(port_file)
-      log.info("Found port: " .. port)
-      echo.info("server started on port " .. port, options.silent)
+      log.info("Server started on port " .. port, { type = log.BOTH, silent = options.silent })
 
       state.request_data.metadata = self.metadata
       state.accept_request_data.metadata = self.metadata

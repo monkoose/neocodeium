@@ -113,10 +113,14 @@ function Completer:handle_response(r)
    local resp_str = table.concat(r.out)
    local ok, response = pcall(json.decode, resp_str)
    if not ok then
-      log.error("Invalid response from server")
-      log.error(resp_str)
-      log.error("stderr: " .. vim.inspect(r.err))
-      log.error(debug.traceback(response))
+      log.error(
+         "Invalid response from server\n"
+            .. resp_str
+            .. "\nstderr: "
+            .. vim.inspect(r.err)
+            .. "\n"
+            .. debug.traceback(response)
+      )
       return
    end
 

@@ -1,7 +1,7 @@
 local options = require("neocodeium.options").options
 local server = require("neocodeium.server")
 local doc = require("neocodeium.doc")
-local echo = require("neocodeium.utils.echo")
+local log = require("neocodeium.log")
 local stdio = require("neocodeium.utils.stdio")
 local utils = require("neocodeium.utils")
 local state = require("neocodeium.state")
@@ -35,7 +35,10 @@ function chat.launch(response)
 
    -- possible, server is not ready
    if not (chat_port and ws_port) then
-      echo.error("Server not ready. Chat client port or web server port is missing.")
+      log.error(
+         "Server not ready. Chat client port or web server port is missing.",
+         { type = log.BOTH }
+      )
       return
    end
 
@@ -59,7 +62,7 @@ function chat.launch(response)
 
    vim.ui.open(url)
    vim.schedule(function()
-      echo.info("Chat has been opened in the browser")
+      log.info("Chat has been opened in the browser", { type = log.ECHO })
    end)
 end
 
@@ -79,7 +82,7 @@ function chat.add_tracked_workspace()
    if root then
       server:request("AddTrackedWorkspace", { workspace = root })
    else
-      echo.error("Project root not found. Unable to add tracked workspace.")
+      log.error("Project root not found. Unable to add tracked workspace.", { type = log.BOTH })
    end
 end
 
