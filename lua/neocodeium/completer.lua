@@ -315,11 +315,10 @@ function Completer:accept_regex(regex)
    nvim_feedkeys(text, "nt", true)
 end
 
--- TODO: better word boundaries
 ---Accepts a suggestion till the end of the word.
 function Completer:accept_word()
    state.matching = true
-   self:accept_regex([[.\{-}\%(\>\|$\)]])
+   self:accept_regex([[.\{-}\%(\>\|\W\{2,}\|$\)]])
 end
 
 ---Accepts a suggestion till the end of the line.
