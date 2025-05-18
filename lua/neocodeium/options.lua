@@ -6,14 +6,13 @@
 ---@field show_label boolean
 ---@field debounce boolean
 ---@field max_lines integer # `-1` for all lines
----@field single_line { enabled: boolean, label: string }
 ---@field silent boolean
+---@field disable_in_special_buftypes boolean
+---@field log_level string
+---@field single_line { enabled: boolean, label: string }
 ---@field filetypes table<string, boolean>
 ---@field root_dir string[]
 ---@field filter? fun(bufnr: integer)
----@field status function
----@field disable_in_special_buftypes boolean
----@field log_level string
 local defaults = {
    enabled = true,
    bin = nil,
@@ -38,7 +37,7 @@ local defaults = {
    root_dir = { ".bzr", ".git", ".hg", ".svn", "_FOSSIL_", "package.json" },
 }
 
-local M = { options = defaults }
+local M = { options = vim.deepcopy(defaults) }
 
 function M.setup(opts)
    ---@type Options
