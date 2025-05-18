@@ -165,6 +165,9 @@ your preference and to match your chosen color scheme:
     NeoCodeiumLabel~
         Color of the label that indicates the number of suggestions.
         Default: `inverted` |hl-DiagnosticInfo|.
+    NeoCodeiumSingleLineLabel~
+        Color of the label of multi-line suggestion in single line mode.
+        Default: `bold #808080`
 
 ------------------------------------------------------------------------------
 USING WITH NVIM-CMP

@@ -491,6 +491,7 @@ NeoCodeium offers a couple of highlight groups. Feel free to adjust them to
 your preference and to match your chosen color scheme:
 - `NeoCodeiumSuggestion` - virtual text color of the plugin suggestions (default: `#808080`)
 - `NeoCodeiumLabel` - color of the label that indicates the number of suggestions (default: inverted DiagnosticInfo)
+- `NeoCodeiumSingleLineLabel` - color of the label of multi-line suggestion in single line mode (default: `bold #808080`)
 
 #### 📄 Logging
 
