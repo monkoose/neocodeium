@@ -1,3 +1,5 @@
+-- Imports ------------------------------------------------- {{{1
+
 local options = require("neocodeium.options").options
 local server = require("neocodeium.server")
 local doc = require("neocodeium.doc")
@@ -12,6 +14,8 @@ local nvim_create_augroup = vim.api.nvim_create_augroup
 local nvim_win_get_cursor = vim.api.nvim_win_get_cursor
 local nvim_get_option_value = vim.api.nvim_get_option_value
 
+-- Chat ---------------------------------------------------- {{{1
+
 local chat = {}
 local request_data = {}
 
@@ -24,6 +28,8 @@ nvim_create_autocmd("BufEnter", {
       end
    end,
 })
+
+-- Chat methods -------------------------------------------- {{{1
 
 ---Opens chat in browser.
 ---@param response table
@@ -87,3 +93,5 @@ function chat.add_tracked_workspace()
 end
 
 return chat
+
+-- vim: fdm=marker
