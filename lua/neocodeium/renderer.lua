@@ -347,7 +347,6 @@ function Renderer:update_horz_move(prev_pos, curline_text)
          local prefix = state.curline_text:sub(col + 1, col - horz_move)
          state.inline[1].text = prefix .. first_inline.text
          self:set_virt_inline(first_inline.id, first_inline.text, col)
-         state.matching = true
          self.clear_timer:stop()
          self:start_clear_timer()
       end
