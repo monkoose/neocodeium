@@ -11,6 +11,7 @@ local nvim_create_user_command = vim.api.nvim_create_user_command
 -- Auxiliary functions ------------------------------------- {{{1
 
 local augroup = vim.api.nvim_create_augroup("neocodeium", {})
+local other_docs_timer = assert(uv.new_timer())
 
 ---@param events string|table
 ---@param opts table
@@ -55,12 +56,28 @@ local function enable_autocmds()
    local doc = require("neocodeium.doc")
    local state = require("neocodeium.state")
    local utils = require("neocodeium.utils")
+   local options = require("neocodeium.options").options
    local STATUS = require("neocodeium.enums").STATUS
 
-   local other_docs_timer = assert(uv.new_timer())
+   local function set_allowed_encoding()
+      local buffers = options.disable_in_special_buftypes and utils.normal_bufs()
+         or utils.all_bufs()
+      for b in buffers do
+         vim.b[b].neocodeium_allowed_encoding = utils.is_utf8_or_latin1(b)
+      end
+   end
 
-   for b in utils.normal_bufs() do
-      vim.b[b].neocodeium_allowed_encoding = utils.is_utf8_or_latin1(b)
+   if vim.v.vim_did_enter == 1 then
+      set_allowed_encoding()
+      set_highlights()
+   else
+      create_autocmd("VimEnter", {
+         once = true,
+         callback = function()
+            set_allowed_encoding()
+            set_highlights()
+         end,
+      })
    end
 
    create_autocmd({ "BufAdd" }, {
@@ -194,7 +211,6 @@ function M.setup(opts)
       end
    end
 
-   set_highlights()
    enable_autocmds()
 
    -- User command

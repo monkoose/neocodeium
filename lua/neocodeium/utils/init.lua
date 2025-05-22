@@ -152,4 +152,10 @@ function M.normal_bufs()
    return vim.iter(nvim_list_bufs()):filter(M.is_normal_buf)
 end
 
+---Returns iterator over numbers of all buffers.
+---@return Iter
+function M.all_bufs()
+   return vim.iter(nvim_list_bufs())
+end
+
 return M
