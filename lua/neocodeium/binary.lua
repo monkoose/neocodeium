@@ -23,7 +23,7 @@ local Bin = { version = "1.46.3" }
 ---@return boolean
 local function is_expanded_successfully()
    if vim.v.shell_error ~= 0 then
-      log.error("Failed to extract binary\n" .. vim.v.shell_error, { type = log.BOTH })
+      log.error("Failed to extract binary.", { type = log.BOTH })
       return false
    end
    return true
@@ -38,7 +38,8 @@ local function powershell_expand(bin_gz)
       vim.o.shell = "powershell"
       vim.o.shellpipe = "|"
       vim.o.shellredir = "| Out-File -Encoding UTF8"
-      vim.o.shellquote = '"'
+      vim.o.shellquote = ""
+      vim.o.shellxquote = ""
       vim.o.shellcmdflag = "-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command"
       fn.system(
          "& { . "
