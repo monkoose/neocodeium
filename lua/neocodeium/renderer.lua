@@ -177,7 +177,6 @@ function Renderer:update_label()
    end)
 end
 
----@private
 function Renderer:display_label()
    if not (options.show_label and self.label.enabled) then
       return

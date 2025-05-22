@@ -1,6 +1,7 @@
 -- Imports ------------------------------------------------- {{{1
 
 local uv = vim.uv
+local fn = vim.fn
 
 local nvim_get_hl = vim.api.nvim_get_hl
 local nvim_set_hl = vim.api.nvim_set_hl
@@ -12,6 +13,7 @@ local nvim_create_user_command = vim.api.nvim_create_user_command
 
 local augroup = vim.api.nvim_create_augroup("neocodeium", {})
 local other_docs_timer = assert(uv.new_timer())
+local pummenu_timer = assert(uv.new_timer())
 
 ---@param events string|table
 ---@param opts table
@@ -159,9 +161,51 @@ local function enable_autocmds()
       end,
    })
 
-   create_autocmd({ "CursorMovedI", "TextChangedP" }, {
+   local function is_noselect()
+      local completeopt = vim.o.completeopt
+      return completeopt:find("noselect") and -1 or 0
+   end
+
+   local default_selected_compl = is_noselect()
+   local selected_compl = default_selected_compl
+
+   create_autocmd("OptionSet", {
+      pattern = "completeopt",
+      callback = function()
+         default_selected_compl = is_noselect()
+      end,
+   })
+
+   -- Make neocodeium less disruptive when using pummenu
+   create_autocmd("TextChangedP", {
+      callback = function()
+         local cur_selected = fn.complete_info({ "selected" }).selected
+         if selected_compl == cur_selected then
+            completer:initiate()
+         else
+            selected_compl = cur_selected
+            completer:clear(true)
+            renderer:display_label()
+            pummenu_timer:stop()
+            pummenu_timer:start(
+               400,
+               0,
+               vim.schedule_wrap(function()
+                  if fn.pumvisible() == 1 then
+                     completer:initiate()
+                  end
+               end)
+            )
+         end
+      end,
+   })
+
+   create_autocmd("CursorMovedI", {
       callback = function()
          completer:initiate()
+         if fn.pumvisible() == 0 then
+            selected_compl = default_selected_compl
+         end
       end,
    })
 
