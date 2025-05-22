@@ -59,7 +59,7 @@ local function enable_autocmds()
 
    local other_docs_timer = assert(uv.new_timer())
 
-   for b in utils.loaded_bufs() do
+   for b in utils.normal_bufs() do
       vim.b[b].neocodeium_allowed_encoding = utils.is_utf8_or_latin1(b)
    end
 

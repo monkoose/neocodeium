@@ -146,4 +146,10 @@ function M.loaded_bufs()
    return vim.iter(nvim_list_bufs()):filter(nvim_buf_is_loaded)
 end
 
+---Returns iterator over numbers of all normal buffers.
+---@return Iter
+function M.normal_bufs()
+   return vim.iter(nvim_list_bufs()):filter(M.is_normal_buf)
+end
+
 return M
