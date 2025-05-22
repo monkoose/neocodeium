@@ -159,7 +159,7 @@ local function enable_autocmds()
       end,
    })
 
-   create_autocmd({ "CursorMovedI" }, {
+   create_autocmd({ "CursorMovedI", "TextChangedP" }, {
       callback = function()
          completer:initiate()
       end,
