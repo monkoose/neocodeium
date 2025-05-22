@@ -38,8 +38,7 @@ local function powershell_expand(bin_gz)
       vim.o.shell = "powershell"
       vim.o.shellpipe = "|"
       vim.o.shellredir = "| Out-File -Encoding UTF8"
-      vim.o.shellquote = ""
-      vim.o.shellxquote = ""
+      vim.o.shellquote = '"'
       vim.o.shellcmdflag = "-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command"
       fn.system(
          "& { . "
@@ -49,7 +48,7 @@ local function powershell_expand(bin_gz)
             .. " }"
       )
    end)
-   return is_expanded_successfully()
+   return true
 end
 
 ---Expands language server binary from compressed file on POSIX.
