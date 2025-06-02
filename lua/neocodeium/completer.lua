@@ -79,10 +79,10 @@ end
 ---@param s1 string
 ---@param s2 string
 ---@return integer
-local function same_prefix_index(s1, s2)
+local function common_prefix_index(s1, s2)
    local len = math.min(#s1, #s2)
    for i = 1, len do
-      if s1:sub(i, i) ~= s2:sub(i, i) then
+      if s1:byte(i) ~= s2:byte(i) then
          return i - 1
       end
    end
@@ -156,7 +156,7 @@ function Completer:update()
 
             if i == 1 then
                local compl_line = prefix .. text
-               local match_prefix_idx = same_prefix_index(compl_line, state.curline_text)
+               local match_prefix_idx = common_prefix_index(compl_line, state.curline_text)
                -- When actual text doesn't match prefix dispatch a new request
                if match_prefix_idx ~= col then
                   self:request()
