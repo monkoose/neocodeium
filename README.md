@@ -41,6 +41,8 @@ nvim-cmp.
 
 - Neovim >= **0.10.0**
 
+---
+
 ### 📦 Installation
 
 Here’s an example for 💤[lazy](https://github.com/folke/lazy.nvim) plugin manager. If you're using
@@ -80,6 +82,8 @@ Once you get them, add them to your config. This way `:NeoCodeium auth` will aut
 
 **Note:** To obtain an API token, you’ll need to run `:NeoCodeium auth`.
 On Windows WSL `wslview` `(sudo apt install wslu)` should be installed to properly open the browser.
+
+---
 
 ### ⚒️ Setup
 
@@ -143,6 +147,8 @@ require("neocodeium").setup({
 })
 ```
 
+---
+
 ### 🚀 Usage
 
 #### 📒 API
@@ -173,6 +179,8 @@ neocodeium.cycle_or_complete(n)
 -- Checks if a suggestion's virtual text is visible or not (useful for some complex mappings)
 neocodeium.visible()
 ```
+
+<br>
 
 #### 🪄 Tips
 
@@ -312,6 +320,8 @@ end
 ```
 </details>
 
+<br>
+
 #### ⌨️ Keymaps
 
 NeoCodeium doesn’t provide any keymaps, which means you’ll need to add them
@@ -348,6 +358,8 @@ vim.keymap.set("i", "<A-c>", function()
 end)
 ```
 
+<br>
+
 #### 🔤 Commands
 
 NeoCodeium provides `:NeoCodeium` user command, which has some useful actions:
@@ -373,6 +385,8 @@ require("neocodeium.commands").disable()
 require("neocodeium.commands").disable(true)
 ```
 
+<br>
+
 #### 📆 User Events
 
 NeoCodeium triggers several user events which can be used to trigger code. These can be used to optimize when statusline elements are updated, creating mappings only when the server is available, or modifying completion engine settings when AI completion is started or displaying hints.
@@ -386,6 +400,8 @@ NeoCodeium triggers several user events which can be used to trigger code. These
 - `NeoCodeiumBufDisabled` - triggers when the NeoCodeium plugin is disabled for a buffer
 - `NeoCodeiumCompletionDisplayed` - triggers when NeoCodeium successfully displays a completion item as virtual text
 - `NeoCodeiumCompletionCleared` - triggers when NeoCodeium clears virtual text and completions
+
+<br>
 
 #### 🚃 Statusline
 
@@ -485,6 +501,8 @@ local NeoCodeium = {
 ```
 </details>
 
+<br>
+
 #### 🎨 Highlight groups
 
 NeoCodeium offers a couple of highlight groups. Feel free to adjust them to
@@ -492,6 +510,8 @@ your preference and to match your chosen color scheme:
 - `NeoCodeiumSuggestion` - virtual text color of the plugin suggestions (default: `#808080`)
 - `NeoCodeiumLabel` - color of the label that indicates the number of suggestions (default: inverted DiagnosticInfo)
 - `NeoCodeiumSingleLineLabel` - color of the label of multi-line suggestion in single line mode (default: `bold #808080`)
+
+<br>
 
 #### 📄 Logging
 
@@ -508,6 +528,8 @@ Example:
 NEOCODEIUM_LOG_LEVEL=info nvim
 ```
 
+<br>
+
 #### 💬 Chat
 
 You can chat with AI in the browser with the `:NeoCodeium chat` command. The
@@ -518,6 +540,8 @@ context of the current buffer. Here, you can ask some specific questions about
 your code base. When you switch buffers, this context should be updated
 automatically (it takes some time). You can see current chat context in the
 left bottom corner.
+
+---
 
 ### 🌟 License
 
