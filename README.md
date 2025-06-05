@@ -358,7 +358,7 @@ NeoCodeium provides `:NeoCodeium` user command, which has some useful actions:
 - `:NeoCodeium disable_buffer` - disables NeoCodeium completion in the current buffer.
 - `:NeoCodeium enable_buffer` - enables NeoCodeium completion in the current buffer.
 - `:NeoCodeium toggle_buffer` - toggles NeoCodeium completion in the current buffer.
-- `:NeoCodeium open_log` - opens new tab with the log output. More information is in the [logging](#logging) section.
+- `:NeoCodeium open_log` - opens new tab with the log output. More information is in the [logging] section.
 - `:NeoCodeium chat` - opens browser with the Windsurf Chat.
 - `:NeoCodeium restart` - restarts the server (useful if the server stops responding for any reason).
 
@@ -410,7 +410,7 @@ This function returns two numbers:
         2 - Server is off (stopped)
 
 To use output from `get_status()` for in-time update it is required to invoke this function
-from [events](https://github.com/monkoose/neocodeium?tab=readme-ov-file#-user-events)
+from [events].
 
 **Statusline Examples**
 
@@ -525,3 +525,5 @@ MIT license
 
 [windsurf.vim]: https://github.com/Exafunction/windsurf.vim
 [Windsurf]: https://windsurf.com
+[events]: https://github.com/monkoose/neocodeium?tab=readme-ov-file#-user-events
+[logging]: https://github.com/monkoose/neocodeium?tab=readme-ov-file#-logging
