@@ -1,4 +1,4 @@
-*NeoCodeium*           free AI completion plugin powered by codeium
+*NeoCodeium*           free AI completion plugin powered by windsurf
 
 Author: monkoose <https://github.com/monkoose>
 License: MIT license
@@ -20,11 +20,11 @@ CONTENTS
 ==============================================================================
 INTRODUCTION                                         *neocodeium-introduction*
 
-|NeoCodeium| is an AI completion plugin powered by https://codeium.com/ toolkit.
-It spawns codeium server and sends requests to it to get so called completion
-items, which are rendered as virtual text and can span multiple lines.
-|NeoCodeium| parses loaded buffers on BufEnter autocmd to improve the quality
-of suggested items.
+|NeoCodeium| is an AI completion plugin powered by https://windsurf.com/
+(formerly codeium) toolkit. It spawns windsurf server and sends requests to it
+to get so called completion items, which are rendered as virtual text and can
+span multiple lines. |NeoCodeium| parses loaded buffers on BufEnter autocmd to
+improve the quality of suggested items.
 
 ==============================================================================
 INSTALLATION                                         *neocodeium-installation*
@@ -44,7 +44,7 @@ documentation for installation instructions.
     end,
     }
 <
-Now you can use `Alt-f` in insert mode to accept codeium suggestions.
+Now you can use `Alt-f` in insert mode to accept suggestions.
 Note: To obtain an API token, you’ll need to run `:NeoCodeium auth` command.
 
 ==============================================================================
@@ -76,7 +76,7 @@ API                                                           *neocodeium-api*
     -- visible. Mostly useful with the enabled `manual` option.
     neocodeium.cycle_or_complete(n)
 
-    -- Checks if codeium suggestion is shown or not
+    -- Checks if a suggestion is shown or not
     neocodeium.visible()
 <
 ------------------------------------------------------------------------------
@@ -102,10 +102,10 @@ COMMANDS                                                 *neocodeium-commands*
         Opens new tab with the log output. Read |neocodeium-logging| for more
         information about logging.
     restart~
-        Restarts Codeium server. Useful when server stops responding for any
+        Restarts windsurf server. Useful when server stops responding for any
         reason.
     chat~
-        Opens browser with the Codeium Chat.
+        Opens browser with the Windsurf Chat.
 
 You can also use such commands in your lua scripts:
 >lua
@@ -124,7 +124,7 @@ You can also use such commands in your lua scripts:
 KEYMAPS                                                  *neocodeium-keymaps*
 
 NeoCodeium doesn’t enforce any keymaps, which means you’ll need to add them
-yourself. `codeium.vim` and `copilot.vim` set `<Tab>` keymap as the default
+yourself. `windsurf.vim` and `copilot.vim` set `<Tab>` keymap as the default
 key for accepting a suggestion, but `<Tab>` has some downsides to consider
 (but nothing stops you from using it):
 >
@@ -206,8 +206,8 @@ CONFIGURATION                                       *neocodeium-configuration*
         When `false` doesn't start the server at startup.
     bin~
         String.
-        Path to a custom Codeium server binary.
-        You can download a specific version from codeium github page
+        Path to a custom windsurf server binary.
+        You can download a specific version from the github page
         https://github.com/Exafunction/codeium/releases
     manual~
         Boolean.
@@ -274,7 +274,7 @@ CONFIGURATION                                       *neocodeium-configuration*
         them in this table with a `false` value.
     root_dir~
         List of directories and files to detect workspace root directory for
-        codeium chat.
+        Windsurf Chat.
 
 
 Defaults: >lua
@@ -319,11 +319,11 @@ mappings only when the server is available, or modifying completion engine
 settings when AI completion is started or displaying hints.
 
     `NeoCodeiumServerConnecting`
-        Triggers when a connection to the Codeium server is starting.
+        Triggers when a connection to the windsurf server is starting.
     `NeoCodeiumServerConnected`
-        Triggers when a successful connection to the Codeium server is made.
+        Triggers when a successful connection to the windsurf server is made.
     `NeoCodeiumServerStopped`
-        Triggers when the Codeium server is stopped.
+        Triggers when the windsurf server is stopped.
     `NeoCodeiumEnabled`
         Triggers when the NeoCodeium plugin is enabled globally
     `NeoCodeiumDisabled`
@@ -355,7 +355,7 @@ This function returns two numbers:
             `options.filetypes = { some_filetyps = false }`
         4 - Buffer is disabled when `options.enalbed` is a function and
             it returns `false`
-        5 - Buffer has wrong encoding (codeium can accept only UTF-8 and
+        5 - Buffer has wrong encoding (windsurf can accept only UTF-8 and
             LATIN-1 encodings)
         6 - Buffer is of special type `:help 'buftype'`
     2. Server status

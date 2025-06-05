@@ -1,20 +1,20 @@
 <div align="center">
     <img width="450" alt="NeoCodeium" src="https://github.com/user-attachments/assets/f31d5035-ca1c-43f1-b309-fb523ecdfe48"/>
-    <p>⚡ Free AI completion plugin powered by <a href="https://codeium.com">codeium</a> ⚡</p>
+    <p>⚡ Free AI completion plugin powered by <a href="https://windsurf.com">windsurf</a> (formerly codeium) ⚡</p>
 </div>
 
 ---
 
-NeoCodeium is a plugin that provides AI completion powered by [Codeium]. The
+NeoCodeium is a plugin that provides AI completion powered by [Windsurf]. The
 primary reason for creating NeoCodeium was to address the issue of flickering
 suggestions in the official plugin which was particularly annoying when dealing
 with multi-line virtual text. Additionally, I desired a feature that would
-allow accepting Codeium suggestions to be repeatable using the `.` command
+allow accepting suggestions to be repeatable using the `.` command,
 because I use it as my main completion plugin and only manually invoke
 nvim-cmp.
 
 <details>
-<summary>Differences with <a href="https://github.com/Exafunction/codeium.vim">codeium.vim</a></summary>
+<summary>Differences with <a href="https://github.com/Exafunction/windsurf.vim">windsurf.vim</a></summary>
 
 - Supports only Neovim (written in Lua)
 - Flickering has been removed in most scenarios, resulting in a snappier experience
@@ -22,18 +22,18 @@ nvim-cmp.
 - Performance improvements have been achieved through cache techniques
 - The suggestion count label is displayed in the number column, making it closer to the context
 - Default keymaps have been removed
-- ~~Possibility to complete only word/line of the suggestion~~ (codeium.vim added this feature in [9fa0dee](https://github.com/Exafunction/codeium.vim/commit/9fa0dee67051d8e5d334f7f607e6bab1d6a46d1a))
+- ~~Possibility to complete only word/line of the suggestion~~ (windsurf.vim added this feature in [9fa0dee](https://github.com/Exafunction/windsurf.vim/commit/9fa0dee67051d8e5d334f7f607e6bab1d6a46d1a))
 - No debounce by default, allowing suggestions to appear while typing (this behavior can be disabled with `debounce = true` in the setup)
 
 </details>
 
 > [!Warning]
 > While using this plugin, your code is constantly being sent to
-> Codeium servers by their own language server in order to evaluate and return
-> completions. Before using make sure you have read and accept the [Codeium
-> Privacy Policy](https://codeium.com/privacy-policy). NeoCodeium has the
+> Windsurf servers by their own language server in order to evaluate and return
+> completions. Before using make sure you have read and accept the [Windsurf
+> Privacy Policy](https://windsurf.com/privacy-policy). NeoCodeium has the
 > ability to disable the server globally or for individual buffers. This plugin
-> does not send any data to the server from disabled buffers, but the Codeium
+> does not send any data to the server from disabled buffers, but the Windsurf
 > server is still running behind the scenes and we cannot guarantee that it
 > doesn't send information while running.
 
@@ -60,9 +60,9 @@ a different plugin manager, please refer to its documentation for installation i
 
 ```
 
-Now you can use `Alt-f` in insert mode to accept codeium suggestions.
+Now you can use `Alt-f` in insert mode to accept suggestions.
 
-Enterprise users: you should receive portal and API URLs for Codeium from your company.
+Enterprise users: you should receive portal and API URLs for Windsurf from your company.
 Once you get them, add them to your config. This way `:NeoCodeium auth` will authenticate you on the right portal. For example,
 
 ```lua
@@ -88,10 +88,10 @@ NeoCodeium comes with the following default options:
 ```lua
 -- NeoCodeium Configuration
 require("neocodeium").setup({
-  -- If `false`, then would not start codeium server (disabled state)
+  -- If `false`, then would not start windsurf server (disabled state)
   -- You can manually enable it at runtime with `:NeoCodeium enable`
   enabled = true,
-  -- Path to a custom Codeium server binary (you can download one from:
+  -- Path to a custom windsurf server binary (you can download one from:
   -- https://github.com/Exafunction/codeium/releases)
   bin = nil,
   -- When set to `true`, autosuggestions are disabled.
@@ -138,7 +138,7 @@ require("neocodeium").setup({
     gitrebase = false,
     ["."] = false,
   },
-  -- List of directories and files to detect workspace root directory for Codeium chat
+  -- List of directories and files to detect workspace root directory for Windsurf Chat
   root_dir = { ".bzr", ".git", ".hg", ".svn", "_FOSSIL_", "package.json" }
 })
 ```
@@ -315,7 +315,7 @@ end
 #### ⌨️ Keymaps
 
 NeoCodeium doesn’t provide any keymaps, which means you’ll need to add them
-yourself. While [codeium.vim] and
+yourself. While [windsurf.vim] and
 [copilot.vim](https://github.com/github/copilot.vim) set the `<Tab>` key as the
 default key for accepting a suggestion, we recommend avoiding it as it has some
 downsides to consider (although nothing is stopping you from using it):
@@ -352,15 +352,15 @@ end)
 
 NeoCodeium provides `:NeoCodeium` user command, which has some useful actions:
 - `:NeoCodeium auth` - authenticates the user and saves the API token.
-- `:NeoCodeium[!] disable` - disables completions. With the bang also stops the codeium server.
+- `:NeoCodeium[!] disable` - disables completions. With the bang also stops the windsurf server.
 - `:NeoCodeium enable` - enables NeoCodeium completion.
 - `:NeoCodeium[!] toggle` - toggles NeoCodeium completion. Convey the bang to disable command.
 - `:NeoCodeium disable_buffer` - disables NeoCodeium completion in the current buffer.
 - `:NeoCodeium enable_buffer` - enables NeoCodeium completion in the current buffer.
 - `:NeoCodeium toggle_buffer` - toggles NeoCodeium completion in the current buffer.
 - `:NeoCodeium open_log` - opens new tab with the log output. More information is in the [logging](#logging) section.
-- `:NeoCodeium chat` - opens browser with the Codeium Chat.
-- `:NeoCodeium restart` - restarts Codeium server (useful if the server stops responding for any reason).
+- `:NeoCodeium chat` - opens browser with the Windsurf Chat.
+- `:NeoCodeium restart` - restarts the server (useful if the server stops responding for any reason).
 
 You can also use the same commands in your Lua scripts by calling:
 
@@ -377,9 +377,9 @@ require("neocodeium.commands").disable(true)
 
 NeoCodeium triggers several user events which can be used to trigger code. These can be used to optimize when statusline elements are updated, creating mappings only when the server is available, or modifying completion engine settings when AI completion is started or displaying hints.
 
-- `NeoCodeiumServerConnecting` - triggers when a connection to the Codeium server is starting
-- `NeoCodeiumServerConnected` - triggers when a successful connection to the Codeium server is made
-- `NeoCodeiumServerStopped` - triggers when the Codeium server is stopped
+- `NeoCodeiumServerConnecting` - triggers when a connection to the windsurf server is starting
+- `NeoCodeiumServerConnected` - triggers when a successful connection to the windsurf server is made
+- `NeoCodeiumServerStopped` - triggers when the windsurf server is stopped
 - `NeoCodeiumEnabled` - triggers when the NeoCodeium plugin is enabled globally
 - `NeoCodeiumDisabled` - triggers when the NeoCodeium plugin is disabled globally
 - `NeoCodeiumBufEnabled` - triggers when the NeoCodeium plugin is enabled for a buffer
@@ -400,7 +400,7 @@ This function returns two numbers:
         2 - Buffer is disabled with `:NeoCodeium disable_buffer`
         3 - Buffer is disableld when it's filetype is matching `setup.filetypes = { some_filetyps = false }`
         4 - Buffer is disabled when `setup.filter` returns `false` for the current buffer
-        5 - Buffer has wrong encoding (codeium can accept only UTF-8 and LATIN-1 encodings)
+        5 - Buffer has wrong encoding (windsurf can accept only UTF-8 and LATIN-1 encodings)
         6 - Buffer is of special type `:help 'buftype'`
 
 2. Server status
@@ -519,13 +519,9 @@ your code base. When you switch buffers, this context should be updated
 automatically (it takes some time). You can see current chat context in the
 left bottom corner.
 
-### 💐 Credits
-
-- [codeium.vim] - The main source for understanding how to use Codeium.
-
 ### 🌟 License
 
 MIT license
 
-[codeium.vim]: https://github.com/Exafunction/codeium.vim
-[Codeium]: https://codeium.com
+[windsurf.vim]: https://github.com/Exafunction/windsurf.vim
+[Windsurf]: https://windsurf.com
