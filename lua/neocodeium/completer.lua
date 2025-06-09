@@ -318,7 +318,7 @@ end
 ---Accepts a suggestion till the end of the word.
 function Completer:accept_word()
    state.matching = true
-   self:accept_regex([[.\{-}\%(\>\|\W\{2,}\|$\)]])
+   self:accept_regex([[.\{-}\%(\>\|$\)]])
 end
 
 ---Accepts a suggestion till the end of the line.
