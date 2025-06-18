@@ -79,7 +79,7 @@ function Bin.new()
    if options.bin then
       options.bin = fs.normalize(options.bin)
       if stdio.executable(options.bin) then
-         self.version = self:get_version()
+         Bin.version = self:get_version()
          self.path = options.bin
          return self
       else
