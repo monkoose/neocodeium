@@ -76,9 +76,18 @@ end
 function Bin.new()
    local self = setmetatable({}, { __index = Bin })
 
-   if options.bin and stdio.readable(options.bin) then
-      self.path = options.bin
-      return self
+   if options.bin then
+      options.bin = fs.normalize(options.bin)
+      if stdio.executable(options.bin) then
+         self.version = self:get_version()
+         self.path = options.bin
+         return self
+      else
+         log.error(
+            "Specified binary is not executable, falling back to default",
+            { type = log.BOTH }
+         )
+      end
    end
 
    local system_info = utils.get_system_info()
@@ -154,6 +163,20 @@ function Bin:expand()
    end
 
    return ok
+end
+
+function Bin:get_version()
+   if options.bin and stdio.executable(options.bin) then
+      local result = fn.systemlist({ options.bin, "--version" })
+      if #result > 0 and string.find(result[#result], "%d+%.%d+%.%d+") then
+         return result[#result]
+      else
+         log.error("Failed to get binary version, falling back to default", { type = log.BOTH })
+         return ""
+      end
+   else
+      return self.version
+   end
 end
 -- }}}1
 
