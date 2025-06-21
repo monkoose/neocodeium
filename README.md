@@ -129,7 +129,7 @@ require("neocodeium").setup({
   single_line = {
     enabled = false,
     label = "...", -- Label indicating that there is multi-line suggestion.
-  }
+  },
   -- Set to a function that returns `true` if a buffer should be enabled
   -- and `false` if the buffer should be disabled
   -- You can still enable disabled by this option buffer with `:NeoCodeium enable_buffer`
