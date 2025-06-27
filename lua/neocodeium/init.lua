@@ -211,6 +211,11 @@ local function enable_autocmds()
 
    create_autocmd("InsertEnter", {
       callback = function()
+         -- do not run in Replace mode
+         if vim.v.insertmode ~= "i" then
+            return
+         end
+
          if state:get_status() == STATUS.enabled then
             state.active = true
          else
