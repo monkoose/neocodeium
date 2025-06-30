@@ -177,22 +177,26 @@ function Renderer:update_label()
    end)
 end
 
-function Renderer:display_label()
-   if not (options.show_label and self.label.enabled) then
-      return
-   end
-
-   if state.pending then
-      self.label.id = self:set_virt_label(" * ")
+---@param text? string
+function Renderer:display_label(text)
+   if text then
+      text = text
+   elseif state.pending then
+      text = " * "
    elseif utils.is_empty(state.data.items) then
-      self.label.id = self:set_virt_label(" 0 ")
+      text = " 0 "
    else
       if #state.inline == 1 and state.inline[1].text == "" and not state.block.text then
-         self.label.id = self:set_virt_label(" 0 ")
+         text = " 0 "
       else
-         self.label.id = self:set_virt_label(state.data.index .. "/" .. #state.data.items)
+         text = state.data.index .. "/" .. #state.data.items
       end
    end
+
+   if options.show_label and self.label.enabled then
+      self.label.id = self:set_virt_label(text)
+   end
+   events.emit("NeoCodeiumLabelUpdated", text, true)
 end
 
 ---Displays completion item, if request to the server should be resend returns true
@@ -289,9 +293,7 @@ function Renderer:update_forward_line()
          state.inline[1].text = state.block.text:sub(col + 1)
          self:remove_block()
          -- required to update label position
-         if options.show_label and self.label.enabled then
-            self:set_virt_label(" 0 ")
-         end
+         self:display_label(" 0 ")
       end
       state.inline[1].id = self:set_virt_inline(nil, state.inline[1].text, col, lnum)
    end
