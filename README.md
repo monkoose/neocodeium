@@ -320,6 +320,32 @@ end
 ```
 </details>
 
+<details>
+<summary><b>Using NeoCodeiumLabelUpdated to get suggestions label text</b></summary>
+
+If you have disabled suggestions label with `show_labe = false`, but still want to know number of suggestions,
+you can use `NeoCodeiumLabelUpdated` event to get label text, for example using it as statusline component.
+Label text is always 3 characters long string.
+
+`"   "` - Not in insert mode (neocodeium disabled)
+`" * "` - pending response from the windsurf server
+`" 0 "` - no suggestions
+`" 1 "` - only one suggestion
+`"1/6"` - 1 of 6 suggestions, etc
+
+```lua
+vim.api.nvim_create_autocmd("User", {
+    pattern = "NeoCodeiumLabelUpdated",
+    -- Don't forget to add some `group`
+    callback = function(ev)
+       -- Use ev.data to update your statusline
+       -- As example just print to cmdline
+       vim.print(ev.data)
+    end,
+})
+```
+</details>
+
 <br>
 
 #### ⌨️ Keymaps
@@ -400,6 +426,8 @@ NeoCodeium triggers several user events which can be used to trigger code. These
 - `NeoCodeiumBufDisabled` - triggers when the NeoCodeium plugin is disabled for a buffer
 - `NeoCodeiumCompletionDisplayed` - triggers when NeoCodeium successfully displays a completion item as virtual text
 - `NeoCodeiumCompletionCleared` - triggers when NeoCodeium clears virtual text and completions
+- `NeoCodeiumLabelUpdated` - triggers when number of suggestions has changed (suggestions label is updated)
+This event sends label text as it's data. You can access it in autocmd callback with `ev.data` - see example in the Tips secsion.
 
 <br>
 

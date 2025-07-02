@@ -61,6 +61,7 @@ local function enable_autocmds()
    local state = require("neocodeium.state")
    local utils = require("neocodeium.utils")
    local options = require("neocodeium.options").options
+   local events = require("neocodeium.events")
    local STATUS = require("neocodeium.enums").STATUS
 
    local function set_allowed_encoding()
@@ -159,6 +160,7 @@ local function enable_autocmds()
       callback = function()
          completer:clear(true)
          state.active = false
+         events.emit("NeoCodeiumLabelUpdated", "   ", true)
       end,
    })
 
