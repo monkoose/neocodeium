@@ -337,6 +337,9 @@ settings when AI completion is started or displaying hints.
         virtual text.
     `NeoCodeiumCompletionCleared`
         Triggers when NeoCodeium clears virtual text and completions.
+    `NeoCodeiumLabelUpdated`
+        Triggers when number of suggestions has changed (suggestions label is
+        updated).
 
 ==============================================================================
 STATUSLINE                                             *neocodeium-statusline*
