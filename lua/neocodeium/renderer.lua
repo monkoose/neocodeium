@@ -193,7 +193,7 @@ function Renderer:display_label(text)
       end
    end
 
-   if options.show_label and self.label.enabled then
+   if self.label.enabled then
       self.label.id = self:set_virt_label(text)
    end
    events.emit("NeoCodeiumLabelUpdated", text, true)

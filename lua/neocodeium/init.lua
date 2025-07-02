@@ -8,6 +8,7 @@ local nvim_set_hl = vim.api.nvim_set_hl
 local nvim_create_autocmd = vim.api.nvim_create_autocmd
 local nvim_get_current_buf = vim.api.nvim_get_current_buf
 local nvim_create_user_command = vim.api.nvim_create_user_command
+local nvim_get_autocmds = vim.api.nvim_get_autocmds
 
 -- Auxiliary functions ------------------------------------- {{{1
 
@@ -17,8 +18,9 @@ local pummenu_timer = assert(uv.new_timer())
 
 ---@param events string|table
 ---@param opts table
+---@return integer
 local function create_autocmd(events, opts)
-   nvim_create_autocmd(
+   return nvim_create_autocmd(
       events,
       vim.tbl_extend("keep", opts, {
          group = augroup,
@@ -113,30 +115,35 @@ local function enable_autocmds()
       return vim.wo.number or vim.wo.relativenumber
    end
 
-   local function insert_enter_once()
-      create_autocmd("ModeChanged", {
-         pattern = "*:i*",
-         once = true,
+   if options.show_label then
+      local mode_changed_id
+      local function insert_enter_once()
+         mode_changed_id = create_autocmd("ModeChanged", {
+            pattern = "*:i*",
+            once = true,
+            callback = function()
+               renderer.label.enabled = nu_or_rnu()
+            end,
+         })
+      end
+
+      insert_enter_once()
+
+      create_autocmd({ "WinEnter", "BufEnter" }, {
+         callback = function()
+            if not nvim_get_autocmds({ id = mode_changed_id })[1] then
+               insert_enter_once()
+            end
+         end,
+      })
+
+      create_autocmd("OptionSet", {
+         pattern = "number,relativenumber",
          callback = function()
             renderer.label.enabled = nu_or_rnu()
          end,
       })
    end
-
-   insert_enter_once()
-
-   create_autocmd("WinEnter", {
-      callback = function()
-         insert_enter_once()
-      end,
-   })
-
-   create_autocmd("OptionSet", {
-      pattern = "number,relativenumber",
-      callback = function()
-         renderer.label.enabled = nu_or_rnu()
-      end,
-   })
 
    create_autocmd("OptionSet", {
       pattern = "shiftwidth,expandtab",
