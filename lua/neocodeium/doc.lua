@@ -14,13 +14,23 @@ local nvim_buf_get_var = vim.api.nvim_buf_get_var
 local nvim_create_augroup = vim.api.nvim_create_augroup
 local nvim_create_autocmd = vim.api.nvim_create_autocmd
 
+local uv = vim.uv
+
 -- Cache --------------------------------------------------- {{{1
 
 ---Persistent cache of the buffers data.
 ---@type table<bufnr, { data: document, tick: integer }>
 local cached_data = {}
 
-local project_root = stdio.to_uri(stdio.get_project_root())
+local prev_cwd = uv.cwd()
+local project_root, project_root_uri
+
+local function update_project_root()
+   project_root = stdio.get_project_root()
+   project_root_uri = stdio.to_uri(project_root)
+end
+
+update_project_root()
 
 local augroup = nvim_create_augroup("neocodeium_docs", {})
 
@@ -38,7 +48,18 @@ nvim_create_autocmd("DirChanged", {
    group = augroup,
    desc = "Update project's root directory",
    callback = function()
-      project_root = stdio.to_uri(stdio.get_project_root())
+      update_project_root()
+   end,
+})
+
+---Autocmd to update project's root directory.
+nvim_create_autocmd("WinEnter", {
+   group = augroup,
+   desc = "Update project's root directory",
+   callback = function()
+      if uv.cwd() ~= prev_cwd then
+         update_project_root()
+      end
    end,
 })
 
@@ -69,7 +90,7 @@ function M.get(buf, ft, max_lines, pos)
       language = filetype.language[lang] or filetype.language.unspecified,
       cursor_position = { row = pos[1], col = pos[2] },
       absolute_uri = stdio.to_uri(name),
-      workspace_uri = project_root,
+      workspace_uri = project_root_uri,
       line_ending = "\n",
    }
 end
@@ -92,6 +113,7 @@ function M.get_all_loaded(cur_bufnr)
          and buf_ft ~= ""
          and utils.is_normal_buf(b)
          and state:get_status(b) == STATUS.enabled
+         and nvim_buf_get_name(b):find(project_root, 1, true)
       then
          local buf_cache = cached_data[b]
          local buf_tick = nvim_buf_get_var(b, "changedtick") ---@type integer
