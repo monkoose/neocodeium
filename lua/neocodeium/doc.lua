@@ -11,61 +11,14 @@ local nvim_buf_get_lines = vim.api.nvim_buf_get_lines
 local nvim_buf_get_name = vim.api.nvim_buf_get_name
 local nvim_get_option_value = vim.api.nvim_get_option_value
 local nvim_buf_get_var = vim.api.nvim_buf_get_var
-local nvim_create_augroup = vim.api.nvim_create_augroup
-local nvim_create_autocmd = vim.api.nvim_create_autocmd
-
-local uv = vim.uv
-
--- Cache --------------------------------------------------- {{{1
-
----Persistent cache of the buffers data.
----@type table<bufnr, { data: document, tick: integer }>
-local cached_data = {}
-
-local prev_cwd = uv.cwd()
-local project_root, project_root_uri
-
-local function update_project_root()
-   project_root = stdio.get_project_root()
-   project_root_uri = stdio.to_uri(project_root)
-end
-
-update_project_root()
-
-local augroup = nvim_create_augroup("neocodeium_docs", {})
-
----Autocmd to clear docs cache.
-nvim_create_autocmd("BufUnload", {
-   group = augroup,
-   desc = "Clear documents cache on buffer unload",
-   callback = function(args)
-      cached_data[args.buf] = nil
-   end,
-})
-
----Autocmd to update project's root directory.
-nvim_create_autocmd("DirChanged", {
-   group = augroup,
-   desc = "Update project's root directory",
-   callback = function()
-      update_project_root()
-   end,
-})
-
----Autocmd to update project's root directory.
-nvim_create_autocmd("WinEnter", {
-   group = augroup,
-   desc = "Update project's root directory",
-   callback = function()
-      if uv.cwd() ~= prev_cwd then
-         update_project_root()
-      end
-   end,
-})
 
 -- Public API ---------------------------------------------- {{{1
 
-local M = {}
+---@alias docdata table<bufnr, { data: document, tick: integer }>
+
+---@class Doc
+---@field cached_data docdata # Persistent cache of the buffers data.
+local M = { cached_data = {} }
 
 ---Returns document data.
 ---@param buf bufnr
@@ -90,7 +43,7 @@ function M.get(buf, ft, max_lines, pos)
       language = filetype.language[lang] or filetype.language.unspecified,
       cursor_position = { row = pos[1], col = pos[2] },
       absolute_uri = stdio.to_uri(name),
-      workspace_uri = project_root_uri,
+      workspace_uri = state.project_root_uri,
       line_ending = "\n",
    }
 end
@@ -113,20 +66,20 @@ function M.get_all_loaded(cur_bufnr)
          and buf_ft ~= ""
          and utils.is_normal_buf(b)
          and state:get_status(b) == STATUS.enabled
-         and nvim_buf_get_name(b):find(project_root, 1, true)
+         and nvim_buf_get_name(b):find(state.project_root, 1, true)
       then
-         local buf_cache = cached_data[b]
+         local buf_cache = M.cached_data[b]
          local buf_tick = nvim_buf_get_var(b, "changedtick") ---@type integer
          -- use new data only when buffer's content has changed, otherwise use cached data
          if not buf_cache or buf_tick ~= buf_cache.tick then
             doc_data = M.get(b, buf_ft, options.max_lines, pos)
             table.insert(docs, doc_data)
-            cached_data[b] = {
+            M.cached_data[b] = {
                data = doc_data,
                tick = buf_tick,
             }
          else
-            table.insert(docs, cached_data[b].data)
+            table.insert(docs, M.cached_data[b].data)
          end
       end
    end

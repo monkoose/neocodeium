@@ -4,7 +4,6 @@ local options = require("neocodeium.options").options
 local server = require("neocodeium.server")
 local doc = require("neocodeium.doc")
 local log = require("neocodeium.log")
-local stdio = require("neocodeium.utils.stdio")
 local utils = require("neocodeium.utils")
 local state = require("neocodeium.state")
 local STATUS = require("neocodeium.enums").STATUS
@@ -72,6 +71,7 @@ function chat.launch(response)
    end)
 end
 
+--- XXX: should it change workspace?
 ---Sends a request to the server to refresh context.
 function chat.refresh_context()
    if state:get_status() == STATUS.enabled then
@@ -84,12 +84,7 @@ end
 
 ---Sends a request to the server to add a tracked workspace.
 function chat.add_tracked_workspace()
-   local root = stdio.get_project_root()
-   if root then
-      server:request("AddTrackedWorkspace", { workspace = root })
-   else
-      log.error("Project root not found. Unable to add tracked workspace.", { type = log.BOTH })
-   end
+   server:request("AddTrackedWorkspace", { workspace = state.project_root })
 end
 
 return chat

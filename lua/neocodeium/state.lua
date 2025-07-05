@@ -1,5 +1,6 @@
 local options = require("neocodeium.options").options
 local utils = require("neocodeium.utils")
+local stdio = require("neocodeium.utils.stdio")
 local STATUS = require("neocodeium.enums").STATUS
 
 local uv = vim.uv
@@ -31,6 +32,9 @@ local nvim_get_option_value = vim.api.nvim_get_option_value
 ---@field block block
 ---@field debounce_timer uv.uv_timer_t
 ---@field curline_text string
+---@field project_root filepath
+---@field project_root_uri url
+---@field cwd filepath
 local State = {
    active = false,
    chat_enabled = false,
@@ -51,6 +55,9 @@ local State = {
    block = {},
    debounce_timer = assert(uv.new_timer()),
    curline_text = "",
+   project_root = stdio.get_project_root(),
+   project_root_uri = stdio.to_uri(stdio.get_project_root()),
+   cwd = fn.getcwd(),
 }
 
 ---Returns `true` if completion data is present and valid.
@@ -94,6 +101,16 @@ end
 function State:update_editor_options()
    self.completion_request_data.editor_options.tab_size = fn.shiftwidth()
    self.completion_request_data.editor_options.insert_spaces = vim.bo.expandtab
+end
+
+function State:update_project_root()
+   local cwd = fn.getcwd()
+   if self.cwd ~= cwd then
+      self.cwd = cwd
+      local root = stdio.get_project_root()
+      self.project_root = root
+      self.project_root_uri = stdio.to_uri(root)
+   end
 end
 
 return State

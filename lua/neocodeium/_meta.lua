@@ -13,7 +13,7 @@
 ---Decoded json table
 ---Encoded json string
 ---@alias json_str string
----Represenation of the url string, must start with http:// or https://.
+---Represenation of the url string, must start with http:// https:// or file://
 ---@alias url string
 
 ---@alias extmark_id integer

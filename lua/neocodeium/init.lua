@@ -242,6 +242,27 @@ local function enable_autocmds()
          Server:stop()
       end,
    })
+
+   create_autocmd("BufUnload", {
+      desc = "Clear documents cache on buffer unload",
+      callback = function(args)
+         doc.cached_data[args.buf] = nil
+      end,
+   })
+
+   create_autocmd("DirChanged", {
+      desc = "Update project's root directory",
+      callback = function()
+         state:update_project_root()
+      end,
+   })
+
+   create_autocmd("WinEnter", {
+      desc = "Update project's root directory",
+      callback = function()
+         state:update_project_root()
+      end,
+   })
 end
 
 -- API ----------------------------------------------------- {{{1
