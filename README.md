@@ -323,7 +323,7 @@ end
 <details>
 <summary><b>Using NeoCodeiumLabelUpdated to get suggestions label text</b></summary>
 
-If you have disabled suggestions label with `show_labe = false`, but still want to know number of suggestions,
+If you have disabled suggestions label with `show_label = false`, but still want to know number of suggestions,
 you can use `NeoCodeiumLabelUpdated` event to get label text, for example using it as statusline component.
 Label text is always 3 characters long string.
 
