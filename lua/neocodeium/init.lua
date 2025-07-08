@@ -132,7 +132,7 @@ local function enable_autocmds()
 
       create_autocmd({ "WinEnter", "BufEnter" }, {
          callback = function()
-            if not nvim_get_autocmds({ id = mode_changed_id })[1] then
+            if not nvim_get_autocmds({})[1] then
                insert_enter_once()
             end
          end,
