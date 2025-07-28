@@ -156,8 +156,9 @@ local function enable_autocmds()
    })
 
    create_autocmd("ModeChanged", {
-      pattern = "i*:[^i]*",
+      pattern = "i*:[^ic]*",
       callback = function()
+         pummenu_timer:stop()
          completer:clear(true)
          state.active = false
          events.emit("NeoCodeiumLabelUpdated", "   ", true)
