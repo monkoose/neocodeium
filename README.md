@@ -53,11 +53,17 @@ a different plugin manager, please refer to its documentation for installation i
 {
   "monkoose/neocodeium",
   event = "VeryLazy",
-  config = function()
-    local neocodeium = require("neocodeium")
-    neocodeium.setup()
-    vim.keymap.set("i", "<A-f>", neocodeium.accept)
-  end,
+  keys = {
+    {
+      "<A-f>",
+      function()
+        require("neocodeium").accept()
+      end,
+      mode = { "i" },
+      desc = "Accept suggestion",
+    },
+  },
+  opts = {},
 }
 
 ```
