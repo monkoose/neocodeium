@@ -103,6 +103,27 @@ local function calc_inline_delta(len, idx, col)
    return result
 end
 
+---Converts leading spaces in the string `str` to tabs
+---@param str string
+---@return string
+local function leading_spaces_to_tabs(str)
+   local result = str:gsub("^([ ]*)", function(spaces)
+      if #spaces == 0 then
+         return ""
+      end
+
+      local num_tabs = math.floor(#spaces / state.completion_request_data.editor_options.tab_size)
+      local ret = string.rep("\t", num_tabs)
+      -- in general there shouldn't be remaining spaces
+      local remaining_spaces = #spaces % state.completion_request_data.editor_options.tab_size
+      if remaining_spaces > 0 then
+         ret = ret .. remaining_spaces
+      end
+      return ret
+   end)
+   return result
+end
+
 -- Completer methods --------------------------------------- {{{1
 
 ---Returns current completion item or nil if there isn't one.
@@ -415,14 +436,17 @@ function Completer:accept()
    local lnum = state.pos[1] + 1
    if block then
       local block_len = #block
-      -- XXX: is codeium completion item still has suffix?
       local delta = curr_item.suffix and curr_item.suffix.deltaCursorOffset or 0
       local last_line = block[block_len]
       local col = #last_line + delta
-      if col > 0 then
-         pos = { lnum + block_len - 1, col }
-      else
-         pos = { lnum + block_len - 2, vim.v.maxcol }
+      -- XXX: suggests that windsurf only change cursor position for closing brackets
+      -- so it could a wrong position (but I don't know any filetypes for which this doesn't work)
+      pos = { lnum + block_len - (col > 0 and 1 or 2), vim.v.maxcol }
+      -- fix leading spaces sometimes appears in buffers with noexpandtab
+      if not state.completion_request_data.editor_options.insert_spaces then
+         for i, s in ipairs(block) do
+            block[i] = leading_spaces_to_tabs(s)
+         end
       end
    end
 
