@@ -96,6 +96,7 @@ function Server:start()
    local stdout = assert(uv.new_pipe())
    local stderr = assert(uv.new_pipe())
 
+   ---@diagnostic disable-next-line: assign-type-mismatch
    self.handle, self.pid = uv.spawn(
       self.bin.path,
       ---@diagnostic disable-next-line: missing-fields
