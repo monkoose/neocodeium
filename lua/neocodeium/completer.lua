@@ -256,14 +256,7 @@ function Completer:handle_response(r)
    local resp_str = table.concat(r.out)
    local ok, response = pcall(json.decode, resp_str)
    if not ok then
-      log.error(
-         "Invalid response from server\n"
-            .. resp_str
-            .. "\nstderr: "
-            .. vim.inspect(r.err)
-            .. "\n"
-            .. debug.traceback(response)
-      )
+      -- error logging is done by the server request
       return
    end
 
