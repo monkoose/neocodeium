@@ -65,10 +65,6 @@
 ---@field document document
 ---@field other_documents document[]
 
----@class response
----@field out string[]
----@field err string[]
-
 ---@class state.editor_options
 ---@field tab_size integer
 ---@field insert_spaces boolean

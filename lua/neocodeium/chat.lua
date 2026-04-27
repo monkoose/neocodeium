@@ -31,10 +31,10 @@ nvim_create_autocmd("BufEnter", {
 -- Chat methods -------------------------------------------- {{{1
 
 ---Opens chat in browser.
----@param response table
+---@param response string
 function chat.launch(response)
    local metadata = server.metadata
-   local processes = vim.json.decode(response.out[1])
+   local processes = vim.json.decode(response)
    local chat_port = processes["chatClientPort"]
    local ws_port = processes["chatWebServerPort"]
 

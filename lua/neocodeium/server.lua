@@ -46,16 +46,6 @@ local function find_port_file(path)
    end, { path = path, type = "file" })[1]
 end
 
----@param t table list to append data
----@return fun(_, data?: string)
-local function data_appender(t)
-   return function(_, data)
-      if data then
-         t[#t + 1] = data
-      end
-   end
-end
-
 -- Server methods ------------------------------------------ {{{1
 
 ---Spawns a process for the server and sets Server.handle.
@@ -193,7 +183,7 @@ end
 ---Sends request to the server
 ---@param type request_type
 ---@param data table
----@param on_exit? fun(response: response)
+---@param on_exit? fun(response: string)
 function Server:request(type, data, on_exit)
    if not self.port then
       return
@@ -226,8 +216,6 @@ function Server:request(type, data, on_exit)
       return
    end
 
-   local response = { out = {}, err = {} }
-
    client:connect("127.0.0.1", port_number, function(err)
       if err then
          client:close()
@@ -242,24 +230,24 @@ function Server:request(type, data, on_exit)
          return
       end
 
+      local response_chunks = {}
+
       client:read_start(function(read_err, chunk)
          if read_err then
-            table.insert(response.err, read_err)
             log.info("Invalid response from the server:\n" .. read_err)
             client:close()
          elseif chunk then
             if on_exit then
-               table.insert(response.out, chunk)
+               table.insert(response_chunks, chunk)
             end
          else -- EOF
             client:close()
             if on_exit then
-               local full_response = table.concat(response.out)
-               local header_end = full_response:find("\r\n\r\n", 1, true)
+               local response = table.concat(response_chunks)
+               local header_end = response:find("\r\n\r\n", 1, true)
                if header_end then
-                  response.out = { full_response:sub(header_end + 4):match("{.*}") }
+                  on_exit(response:match("{.*}", header_end + 4))
                end
-               on_exit(response)
             end
          end
       end)

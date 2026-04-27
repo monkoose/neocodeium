@@ -7,7 +7,7 @@ local uv = vim.uv
 local logfile = fn.tempname() .. "-neocodeium.log"
 local min_log_level = vim.env.NEOCODEIUM_LOG_LEVEL or options.log_level
 ---@type integer
-local o644 = tonumber(644, 8) ---@diagnostic disable-line: assign-type-mismatch
+local o644 = tonumber(644, 8) ---@diagnostic disable-line: param-type-mismatch
 
 ---@enum level
 local LEVEL = {

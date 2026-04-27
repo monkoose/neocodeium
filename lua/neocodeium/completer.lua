@@ -1,6 +1,5 @@
 -- Imports ------------------------------------------------- {{{1
 
-local log = require("neocodeium.log")
 local doc = require("neocodeium.doc")
 local utils = require("neocodeium.utils")
 local options = require("neocodeium.options").options
@@ -243,8 +242,8 @@ end
 
 ---Handles a response from the server.
 ---@private
----@param r response
-function Completer:handle_response(r)
+---@param resp_str string
+function Completer:handle_response(resp_str)
    state.pending = false
    renderer:update_label()
 
@@ -253,7 +252,6 @@ function Completer:handle_response(r)
    end
    self.request_is_valid = false
 
-   local resp_str = table.concat(r.out)
    local ok, response = pcall(json.decode, resp_str)
    if not ok then
       -- error logging is done by the server request
