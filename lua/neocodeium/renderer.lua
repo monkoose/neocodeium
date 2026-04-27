@@ -52,8 +52,7 @@ end
 ---@param str string
 ---@return string
 local function tabs_to_spaces(str)
-   local result =
-      str:gsub("\t", string.rep(" ", state.completion_request_data.editor_options.tab_size))
+   local result = str:gsub("\t", state.spaces_count)
    return result
 end
 

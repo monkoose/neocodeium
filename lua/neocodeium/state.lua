@@ -24,6 +24,7 @@ local nvim_get_option_value = vim.api.nvim_get_option_value
 ---@field request_data request_data
 ---@field accept_request_data accept_request_data
 ---@field completion_request_data state.completion_request_data
+---@field spaces_count string
 ---@field pending boolean
 ---@field matching boolean
 ---@field pos pos
@@ -47,6 +48,7 @@ local State = {
          insert_spaces = vim.bo.expandtab,
       },
    },
+   spaces_count = string.rep(" ", fn.shiftwidth()),
    pending = false,
    matching = false,
    pos = { 0, 0 },
@@ -99,8 +101,10 @@ function State:get_status(bufnr)
 end
 
 function State:update_editor_options()
-   self.completion_request_data.editor_options.tab_size = fn.shiftwidth()
+   local shiftwidth = fn.shiftwidth()
+   self.completion_request_data.editor_options.tab_size = shiftwidth
    self.completion_request_data.editor_options.insert_spaces = vim.bo.expandtab
+   self.spaces_count = string.rep(" ", shiftwidth)
 end
 
 function State:update_project_root()
