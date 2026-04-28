@@ -78,15 +78,17 @@ end
 ---@return integer
 function State:get_status(bufnr)
    bufnr = bufnr or 0
+   local buf_vars = vim.b[bufnr]
+
    if not options.enabled then
       return STATUS.disabled
       -- Buffer variable should enable neocodeium even if it is disabled
       -- by 'options.filetypes' or 'options.filter()' or in special buftypes
-   elseif vim.b[bufnr].neocodeium_enabled then
+   elseif buf_vars.neocodeium_enabled then
       return STATUS.enabled
-   elseif vim.b[bufnr].neocodeium_enabled == false then
+   elseif buf_vars.neocodeium_enabled == false then
       return STATUS.buf_disabled
-   elseif not vim.b[bufnr].neocodeium_allowed_encoding then
+   elseif not buf_vars.neocodeium_allowed_encoding then
       return STATUS.encoding_disabled
    elseif options.disable_in_special_buftypes and not utils.is_normal_buf(bufnr) then
       return STATUS.special_buf_disabled
