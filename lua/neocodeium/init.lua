@@ -226,6 +226,8 @@ local function enable_autocmds()
             return
          end
 
+         state:update_editor_options()
+
          if state:get_status() == STATUS.enabled then
             state.active = true
          else
