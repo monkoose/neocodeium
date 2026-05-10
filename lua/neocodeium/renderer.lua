@@ -225,6 +225,13 @@ function Renderer:remove_block()
    end
 end
 
+---Clears inline virtual text and without reset of `state.inline`
+function Renderer:clear_inline()
+   for i = #state.inline, 1, -1 do
+      delete_virttext(state.inline[i].id)
+   end
+end
+
 ---Removes inline virtual text and resets `state.inline`
 function Renderer:remove_inline()
    for i = #state.inline, 1, -1 do
