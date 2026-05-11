@@ -352,7 +352,17 @@ function Renderer:update_horz_move(prev_pos, curline_text)
          end
       end
    else -- deleted some text
-      if state.curline_text:match("^%s*$") then
+      local len_state_preceding_spaces = #state.curline_text:match("^%s*")
+      local len_preceding_spaces = #curline_text:match("^%s*")
+      -- contains only spaces
+      if
+         len_state_preceding_spaces == #state.curline_text
+         and len_preceding_spaces == #curline_text
+      then
+         self:start_clear_timer()
+      -- shifted to the left (happens on neovim autoindent; like completing `end` in lua files)
+      elseif len_state_preceding_spaces > len_preceding_spaces then
+         self:clear_inline()
          self:start_clear_timer()
       else
          local prefix = state.curline_text:sub(col + 1, col - horz_move)
@@ -385,6 +395,7 @@ function Renderer:update()
       else -- cursor movement happened on the same line
          if not state.inline[1] then
             self:remove_inline()
+            self:start_clear_timer()
          else
             self:update_horz_move(prev_pos, curline_text)
          end
