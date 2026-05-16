@@ -1,17 +1,17 @@
 ---@class Options
----@field enabled boolean
+---@field enabled? boolean
 ---@field bin? string
----@field manual boolean
----@field server { api_url?: string, portal_url?: string }
----@field show_label boolean
----@field debounce boolean
----@field max_lines integer # `-1` for all lines
----@field silent boolean
----@field disable_in_special_buftypes boolean
----@field log_level string
----@field single_line { enabled: boolean, label: string }
----@field filetypes table<string, boolean>
----@field root_dir string[]
+---@field manual? boolean
+---@field server? { api_url?: string, portal_url?: string }
+---@field show_label? boolean
+---@field debounce? boolean
+---@field max_lines? integer # `-1` for all lines
+---@field silent? boolean
+---@field disable_in_special_buftypes? boolean
+---@field log_level? string
+---@field single_line? { enabled: boolean, label: string }
+---@field filetypes? table<string, boolean>
+---@field root_dir? string[]
 ---@field filter? fun(bufnr: integer)
 local defaults = {
    enabled = true,
@@ -37,7 +37,9 @@ local defaults = {
    root_dir = { ".bzr", ".git", ".hg", ".svn", "_FOSSIL_", "package.json" },
 }
 
-local M = { options = vim.deepcopy(defaults) }
+local M = {}
+---@type Options
+M.options = {}
 
 function M.setup(opts)
    ---@type Options
