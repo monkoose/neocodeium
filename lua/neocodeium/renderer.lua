@@ -111,10 +111,14 @@ function Renderer:set_virt_block(text, lnum)
       state.block.visible = true
       local block_lines = {}
       for line in vim.gsplit(text, "\n") do
-         if not state.completion_request_data.editor_options.insert_spaces then
-            line = tabs_to_spaces(line)
-         end
          table.insert(block_lines, { { line, hlgroup } })
+      end
+
+      -- convert tabs to spaces (prevents virtual text bug)
+      if not state.completion_request_data.editor_options.insert_spaces then
+         for i, bt in ipairs(block_lines) do
+            block_lines[i][1][1] = tabs_to_spaces(bt[1][1])
+         end
       end
 
       return nvim_buf_set_extmark(0, ns, lnum, 0, {
