@@ -48,6 +48,33 @@ function M.get(buf, ft, max_lines, pos)
    }
 end
 
+---Returns document data for the buffer `bufnr`.
+---@param bufnr bufnr
+---@return document|nil
+local function get_buf_doc(bufnr)
+   local buf_cache = M.cached_data[bufnr]
+   local buf_tick = nvim_buf_get_var(bufnr, "changedtick") ---@type integer
+   -- use new data only when buffer's content has changed, otherwise use cached data
+   if buf_cache and buf_tick == buf_cache.tick then
+      return M.cached_data[bufnr].data
+   end
+
+   local buf_ft = nvim_get_option_value("filetype", { buf = bufnr })
+   if
+      buf_ft ~= ""
+      and utils.is_normal_buf(bufnr)
+      and state:get_status(bufnr) == STATUS.enabled
+      and nvim_buf_get_name(bufnr):find(state.project_root, 1, true)
+   then
+      local doc_data = M.get(bufnr, buf_ft, options.max_lines, { 0, 0 })
+      M.cached_data[bufnr] = {
+         data = doc_data,
+         tick = buf_tick,
+      }
+      return doc_data
+   end
+end
+
 ---Returns docs for all loaded buffers.
 ---@param cur_bufnr integer current buffer number
 ---@return document[]
@@ -56,30 +83,13 @@ function M.get_all_loaded(cur_bufnr)
       return {}
    end
 
-   local doc_data
    local docs = {}
-   local pos = { 0, 0 }
    for b in utils.loaded_bufs() do
-      local buf_ft = nvim_get_option_value("filetype", { buf = b })
-      if
-         b ~= cur_bufnr
-         and buf_ft ~= ""
-         and utils.is_normal_buf(b)
-         and state:get_status(b) == STATUS.enabled
-         and nvim_buf_get_name(b):find(state.project_root, 1, true)
-      then
-         local buf_cache = M.cached_data[b]
-         local buf_tick = nvim_buf_get_var(b, "changedtick") ---@type integer
-         -- use new data only when buffer's content has changed, otherwise use cached data
-         if not buf_cache or buf_tick ~= buf_cache.tick then
-            doc_data = M.get(b, buf_ft, options.max_lines, pos)
+      -- Skip current buffer, because it's already processed
+      if b ~= cur_bufnr then
+         local doc_data = get_buf_doc(b)
+         if doc_data then
             table.insert(docs, doc_data)
-            M.cached_data[b] = {
-               data = doc_data,
-               tick = buf_tick,
-            }
-         else
-            table.insert(docs, M.cached_data[b].data)
          end
       end
    end
