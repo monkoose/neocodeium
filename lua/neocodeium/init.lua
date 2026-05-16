@@ -139,7 +139,7 @@ local function enable_autocmds()
       })
 
       create_autocmd("OptionSet", {
-         pattern = "number,relativenumber",
+         pattern = { "number", "relativenumber" },
          callback = function()
             renderer.label.enabled = nu_or_rnu()
          end,
@@ -147,7 +147,7 @@ local function enable_autocmds()
    end
 
    create_autocmd("OptionSet", {
-      pattern = "shiftwidth,expandtab",
+      pattern = { "shiftwidth", "expandtab" },
       callback = function(ev)
          if ev.buf == nvim_get_current_buf() then
             state:update_editor_options()
@@ -274,6 +274,7 @@ local M = {}
 
 local already_setup = false
 
+---@param opts Options
 function M.setup(opts)
    if already_setup then
       local log = require("neocodeium.log")
