@@ -1,3 +1,6 @@
+-- required for proper options setup
+require("neocodeium").setup()
+
 local api_key = require("neocodeium.api_key")
 
 local function last_message()

@@ -274,7 +274,7 @@ local M = {}
 
 local already_setup = false
 
----@param opts Options
+---@param opts? Options
 function M.setup(opts)
    if already_setup then
       local log = require("neocodeium.log")

@@ -1,3 +1,6 @@
+-- required for proper options setup
+require("neocodeium").setup()
+
 local log = require("neocodeium.log")
 local fn = vim.fn
 
