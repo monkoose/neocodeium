@@ -81,6 +81,8 @@ function State:get_status(bufnr)
 
    if not options.enabled then
       return STATUS.disabled
+   elseif not utils.get_buf_var(bufnr, "neocodeium_allowed_encoding") then
+      return STATUS.encoding_disabled
    -- Buffer variable should enable neocodeium even if it is disabled
    -- by 'options.filetypes' or 'options.filter()' or in special buftypes
    elseif is_enabled_in_bufnr then
@@ -89,8 +91,6 @@ function State:get_status(bufnr)
    -- it means that buffer is enabled
    elseif is_enabled_in_bufnr == false then
       return STATUS.buf_disabled
-   elseif not utils.get_buf_var(bufnr, "neocodeium_allowed_encoding") then
-      return STATUS.encoding_disabled
    elseif options.disable_in_special_buftypes and not utils.is_normal_buf(bufnr) then
       return STATUS.special_buf_disabled
    elseif options.filetypes[api.nvim_get_option_value("filetype", { buf = bufnr })] == false then
