@@ -379,8 +379,9 @@ function Renderer:update()
    local prev_pos = state.pos
    state.pos = utils.get_cursor()
    local vert_move = state.pos[1] - prev_pos[1]
+   local curr_changedtick = utils.get_buf_var(0, "changedtick")
 
-   if self.changedtick == vim.b.changedtick or math.abs(vert_move) > 1 then
+   if self.changedtick == curr_changedtick or math.abs(vert_move) > 1 then
       self.clear_timer:stop()
       self:clear()
       state.curline_text = api.nvim_get_current_line()
@@ -403,7 +404,7 @@ function Renderer:update()
       state.curline_text = curline_text
    end
 
-   self.changedtick = vim.b.changedtick
+   self.changedtick = curr_changedtick
 end
 
 return Renderer

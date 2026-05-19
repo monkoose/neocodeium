@@ -328,8 +328,12 @@ function Completer:request()
 
    self.request_id = self.request_id + 1
    state.completion_request_data.metadata.request_id = self.request_id
-   state.completion_request_data.document =
-      doc.get(api.nvim_get_current_buf(), vim.bo.filetype, -1, state.pos)
+   state.completion_request_data.document = doc.get(
+      api.nvim_get_current_buf(),
+      api.nvim_get_option_value("filetype", { scope = "local" }),
+      -1,
+      state.pos
+   )
    state.completion_request_data.other_documents = self.other_docs
 
    self.request_is_valid = true

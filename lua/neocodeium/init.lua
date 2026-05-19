@@ -58,11 +58,15 @@ local function enable_autocmds()
    local other_docs_timer = assert(uv.new_timer())
    local pummenu_timer = assert(uv.new_timer())
 
+   local function update_allowed_encoding_buf_var(bufnr)
+      api.nvim_buf_set_var(bufnr, "neocodeium_allowed_encoding", utils.is_utf8_or_latin1(bufnr))
+   end
+
    local function set_allowed_encoding()
       local buffers = options.disable_in_special_buftypes and utils.normal_bufs()
          or utils.all_bufs()
       for b in buffers do
-         vim.b[b].neocodeium_allowed_encoding = utils.is_utf8_or_latin1(b)
+         update_allowed_encoding_buf_var(b)
       end
    end
 
@@ -81,7 +85,7 @@ local function enable_autocmds()
 
    create_autocmd({ "BufAdd" }, {
       callback = function(ev)
-         vim.b[ev.buf].neocodeium_allowed_encoding = utils.is_utf8_or_latin1(ev.buf)
+         update_allowed_encoding_buf_var(ev.buf)
       end,
    })
 
@@ -102,12 +106,14 @@ local function enable_autocmds()
    create_autocmd("OptionSet", {
       pattern = "fileencoding",
       callback = function(ev)
-         vim.b[ev.buf].neocodeium_allowed_encoding = utils.is_utf8_or_latin1(ev.buf)
+         update_allowed_encoding_buf_var(ev.buf)
       end,
    })
 
    local function nu_or_rnu()
-      return vim.wo.number or vim.wo.relativenumber
+      local local_scope = { scope = "local" }
+      return api.nvim_get_option_value("number", local_scope)
+         or api.nvim_get_option_value("relativenumber", local_scope)
    end
 
    if options.show_label then

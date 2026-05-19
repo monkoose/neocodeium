@@ -130,7 +130,7 @@ end
 ---@param bufnr bufnr
 ---@return boolean
 function M.is_utf8_or_latin1(bufnr)
-   local encoding = vim.bo[bufnr].fileencoding
+   local encoding = api.nvim_get_option_value("fileencoding", { buf = bufnr })
    return encoding == "" or encoding == "utf-8" or encoding == "latin1"
 end
 

@@ -44,7 +44,7 @@ local State = {
    completion_request_data = {
       editor_options = {
          tab_size = fn.shiftwidth(),
-         insert_spaces = vim.bo.expandtab,
+         insert_spaces = api.nvim_get_option_value("expandtab", { scope = "local" }),
       },
    },
    spaces_count = string.rep(" ", fn.shiftwidth()),
@@ -77,21 +77,22 @@ end
 ---@return integer
 function State:get_status(bufnr)
    bufnr = bufnr or 0
-   local buf_vars = vim.b[bufnr]
+   local is_enabled_in_bufnr = utils.get_buf_var(bufnr, "neocodeium_enabled")
 
    if not options.enabled then
       return STATUS.disabled
-      -- Buffer variable should enable neocodeium even if it is disabled
-      -- by 'options.filetypes' or 'options.filter()' or in special buftypes
-   elseif buf_vars.neocodeium_enabled then
+   -- Buffer variable should enable neocodeium even if it is disabled
+   -- by 'options.filetypes' or 'options.filter()' or in special buftypes
+   elseif is_enabled_in_bufnr then
       return STATUS.enabled
-   elseif buf_vars.neocodeium_enabled == false then
+   -- Test for falseness to omit nil check, because when the variable is missing
+   -- it means that buffer is enabled
+   elseif is_enabled_in_bufnr == false then
       return STATUS.buf_disabled
-   elseif not buf_vars.neocodeium_allowed_encoding then
+   elseif not utils.get_buf_var(bufnr, "neocodeium_allowed_encoding") then
       return STATUS.encoding_disabled
    elseif options.disable_in_special_buftypes and not utils.is_normal_buf(bufnr) then
       return STATUS.special_buf_disabled
-      -- The same as vim.b[bunfr].neocodeium_enabled == nil and ...
    elseif options.filetypes[api.nvim_get_option_value("filetype", { buf = bufnr })] == false then
       return STATUS.filetype_disabled
    elseif options.filter and options.filter(bufnr) == false then
@@ -104,7 +105,8 @@ end
 function State:update_editor_options()
    local shiftwidth = fn.shiftwidth()
    self.completion_request_data.editor_options.tab_size = shiftwidth
-   self.completion_request_data.editor_options.insert_spaces = vim.bo.expandtab
+   self.completion_request_data.editor_options.insert_spaces =
+      api.nvim_get_option_value("expandtab", { scope = "local" })
    self.spaces_count = string.rep(" ", shiftwidth)
 end
 

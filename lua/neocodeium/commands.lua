@@ -190,9 +190,10 @@ function M.open_log()
    local log_file = log.get_log_file()
    if stdio.readable(log_file) then
       vim.cmd.tabedit(log_file)
-      vim.bo.buftype = "nofile"
-      vim.bo.bufhidden = "wipe"
-      vim.bo.modifiable = false
+      local buf_options = vim.bo
+      buf_options.buftype = "nofile"
+      buf_options.bufhidden = "wipe"
+      buf_options.modifiable = false
       vim.wo.wrap = true
    else
       log.warn("Log file is empty", { type = log.ECHO })
