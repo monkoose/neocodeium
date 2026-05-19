@@ -5,15 +5,11 @@ local events = require("neocodeium.events")
 local state = require("neocodeium.state")
 local utils = require("neocodeium.utils")
 
+local api = vim.api
 local uv = vim.uv
 
-local nvim_buf_set_extmark = vim.api.nvim_buf_set_extmark
-local nvim_buf_del_extmark = vim.api.nvim_buf_del_extmark
-local nvim_buf_clear_namespace = vim.api.nvim_buf_clear_namespace
-local nvim_get_current_line = vim.api.nvim_get_current_line
-
-local hlgroup = vim.api.nvim_get_hl_id_by_name("NeoCodeiumSuggestion")
-local ns = vim.api.nvim_create_namespace("neocodeium_compl")
+local hlgroup = api.nvim_get_hl_id_by_name("NeoCodeiumSuggestion")
+local ns = api.nvim_create_namespace("neocodeium_compl")
 
 -- Renderer ------------------------------------------------ {{{1
 
@@ -45,7 +41,7 @@ local Renderer = {
 ---@param id extmark_id
 ---@return boolean true if deleted
 local function delete_virttext(id)
-   return nvim_buf_del_extmark(0, ns, id)
+   return api.nvim_buf_del_extmark(0, ns, id)
 end
 
 ---Returns `str` with tabs converted to spaces.
@@ -62,7 +58,7 @@ end
 ---@return extmark_id
 function Renderer:set_virt_label(text)
    self.label.virt_text[1][1] = text
-   return nvim_buf_set_extmark(0, ns, state.pos[1], 0, {
+   return api.nvim_buf_set_extmark(0, ns, state.pos[1], 0, {
       id = self.label.id,
       virt_text = self.label.virt_text,
       virt_text_win_col = -1 - #text,
@@ -79,7 +75,7 @@ end
 function Renderer:set_virt_inline(id, str, col, lnum)
    self.inline_virt_text[1][1] = state.completion_request_data.editor_options.insert_spaces and str
       or tabs_to_spaces(str)
-   return nvim_buf_set_extmark(0, ns, lnum or state.pos[1], col, {
+   return api.nvim_buf_set_extmark(0, ns, lnum or state.pos[1], col, {
       id = id,
       virt_text_pos = "inline",
       virt_text = self.inline_virt_text,
@@ -101,7 +97,7 @@ function Renderer:set_virt_block(text, lnum)
       and not utils.is_empty(state.inline[1].text)
    then
       state.block.visible = false
-      return nvim_buf_set_extmark(0, ns, lnum, 0, {
+      return api.nvim_buf_set_extmark(0, ns, lnum, 0, {
          id = state.block.id,
          virt_text = self.single_line_virt_text,
          undo_restore = false,
@@ -121,7 +117,7 @@ function Renderer:set_virt_block(text, lnum)
          end
       end
 
-      return nvim_buf_set_extmark(0, ns, lnum, 0, {
+      return api.nvim_buf_set_extmark(0, ns, lnum, 0, {
          id = state.block.id,
          virt_lines = block_lines,
          undo_restore = false,
@@ -266,10 +262,10 @@ function Renderer:clear(with_reset, scheduled)
       state.curline_text = ""
       if scheduled then
          vim.schedule(function()
-            nvim_buf_clear_namespace(0, ns, 0, -1)
+            api.nvim_buf_clear_namespace(0, ns, 0, -1)
          end)
       else
-         nvim_buf_clear_namespace(0, ns, 0, -1)
+         api.nvim_buf_clear_namespace(0, ns, 0, -1)
       end
       events.emit("NeoCodeiumCompletionCleared", nil, true)
    else
@@ -387,9 +383,9 @@ function Renderer:update()
    if self.changedtick == vim.b.changedtick or math.abs(vert_move) > 1 then
       self.clear_timer:stop()
       self:clear()
-      state.curline_text = nvim_get_current_line()
+      state.curline_text = api.nvim_get_current_line()
    else
-      local curline_text = nvim_get_current_line()
+      local curline_text = api.nvim_get_current_line()
       if vert_move == 1 then
          self.clear_timer:stop()
          self:update_forward_line()

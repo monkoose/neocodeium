@@ -2,6 +2,8 @@
 local utils = require("neocodeium.utils")
 local stub = require("luassert.stub")
 
+local api = vim.api
+
 describe("exec()", function()
    it("should return string if vim ex command is executed successfully", function()
       assert.has_no.Error(function()
@@ -21,7 +23,7 @@ describe("", function()
 
    describe("get_cursor()", function()
       it("should return 0-based cursor position in the current window", function()
-         vim.api.nvim_win_set_cursor(0, { 2, 1 })
+         api.nvim_win_set_cursor(0, { 2, 1 })
          assert.Same(utils.get_cursor(), { 1, 1 })
       end)
    end)
@@ -30,7 +32,7 @@ describe("", function()
       it("should set 0-based cursor position in the current window", function()
          vim.cmd.edit("tests/assets/readable.txt")
          utils.set_cursor({ 1, 3 })
-         assert.Same(vim.api.nvim_win_get_cursor(0), { 2, 3 })
+         assert.Same(api.nvim_win_get_cursor(0), { 2, 3 })
       end)
    end)
 
@@ -38,7 +40,7 @@ describe("", function()
       it("should set lines in the current buffer", function()
          local lines = { "foo", "bar" }
          utils.set_lines(1, 2, lines)
-         assert.Same(vim.api.nvim_buf_get_lines(0, 1, 1 + #lines, true), lines)
+         assert.Same(api.nvim_buf_get_lines(0, 1, 1 + #lines, true), lines)
       end)
    end)
 
@@ -46,7 +48,7 @@ describe("", function()
 end)
 
 describe("is_insert()", function()
-   local cur_mode = stub(vim.api, "nvim_get_mode")
+   local cur_mode = stub(api, "nvim_get_mode")
 
    it("should return true in insert mode", function()
       cur_mode.returns({ mode = "i" })

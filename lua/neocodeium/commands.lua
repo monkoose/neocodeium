@@ -4,7 +4,7 @@ local utils = require("neocodeium.utils")
 local conf = require("neocodeium.utils.conf")
 local log = require("neocodeium.log")
 local options = require("neocodeium.options").options
-local api_key = require("neocodeium.api_key")
+local windsurf_api_key = require("neocodeium.api_key")
 local stdio = require("neocodeium.utils.stdio")
 local server = require("neocodeium.server")
 local events = require("neocodeium.events")
@@ -41,9 +41,8 @@ end
 ---Returns nil on failure.
 ---@return string|nil
 local function request_api_key()
-   local api_url = options.server.api_url
-   local register_user_url = api_url
-         and api_url .. "/exa.seat_management_pb.SeatManagementService/RegisterUser"
+   local register_user_url = options.server.api_url
+         and options.server.api_url .. "/exa.seat_management_pb.SeatManagementService/RegisterUser"
       or "https://api.codeium.com/register_user/"
 
    local curl_with_args = {
@@ -125,7 +124,7 @@ function M.auth()
       return
    end
 
-   api_key.set(key)
+   windsurf_api_key.set(key)
    server.metadata.api_key = key
 
    local config = conf.load()

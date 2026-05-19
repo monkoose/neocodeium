@@ -8,12 +8,9 @@ local renderer = require("neocodeium.renderer")
 local state = require("neocodeium.state")
 local PART = require("neocodeium.enums").PART
 
+local api = vim.api
 local fn = vim.fn
 local json = vim.json
-
-local nvim_feedkeys = vim.api.nvim_feedkeys
-local nvim_get_current_buf = vim.api.nvim_get_current_buf
-local nvim_replace_termcodes = vim.api.nvim_replace_termcodes
 
 -- Completer ----------------------------------------------- {{{1
 
@@ -286,8 +283,8 @@ function Completer:accept_regex(regex)
             local prefix_chars = fn.strchars(combined_prefix)
             if prefix_chars > 0 then
                local dels =
-                  nvim_replace_termcodes(string.rep("<Del>", prefix_chars), true, false, true)
-               nvim_feedkeys(dels, "n", false)
+                  api.nvim_replace_termcodes(string.rep("<Del>", prefix_chars), true, false, true)
+               api.nvim_feedkeys(dels, "n", false)
             end
          end
       end
@@ -304,7 +301,7 @@ function Completer:accept_regex(regex)
       utils.set_cursor({ lnum1, 0 })
    end
    renderer:clear_inline()
-   nvim_feedkeys(text, "nt", true)
+   api.nvim_feedkeys(text, "nt", true)
 end
 
 ---Accepts a suggestion till the end of the word.
@@ -332,7 +329,7 @@ function Completer:request()
    self.request_id = self.request_id + 1
    state.completion_request_data.metadata.request_id = self.request_id
    state.completion_request_data.document =
-      doc.get(nvim_get_current_buf(), vim.bo.filetype, -1, state.pos)
+      doc.get(api.nvim_get_current_buf(), vim.bo.filetype, -1, state.pos)
    state.completion_request_data.other_documents = self.other_docs
 
    self.request_is_valid = true

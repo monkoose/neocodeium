@@ -1,10 +1,4 @@
-local nvim_exec2 = vim.api.nvim_exec2
-local nvim_buf_set_lines = vim.api.nvim_buf_set_lines
-local nvim_win_get_cursor = vim.api.nvim_win_get_cursor
-local nvim_win_set_cursor = vim.api.nvim_win_set_cursor
-local nvim_get_option_value = vim.api.nvim_get_option_value
-local nvim_list_bufs = vim.api.nvim_list_bufs
-local nvim_buf_is_loaded = vim.api.nvim_buf_is_loaded
+local api = vim.api
 
 local M = {}
 
@@ -12,7 +6,7 @@ local M = {}
 ---@param cmd ex_cmd
 ---@return string
 function M.exec(cmd)
-   local ok, result = pcall(nvim_exec2, cmd, { output = true })
+   local ok, result = pcall(api.nvim_exec2, cmd, { output = true })
    if not ok then
       error(result)
    end
@@ -24,7 +18,7 @@ end
 ---Unlike `vim.api.nvim_win_get_cursor()`, it returns 0-based indexes
 ---@return pos
 function M.get_cursor()
-   local cursor = nvim_win_get_cursor(0)
+   local cursor = api.nvim_win_get_cursor(0)
    return { cursor[1] - 1, cursor[2] }
 end
 
@@ -32,7 +26,7 @@ end
 ---Unlike `vim.api.nvim_win_set_cursor()`, it accepts 0-based indexes
 ---@param pos pos
 function M.set_cursor(pos)
-   nvim_win_set_cursor(0, { pos[1] + 1, pos[2] })
+   api.nvim_win_set_cursor(0, { pos[1] + 1, pos[2] })
 end
 
 ---Wrapper for `vim.api.nvim_buf_set_lines()` for current buffer
@@ -40,14 +34,14 @@ end
 ---@param end_lnum lnum end of the range
 ---@param replacement string[]
 function M.set_lines(lnum, end_lnum, replacement)
-   nvim_buf_set_lines(0, lnum, end_lnum, false, replacement)
+   api.nvim_buf_set_lines(0, lnum, end_lnum, false, replacement)
 end
 
 ---Returns true if current mode is insert or false otherwise.
 ---@return boolean
 function M.is_insert()
    -- `vim.api` required so stub would work in tests
-   return vim.api.nvim_get_mode().mode == "i"
+   return api.nvim_get_mode().mode == "i"
 end
 
 ---Returns OS name
@@ -129,7 +123,7 @@ end
 ---@param bufnr bufnr
 ---@return boolean
 function M.is_normal_buf(bufnr)
-   return nvim_get_option_value("buftype", { buf = bufnr }) == ""
+   return api.nvim_get_option_value("buftype", { buf = bufnr }) == ""
 end
 
 ---Returns true if file encoding in the current buffer is utf-8 or latin1
@@ -143,19 +137,27 @@ end
 ---Returns iterator over numbers of all loaded buffers.
 ---@return Iter
 function M.loaded_bufs()
-   return vim.iter(nvim_list_bufs()):filter(nvim_buf_is_loaded)
+   return vim.iter(api.nvim_list_bufs()):filter(api.nvim_buf_is_loaded)
 end
 
 ---Returns iterator over numbers of all normal buffers.
 ---@return Iter
 function M.normal_bufs()
-   return vim.iter(nvim_list_bufs()):filter(M.is_normal_buf)
+   return vim.iter(api.nvim_list_bufs()):filter(M.is_normal_buf)
 end
 
 ---Returns iterator over numbers of all buffers.
 ---@return Iter
 function M.all_bufs()
-   return vim.iter(nvim_list_bufs())
+   return vim.iter(api.nvim_list_bufs())
+end
+
+---Returns value of `bufnr` buffer variable
+---@param bufnr bufnr
+---@param var string
+---@return any
+function M.get_buf_var(bufnr, var)
+   return vim._getvar("b", bufnr, var)
 end
 
 return M

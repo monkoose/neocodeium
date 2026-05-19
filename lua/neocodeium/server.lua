@@ -2,7 +2,7 @@
 
 local utils = require("neocodeium.utils")
 local log = require("neocodeium.log")
-local api_key = require("neocodeium.api_key")
+local windsurf_api_key = require("neocodeium.api_key")
 local options = require("neocodeium.options").options
 local stdio = require("neocodeium.utils.stdio")
 local events = require("neocodeium.events")
@@ -28,7 +28,7 @@ local Server = {
    bin = Bin.new(),
    is_restart = false,
    metadata = {
-      api_key = api_key.get(),
+      api_key = windsurf_api_key.get(),
       ide_name = "neovim",
       ide_version = Bin.version,
       extension_name = "neocodeium",
@@ -52,13 +52,12 @@ end
 ---@private
 function Server:start()
    local timer = assert(uv.new_timer())
-   local api_url = options.server.api_url
    local manager_dir = fn.tempname() .. "/codeium/manager"
    fn.mkdir(manager_dir, "p")
 
    local args = {
       "--api_server_url",
-      api_url or "https://server.codeium.com",
+      options.server.api_url or "https://server.codeium.com",
       "--manager_dir",
       manager_dir,
    }
@@ -146,7 +145,7 @@ function Server:run()
       return
    end
 
-   if not api_key.check() then
+   if not windsurf_api_key.check() then
       return
    end
 

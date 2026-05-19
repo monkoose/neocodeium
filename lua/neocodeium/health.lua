@@ -1,5 +1,5 @@
 local stdio = require("neocodeium.utils.stdio")
-local api_key = require("neocodeium.api_key")
+local windsurf_api_key = require("neocodeium.api_key")
 local binary = require("neocodeium.binary")
 local server = require("neocodeium.server")
 local utils = require("neocodeium.utils")
@@ -31,7 +31,7 @@ local function check_curl()
 end
 
 local function check_api_key()
-   if api_key.get() then
+   if windsurf_api_key.get() then
       health.ok("*API* *key* is present")
    else
       health.error("*API* *key* is missing", "Please run `:NeoCodeium auth` to set it")

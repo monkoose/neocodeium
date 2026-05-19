@@ -1,10 +1,7 @@
 local events = {}
 
-local nvim_exec_autocmds = vim.api.nvim_exec_autocmds
-local nvim_create_autocmd = vim.api.nvim_create_autocmd
-local nvim_create_augroup = vim.api.nvim_create_augroup
-
-local augroup = nvim_create_augroup("neocodeium_events", {})
+local api = vim.api
+local augroup = api.nvim_create_augroup("neocodeium_events", {})
 
 ---Trigger an event
 ---@param event string The event pattern
@@ -14,10 +11,10 @@ function events.emit(event, data, scheduled)
    local event_opts = { pattern = event, data = data, modeline = false }
    if scheduled then
       vim.schedule(function()
-         nvim_exec_autocmds("User", event_opts)
+         api.nvim_exec_autocmds("User", event_opts)
       end)
    else
-      nvim_exec_autocmds("User", event_opts)
+      api.nvim_exec_autocmds("User", event_opts)
    end
 end
 
@@ -25,7 +22,7 @@ end
 ---@param event string The event pattern
 ---@param callback fun(data: any) The callback function
 function events.subscribe(event, callback)
-   nvim_create_autocmd("User", {
+   api.nvim_create_autocmd("User", {
       pattern = event,
       group = augroup,
       callback = function(ev)

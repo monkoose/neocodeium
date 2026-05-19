@@ -8,10 +8,7 @@ local utils = require("neocodeium.utils")
 local state = require("neocodeium.state")
 local STATUS = require("neocodeium.enums").STATUS
 
-local nvim_create_autocmd = vim.api.nvim_create_autocmd
-local nvim_create_augroup = vim.api.nvim_create_augroup
-local nvim_win_get_cursor = vim.api.nvim_win_get_cursor
-local nvim_get_option_value = vim.api.nvim_get_option_value
+local api = vim.api
 
 -- Chat ---------------------------------------------------- {{{1
 
@@ -19,8 +16,8 @@ local chat = {}
 local request_data = {}
 
 -- Refresh chat content on buffer change.
-nvim_create_autocmd("BufEnter", {
-   group = nvim_create_augroup("neocodeium_chat", {}),
+api.nvim_create_autocmd("BufEnter", {
+   group = api.nvim_create_augroup("neocodeium_chat", {}),
    callback = function()
       if server.port then
          pcall(chat.refresh_context)
@@ -75,8 +72,8 @@ end
 ---Sends a request to the server to refresh context.
 function chat.refresh_context()
    if state:get_status() == STATUS.enabled then
-      local cursor = nvim_win_get_cursor(0)
-      local ft = nvim_get_option_value("filetype", { buf = 0 })
+      local cursor = api.nvim_win_get_cursor(0)
+      local ft = api.nvim_get_option_value("filetype", { buf = 0 })
       request_data.active_document = doc.get(0, ft, -1, cursor)
       server:request("RefreshContextForIdeAction", request_data)
    end

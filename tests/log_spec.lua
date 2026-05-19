@@ -2,6 +2,7 @@
 require("neocodeium").setup()
 
 local log = require("neocodeium.log")
+local api = vim.api
 local fn = vim.fn
 
 describe("get_log_file()", function()
@@ -52,7 +53,7 @@ describe("log functions which doesn't satisfy min_log_level", function()
 end)
 
 local function last_message()
-   return vim.api.nvim_exec2("1mes", { output = true }).output
+   return api.nvim_exec2("1mes", { output = true }).output
 end
 
 describe("echo error()", function()

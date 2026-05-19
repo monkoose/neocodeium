@@ -3,10 +3,9 @@ local utils = require("neocodeium.utils")
 local stdio = require("neocodeium.utils.stdio")
 local STATUS = require("neocodeium.enums").STATUS
 
+local api = vim.api
 local uv = vim.uv
 local fn = vim.fn
-
-local nvim_get_option_value = vim.api.nvim_get_option_value
 
 ---@class inline
 ---@field id? integer
@@ -93,7 +92,7 @@ function State:get_status(bufnr)
    elseif options.disable_in_special_buftypes and not utils.is_normal_buf(bufnr) then
       return STATUS.special_buf_disabled
       -- The same as vim.b[bunfr].neocodeium_enabled == nil and ...
-   elseif options.filetypes[nvim_get_option_value("filetype", { buf = bufnr })] == false then
+   elseif options.filetypes[api.nvim_get_option_value("filetype", { buf = bufnr })] == false then
       return STATUS.filetype_disabled
    elseif options.filter and options.filter(bufnr) == false then
       return STATUS.filter_disabled

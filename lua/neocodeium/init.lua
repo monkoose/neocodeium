@@ -1,24 +1,18 @@
 -- Imports ------------------------------------------------- {{{1
 
+local api = vim.api
 local uv = vim.uv
 local fn = vim.fn
 
-local nvim_get_hl = vim.api.nvim_get_hl
-local nvim_set_hl = vim.api.nvim_set_hl
-local nvim_create_autocmd = vim.api.nvim_create_autocmd
-local nvim_get_current_buf = vim.api.nvim_get_current_buf
-local nvim_create_user_command = vim.api.nvim_create_user_command
-local nvim_get_autocmds = vim.api.nvim_get_autocmds
-
 -- Auxiliary functions ------------------------------------- {{{1
 
-local augroup = vim.api.nvim_create_augroup("neocodeium", {})
+local augroup = api.nvim_create_augroup("neocodeium", {})
 
 ---@param events string|table
 ---@param opts table
 ---@return integer
 local function create_autocmd(events, opts)
-   return nvim_create_autocmd(
+   return api.nvim_create_autocmd(
       events,
       vim.tbl_extend("keep", opts, {
          group = augroup,
@@ -27,21 +21,21 @@ local function create_autocmd(events, opts)
 end
 
 local function set_highlights()
-   nvim_set_hl(0, "NeoCodeiumSuggestion", {
+   api.nvim_set_hl(0, "NeoCodeiumSuggestion", {
       fg = "#808080",
       ctermfg = 244,
       default = true,
    })
 
-   nvim_set_hl(0, "NeoCodeiumSingleLineLabel", {
+   api.nvim_set_hl(0, "NeoCodeiumSingleLineLabel", {
       fg = "#808080",
       ctermfg = 244,
       bold = true,
       default = true,
    })
 
-   local label_fg = nvim_get_hl(0, { name = "DiagnosticInfo" }).fg
-   nvim_set_hl(0, "NeoCodeiumLabel", {
+   local label_fg = api.nvim_get_hl(0, { name = "DiagnosticInfo" }).fg
+   api.nvim_set_hl(0, "NeoCodeiumLabel", {
       fg = label_fg or "#808080",
       bold = true,
       ctermfg = 244,
@@ -99,7 +93,7 @@ local function enable_autocmds()
             1,
             0,
             vim.schedule_wrap(function()
-               completer.other_docs = doc.get_all_loaded(nvim_get_current_buf())
+               completer.other_docs = doc.get_all_loaded(api.nvim_get_current_buf())
             end)
          )
       end,
@@ -132,7 +126,7 @@ local function enable_autocmds()
 
       create_autocmd({ "WinEnter", "BufEnter" }, {
          callback = function()
-            if not nvim_get_autocmds({ id = (mode_changed_id or -2) })[1] then
+            if not api.nvim_get_autocmds({ id = (mode_changed_id or -2) })[1] then
                insert_enter_once()
             end
          end,
@@ -149,7 +143,7 @@ local function enable_autocmds()
    create_autocmd("OptionSet", {
       pattern = { "shiftwidth", "expandtab" },
       callback = function(ev)
-         if ev.buf == nvim_get_current_buf() then
+         if ev.buf == api.nvim_get_current_buf() then
             state:update_editor_options()
          end
       end,
@@ -296,7 +290,7 @@ function M.setup(opts)
       if vim.v.vim_did_enter == 1 then
          server:run()
       else
-         nvim_create_autocmd("VimEnter", {
+         api.nvim_create_autocmd("VimEnter", {
             once = true,
             callback = function()
                server:run()
@@ -336,7 +330,7 @@ function M.setup(opts)
       end
    end
 
-   nvim_create_user_command("NeoCodeium", function(t)
+   api.nvim_create_user_command("NeoCodeium", function(t)
       run_command(t.args, t.bang)
    end, {
       nargs = 1,

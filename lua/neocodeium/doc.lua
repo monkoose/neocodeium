@@ -7,10 +7,7 @@ local utils = require("neocodeium.utils")
 local state = require("neocodeium.state")
 local STATUS = require("neocodeium.enums").STATUS
 
-local nvim_buf_get_lines = vim.api.nvim_buf_get_lines
-local nvim_buf_get_name = vim.api.nvim_buf_get_name
-local nvim_get_option_value = vim.api.nvim_get_option_value
-local nvim_buf_get_var = vim.api.nvim_buf_get_var
+local api = vim.api
 
 -- Public API ---------------------------------------------- {{{1
 
@@ -27,9 +24,9 @@ local M = { cached_data = {} }
 ---@param pos pos
 ---@return document
 function M.get(buf, ft, max_lines, pos)
-   local text = table.concat(nvim_buf_get_lines(buf, 0, max_lines, false), "\n")
+   local text = table.concat(api.nvim_buf_get_lines(buf, 0, max_lines, false), "\n")
    local first_ft = ft:gsub("%..*", "")
-   local name = nvim_buf_get_name(buf)
+   local name = api.nvim_buf_get_name(buf)
    local lang ---@type string
    if first_ft == "" then
       lang = "plaintext"
@@ -53,18 +50,18 @@ end
 ---@return document|nil
 local function get_buf_doc(bufnr)
    local buf_cache = M.cached_data[bufnr]
-   local buf_tick = nvim_buf_get_var(bufnr, "changedtick") ---@type integer
+   local buf_tick = api.nvim_buf_get_var(bufnr, "changedtick") ---@type integer
    -- use new data only when buffer's content has changed, otherwise use cached data
    if buf_cache and buf_tick == buf_cache.tick then
       return M.cached_data[bufnr].data
    end
 
-   local buf_ft = nvim_get_option_value("filetype", { buf = bufnr })
+   local buf_ft = api.nvim_get_option_value("filetype", { buf = bufnr })
    if
       buf_ft ~= ""
       and utils.is_normal_buf(bufnr)
       and state:get_status(bufnr) == STATUS.enabled
-      and nvim_buf_get_name(bufnr):find(state.project_root, 1, true)
+      and api.nvim_buf_get_name(bufnr):find(state.project_root, 1, true)
    then
       local doc_data = M.get(bufnr, buf_ft, options.max_lines, { 0, 0 })
       M.cached_data[bufnr] = {
