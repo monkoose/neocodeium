@@ -191,7 +191,14 @@ local function enable_autocmds()
       callback = function()
          local cur_selected = fn.complete_info({ "selected" }).selected
          if selected_compl == cur_selected then
-            completer:initiate()
+            local pos = utils.get_cursor()
+            if
+               pos[1] ~= state.pos[1]
+               or pos[2] ~= state.pos[2]
+               or api.nvim_get_current_line() ~= state.curline_text
+            then
+               completer:initiate()
+            end
          else
             selected_compl = cur_selected
             completer:clear(true)
