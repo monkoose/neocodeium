@@ -219,7 +219,14 @@ local function enable_autocmds()
 
    create_autocmd("CursorMovedI", {
       callback = function()
-         completer:initiate()
+         local pos = utils.get_cursor()
+         if
+            pos[1] ~= state.pos[1]
+            or pos[2] ~= state.pos[2]
+            or api.nvim_get_current_line() ~= state.curline_text
+         then
+            completer:initiate()
+         end
          if fn.pumvisible() == 0 then
             selected_compl = default_selected_compl
          end
