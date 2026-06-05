@@ -309,21 +309,6 @@ function M.setup(opts)
 
    -- User command
 
-   ---Returns list of :NeoCodeium commands for completion
-   ---@param arg_lead string
-   ---@return table
-   local function complete_commands(arg_lead)
-      local result = {}
-      for cmd in pairs(commands) do
-         if vim.startswith(cmd, arg_lead) then
-            table.insert(result, cmd)
-         end
-      end
-      table.sort(result)
-
-      return result
-   end
-
    ---Calls a function mapped to the command
    ---@param cmd string
    local function run_command(cmd, bang)
@@ -341,7 +326,9 @@ function M.setup(opts)
    end, {
       nargs = 1,
       bang = true,
-      complete = complete_commands,
+      complete = function(arg_lead)
+         return fn.matchfuzzy(vim.tbl_keys(commands), arg_lead)
+      end,
    })
 
    function M.get_status()
