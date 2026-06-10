@@ -18,7 +18,7 @@ jobs:
       - name: Install plenary plugin
         run: |
           mkdir -p ~/.local/share/nvim/site/pack/test-workflow/start
-          git clone --depth=1 https://github.com/nvim-lua/plenary.nvim.git ~/.local/share/nvim/site/pack/test-workflow/start/plenary
+          git clone --depth=1 https://github.com/monkoose/plenary-busted ~/.local/share/nvim/site/pack/test-workflow/start/plenary-busted
           ln -s . ~/.local/share/nvim/site/pack/test-workflow/start/neocodeium
       - name: Run tests
         run: |
