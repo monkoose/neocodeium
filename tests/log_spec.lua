@@ -8,7 +8,6 @@ local fn = vim.fn
 describe("get_log_file()", function()
    it("should return correct path", function()
       local path = log.get_log_file()
-      vim.cmd.sleep("10m")
       assert.is.True(vim.endswith(path, "neocodeium.log"))
       vim.uv.fs_open(path, "a", tonumber("644", 8), function(_, fd)
          if fd then
@@ -16,15 +15,16 @@ describe("get_log_file()", function()
                vim.uv.fs_close(fd)
             end)
          end
-         assert.is.Truthy(fn.filereadable(path) == 1)
       end)
+      vim.cmd.sleep("20m")
+      assert.is.True(fn.filereadable(path) == 1)
    end)
 end)
 
 ---@return string
 local function read_log_file()
    local path = log.get_log_file()
-   vim.cmd.sleep("10m")
+   vim.cmd.sleep("30m")
    local lines = fn.readfile(path, "", -1)
    if #lines > 0 then
       return lines[1]
