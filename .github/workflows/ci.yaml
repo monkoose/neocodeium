@@ -8,18 +8,16 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        nvim-version: [ nightly ]
+        nvim-version: [ stable, nightly ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: rhysd/action-setup-vim@v1
         with:
           neovim: true
           version: ${{ matrix.nvim-version }}
-      - name: Install plenary plugin
+      - name: Install plenary-busted plugin
         run: |
-          mkdir -p ~/.local/share/nvim/site/pack/test-workflow/start
           git clone --depth=1 https://github.com/monkoose/plenary-busted ~/.local/share/nvim/site/pack/test-workflow/start/plenary-busted
-          ln -s . ~/.local/share/nvim/site/pack/test-workflow/start/neocodeium
       - name: Run tests
         run: |
           nvim --version
@@ -29,7 +27,7 @@ jobs:
     name: stylua
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: JohnnyMorganz/stylua-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
