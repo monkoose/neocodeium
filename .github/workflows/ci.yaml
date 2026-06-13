@@ -8,7 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        os: [ ubuntu-latest, macos-latest ]
         nvim-version: [ stable, nightly ]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
       - uses: rhysd/action-setup-vim@v1
