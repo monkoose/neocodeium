@@ -84,6 +84,7 @@ describe("get_system_info()", function()
       jit.os = "Linux"
       jit.arch = "x64"
       package.loaded["neocodeium.utils"] = nil
+      vim.print(utils.get_system_info())
       local info = utils.get_system_info()
       assert.Equal(info.os, "linux")
       assert.Equal(info.arch, "x64")
