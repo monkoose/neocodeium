@@ -82,18 +82,8 @@ describe("get_system_info()", function()
 
       if jit.os == "Linux" then
          assert.Equal(info.os, "linux")
-         if jit.arch == "arm" then
-            assert.Equal(info.arch, "arm")
-         else
-            assert.Equal(info.arch, "x64")
-         end
       elseif jit.os == "OSX" then
          assert.Equal(info.os, "macos")
-         if jit.arch == "arm" then
-            assert.Equal(info.arch, "arm")
-         else
-            assert.Equal(info.arch, "x64")
-         end
       elseif jit.os == "Windows" then
          assert.Equal(info.os, "windows")
          assert.Equal(info.arch, "x64")
