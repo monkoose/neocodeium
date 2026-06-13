@@ -24,8 +24,7 @@ jobs:
           else
             packpath="$HOME/.local/share/nvim/site"
           fi
-          mkdir -p "$packpath/pack/test-workflow/start"
-          git clone --depth=1 https://github.com/monkoose/plenary-busted "$packpath/pack/test-workflow/start/plenary-busted"
+          git clone --depth=1 -b fix_paths https://github.com/monkoose/plenary-busted "$packpath/pack/test-workflow/start/plenary-busted"
       - name: Run tests
         run: |
           nvim --version
