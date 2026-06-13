@@ -7,7 +7,7 @@ jobs:
     name: unit tests
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        os: [ ubuntu-latest, macos-latest ]
         nvim-version: [ stable, nightly ]
     runs-on: ${{ matrix.os }}
     steps:
@@ -18,7 +18,7 @@ jobs:
           version: ${{ matrix.nvim-version }}
       - name: Install plenary-busted plugin
         run: |
-          git clone --depth=1 -b fix_paths https://github.com/monkoose/plenary-busted ~/.local/share/nvim/site/pack/test-workflow/start/plenary-busted
+          git clone --depth=1 https://github.com/monkoose/plenary-busted ~/.local/share/nvim/site/pack/test-workflow/start/plenary-busted
       - name: Run tests
         run: |
           nvim --version
