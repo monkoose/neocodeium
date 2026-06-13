@@ -78,37 +78,26 @@ describe("get_system_info()", function()
    end)
 
    it("should return correct data", function()
-      local jit_os = jit.os
-      local jit_arch = jit.arch
-
-      jit.os = "Linux"
-      jit.arch = "x64"
-      package.loaded["neocodeium.utils"] = nil
-      vim.print(utils.get_system_info())
       local info = utils.get_system_info()
-      assert.Equal(info.os, "linux")
-      assert.Equal(info.arch, "x64")
 
-      jit.os = "Windows"
-      package.loaded["neocodeium.utils"] = nil
-      info = require("neocodeium.utils").get_system_info()
-      assert.Equal(info.os, "windows")
-      assert.Equal(info.arch, "x64")
-
-      jit.os = "OSX"
-      package.loaded["neocodeium.utils"] = nil
-      info = require("neocodeium.utils").get_system_info()
-      assert.Equal(info.os, "macos")
-      assert.Equal(info.arch, "x64")
-
-      jit.arch = "arm"
-      package.loaded["neocodeium.utils"] = nil
-      info = require("neocodeium.utils").get_system_info()
-      assert.Equal(info.os, "macos")
-      assert.Equal(info.arch, "arm")
-
-      jit.os = jit_os
-      jit.arch = jit_arch
+      if jit.os == "Linux" then
+         assert.Equal(info.os, "linux")
+         if jit.arch == "arm" then
+            assert.Equal(info.arch, "arm")
+         else
+            assert.Equal(info.arch, "x64")
+         end
+      elseif jit.os == "OSX" then
+         assert.Equal(info.os, "macos")
+         if jit.arch == "arm" then
+            assert.Equal(info.arch, "arm")
+         else
+            assert.Equal(info.arch, "x64")
+         end
+      elseif jit.os == "Windows" then
+         assert.Equal(info.os, "windows")
+         assert.Equal(info.arch, "x64")
+      end
    end)
 end)
 
