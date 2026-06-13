@@ -5,7 +5,6 @@ on: [ push, pull_request ]
 jobs:
   tests:
     name: unit tests
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         os: [ ubuntu-latest, macos-latest ]
