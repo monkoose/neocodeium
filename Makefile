@@ -1,4 +1,4 @@
 .PHONY: test
 
 test:
-	nvim --headless -c "PlenaryBustedDirectory tests"
+	nvim --headless -c "PlenaryBusted tests { keep_going = false }"
