@@ -344,6 +344,11 @@ function Renderer:update_horz_move(prev_pos, curline_text)
          if curline_text:sub(prev_col + 1) ~= prefix then
             self:start_clear_timer()
          else
+            -- fix leftover virtual text on autoindent
+            if horz_move == 0 then
+               self:clear_inline()
+               self:start_clear_timer()
+            end
             state.matching = true
             -- refresh virttext block of full inline completion
             if state.inline[1].text == "" and state.block.text then
